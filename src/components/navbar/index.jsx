@@ -1,26 +1,19 @@
 import React, { useEffect, useState } from "react";
 import {
-  Button,
   Container,
-  Form,
   Nav,
   Navbar,
   NavDropdown,
   Offcanvas,
 } from "react-bootstrap";
-import { CiLogin } from "react-icons/ci";
 import { Link } from "react-router-dom";
-import { FaCartPlus } from "react-icons/fa";
-import UserType from "../../Hook/userType/UserType";
-import LoginModal from "../modal/LoginModal";
-import SignupModal from "../modal/SignupModal";
 import Navsearch from "./Navsearch";
+import { useAuth } from "../../contexts/AuthContext";
 
-function NavScrollExample() {
+function NavbarComponent() {
   const [carts, setCarts] = useState([]);
-  const [userData, isAdmin, user] = UserType();
-  const [showLoginModal, setShowLoginModal] = useState(false);
-  const [showSignupModal, setShowSignupModal] = useState(false);
+
+  const { isAdmin } = useAuth()
   const [show, setShow] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
 
@@ -38,6 +31,7 @@ function NavScrollExample() {
       window.removeEventListener("resize", handleResize);
     };
   }, []);
+
   const fetchCarts = () => {
     const storedCarts = JSON.parse(localStorage.getItem("carts")) || [];
     setCarts(storedCarts);
@@ -46,12 +40,6 @@ function NavScrollExample() {
   useEffect(() => {
     fetchCarts();
   }, []);
-
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    window.location.reload();
-  };
 
   const navLinks = (
     <Nav dir='rtl' className='me-auto mb- ' style={{ zIndex: "1000" }}>
@@ -90,20 +78,14 @@ function NavScrollExample() {
           </NavDropdown.Item>
         </NavDropdown>
       </div>
-      <Form className='d-flex'>
-        {isAdmin ? (
-          <div className='mt-2 flex'>
-            <Link
-              to={"/admin/add_discount"}
-              className='font-bold text-blue-500 mx-1'
-            >
-              صفحة الادمن
-            </Link>
-          </div>
-        ) : (
-          !userData && <></>
-        )}
-      </Form>
+      {isAdmin && <div className="mt-2 flex">
+        <Link
+          to={"/admin"}
+          className='font-bold text-blue-500 mx-1'
+        >
+          صفحة الادمن
+        </Link>
+      </div>}
     </Nav>
   );
 
@@ -143,4 +125,4 @@ function NavScrollExample() {
   );
 }
 
-export default NavScrollExample;
+export default NavbarComponent;

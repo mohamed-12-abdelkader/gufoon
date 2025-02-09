@@ -27,14 +27,11 @@ const EditeProduct = () => {
         // Update the product in the state directly
 
         toast.success("تم تعديل المنتج بنجاح");
-        console.log(response);
       } else {
-        console.log(response);
         toast.error("فشل تعديل المنتج");
       }
     } catch (error) {
       toast.error("فشل تعديل المنتج");
-      console.log(error);
     } finally {
       setLoading(false);
     }

@@ -1,52 +1,86 @@
-import React from "react";
-import { Modal, Button, Form, Spinner } from "react-bootstrap";
-import LoginAdmin from "../../Hook/admin/useLogin";
-import { Input } from "@chakra-ui/react";
+import React, { useState } from "react";
+import {
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalFooter,
+  ModalBody,
+  ModalCloseButton,
+  Button,
+  Input,
+  Spinner,
+} from "@chakra-ui/react";
+import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../contexts/AuthContext";
 
 const LoginModal = ({ show, handleClose }) => {
-  const [
-    handleLogin,
-    passChange,
-    mailChange,
-    user_name,
-    pass,
-    userType,
-    setUserType,
-    loading,
-  ] = LoginAdmin();
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [pending, setPending] = useState(false);
+  const { login } = useAuth()
+
+  const navigate = useNavigate();
+
+  const handleLogin = async (event) => {
+    event.preventDefault();
+    setPending(true);
+
+    try {
+      await login({ username, password });
+      toast.success("تم تسجيل الدخول بنجاح");
+      handleClose();
+      navigate("/");
+    } catch (error) {
+      toast.error(
+        error.response?.data?.details || "خطأ في تسجيل الدخول، حاول مجددًا"
+      );
+    } finally {
+      setPending(false);
+    }
+  };
+
   return (
-    <Modal show={show} onHide={handleClose}>
-      <Modal.Header closeButton>
-        <Modal.Title>تسجيل الدخول</Modal.Title>
-      </Modal.Header>
-      <Modal.Body style={{ height: "300px" }}>
-        <div dir="rtl" className=" p-2 form md:p-5">
-          <h6> اسم المستخدم </h6>
-          <Input
-            value={user_name}
-            onChange={mailChange}
-            dir="rtl"
-            placeholder="اسم المستخدم "
-            size="lg"
-            className="my-3 bg-white h-5 "
-          />
-          <h6> كلمة السر </h6>
-          <Input
-            value={pass}
-            onChange={passChange}
-            dir="rtl"
-            placeholder="كلمة السر"
-            size="lg"
-            className="my-3 bg-white "
-          />
-        </div>
-        <div className="text-center mb-5">
-          <Button colorScheme="blue" onClick={handleLogin}>
-            {loading ? <Spinner /> : "  تسجيل الدخول"}
-          </Button>
-        </div>
-      </Modal.Body>
-    </Modal>
+    <>
+      <Modal isOpen={show} onClose={handleClose}>
+        <ModalOverlay />
+        <ModalContent>
+          <form onSubmit={handleLogin}>
+            <ModalHeader>تسجيل الدخول</ModalHeader>
+            <ModalCloseButton />
+            <ModalBody>
+              <div dir="rtl">
+                <h6>اسم المستخدم</h6>
+                <Input
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  placeholder="اسم المستخدم"
+                  size="lg"
+                  mb={4}
+                />
+                <h6>كلمة السر</h6>
+                <Input
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="كلمة السر"
+                  size="lg"
+                />
+              </div>
+            </ModalBody>
+            <ModalFooter>
+              <Button colorScheme="blue" type="submit" isDisabled={pending}>
+                {pending ? <Spinner size="sm" /> : "تسجيل الدخول"}
+              </Button>
+              <Button variant="ghost" ml={3} onClick={handleClose}>
+                إلغاء
+              </Button>
+            </ModalFooter>
+          </form>
+        </ModalContent>
+      </Modal>
+    </>
   );
 };
 

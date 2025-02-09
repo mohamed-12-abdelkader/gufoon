@@ -33,7 +33,6 @@ const AllOrder = () => {
       }, 500);
     } catch (error) {
       toast.error("فشل تاكيد الطلب");
-      console.log(error);
     } finally {
       setLoading(false);
       setShowModal(false);
@@ -54,7 +53,6 @@ const AllOrder = () => {
   if (loadingOrder) {
     return <h3>جار تحميل الطلبات ......</h3>;
   }
-  console.log(orders);
   return (
     <div className='mt-[40px]'>
       <div className='text-center my-3'>

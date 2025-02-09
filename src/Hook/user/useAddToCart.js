@@ -24,7 +24,6 @@ const useAddToCart = () => {
         }
       );
 
-      console.log(response);
       toast.success("تم إضافة المنتج للسلة");
     } catch (error) {
       console.error(error);

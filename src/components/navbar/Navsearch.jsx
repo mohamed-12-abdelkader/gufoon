@@ -3,78 +3,66 @@ import {
   Button,
   Dropdown,
   Form,
-  NavDropdown,
-  Navbar,
   Offcanvas,
-  Badge,
-  Spinner,
 } from "react-bootstrap";
-import { CiSearch } from "react-icons/ci";
-import { FaCartShopping, FaBell, FaCartPlus } from "react-icons/fa6";
+import { FaBell, FaCartPlus } from "react-icons/fa6";
 import {
   FaUserCircle,
   FaSignOutAlt,
-  FaUserCog,
   FaShoppingBag,
   FaUserEdit,
   FaTools,
 } from "react-icons/fa";
-import img from "../../images/36dab390-04c0-4604-8931-dbdcfacce53e-260x260.png";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import LoginModal from "../modal/LoginModal";
 import SignupModal from "../modal/SignupModal";
 import useGitCart from "../../Hook/user/useGitCart";
+import { useAuth } from "../../contexts/AuthContext";
+
+const categories = [
+  {
+    title: "نظارات شمسية",
+    items: [
+      { name: "نظارات شمسية رجالى", path: "/men_sunglasses" },
+      { name: "نظارات شمسية نسائى", path: "/women_sunglasses" },
+    ],
+  },
+  {
+    title: "نظارات طبية",
+    items: [
+      { name: "نظارات طبية رجالى", path: "/men_prescription_glasses" },
+      { name: "نظارات طبية نسائى", path: "/women_prescription_glasses" },
+      { name: "نظارات طبية اطفالى", path: "/children_prescription_glasses" },
+    ],
+  },
+  {
+    title: "عدسات لاصقة",
+    items: [
+      { name: "عدسات طبية", path: "/medical_lenses" },
+      { name: "عدسات ملونة power", path: "/colored_lenses" },
+    ],
+  },
+  {
+    title: "الخصومات",
+    items: [
+      { name: "خصومات النظارات", path: "/glasses_offer" },
+      { name: "خصومات العدسات", path: "/lenses_offer" },
+    ],
+  },
+];
 
 const Navsearch = () => {
   const [show, setShow] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [showSignupModal, setShowSignupModal] = useState(false);
-  const navigate = useNavigate();
   const [carts, cartsLoading] = useGitCart();
-  {
-    cartsLoading ? console.log("loading") : console.log(carts);
-  }
-  // التحقق من وجود المستخدم
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [showSearchMenu, setShowSearchMenu] = useState(false);
   const searchRef = useRef(null);
 
-  const categories = [
-    {
-      title: "نظارات شمسية",
-      items: [
-        { name: "نظارات شمسية رجالى", path: "/men_sunglasses" },
-        { name: "نظارات شمسية نسائى", path: "/women_sunglasses" },
-      ],
-    },
-    {
-      title: "نظارات طبية",
-      items: [
-        { name: "نظارات طبية رجالى", path: "/men_prescription_glasses" },
-        { name: "نظارات طبية نسائى", path: "/women_prescription_glasses" },
-        { name: "نظارات طبية اطفالى", path: "/children_prescription_glasses" },
-      ],
-    },
-    {
-      title: "عدسات لاصقة",
-      items: [
-        { name: "عدسات طبية", path: "/medical_lenses" },
-        { name: "عدسات ملونة power", path: "/colored_lenses" },
-      ],
-    },
-    {
-      title: "الخصومات",
-      items: [
-        { name: "خصومات النظارات", path: "/glasses_offer" },
-        { name: "خصومات العدسات", path: "/lenses_offer" },
-      ],
-    },
-  ];
+  const { isAuthenticated, isAdmin, logout } = useAuth()
 
-  // تصفية الفئات حسب البحث
   const filteredCategories = categories
     .map((category) => ({
       ...category,
@@ -84,7 +72,6 @@ const Navsearch = () => {
     }))
     .filter((category) => category.items.length > 0);
 
-  // إغلاق القائمة عند النقر خارجها
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (searchRef.current && !searchRef.current.contains(event.target)) {
@@ -96,24 +83,8 @@ const Navsearch = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    const user = JSON.parse(localStorage.getItem("user"));
-    setIsLoggedIn(!!token);
-    setIsAdmin(user?.role === "admin");
-  }, []);
-
   const handleClose = () => setShow(false);
-  const handleShow = () => setShow(true);
   const toggleNotifications = () => setShowNotifications(!showNotifications);
-
-  const handleLogout = () => {
-    localStorage.removeItem("user");
-    localStorage.removeItem("token");
-    setIsLoggedIn(false);
-    setIsAdmin(false);
-    navigate("/login");
-  };
 
   return (
     <div
@@ -188,7 +159,7 @@ const Navsearch = () => {
               className='p-2'
               style={{ zIndex: 1050 }}
             >
-              {isLoggedIn ? (
+              {isAuthenticated ? (
                 <>
                   {isAdmin && (
                     <Dropdown.Item as={Link} to='/admin/management'>
@@ -215,7 +186,7 @@ const Navsearch = () => {
 
                   <Dropdown.Divider />
 
-                  <Dropdown.Item onClick={handleLogout}>
+                  <Dropdown.Item onClick={logout}>
                     <div className='d-flex align-items-center gap-2'>
                       <FaSignOutAlt className='text-danger' />
                       <span className='text-danger'>تسجيل الخروج</span>
@@ -242,7 +213,7 @@ const Navsearch = () => {
             </Dropdown.Menu>
           </Dropdown>
 
-          {isLoggedIn && (
+          {isAuthenticated && (
             <Dropdown show={showNotifications} onToggle={toggleNotifications}>
               <Dropdown.Toggle
                 variant='none'
@@ -316,93 +287,6 @@ const Navsearch = () => {
         show={showSignupModal}
         handleClose={() => setShowSignupModal(false)}
       />
-
-      <style jsx>{`
-        .dropdown-toggle::after {
-          display: none !important;
-        }
-        .dropdown-item {
-          padding: 8px 16px;
-          transition: all 0.2s ease;
-          dir: rtl;
-        }
-        .dropdown-item:hover {
-          background-color: #f8f9fa;
-          transform: translateX(-5px);
-        }
-        .gap-2 {
-          gap: 0.5rem;
-        }
-        .search-menu {
-          position: absolute;
-          top: 100%;
-          right: 0;
-          left: 40px;
-          background: white;
-          border-radius: 8px;
-          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-          margin-top: 8px;
-          max-height: 400px;
-          overflow-y: auto;
-          z-index: 9999;
-        }
-
-        .category-section {
-          padding: 12px;
-          border-bottom: 1px solid #eee;
-        }
-
-        .category-section:last-child {
-          border-bottom: none;
-        }
-
-        .category-title {
-          color: #666;
-          font-size: 14px;
-          margin-bottom: 8px;
-          font-weight: 600;
-        }
-
-        .search-item {
-          display: block;
-          padding: 8px 12px;
-          color: #333;
-          text-decoration: none;
-          border-radius: 4px;
-          transition: all 0.2s ease;
-        }
-
-        .search-item:hover {
-          background-color: #f8f9fa;
-          color: #0d6efd;
-          transform: translateX(-5px);
-        }
-
-        .no-results {
-          padding: 20px;
-          text-align: center;
-          color: #666;
-        }
-
-        /* تخصيص شريط التمرير */
-        .search-menu::-webkit-scrollbar {
-          width: 8px;
-        }
-
-        .search-menu::-webkit-scrollbar-track {
-          background: #f1f1f1;
-          border-radius: 4px;
-        }
-
-        .search-menu::-webkit-scrollbar-thumb {
-          background: #888;
-          border-radius: 4px;
-        }
-
-        .search-menu::-webkit-scrollbar-thumb:hover {
-          background: #555;
-        }
-      `}</style>
     </div>
   );
 };

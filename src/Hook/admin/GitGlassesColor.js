@@ -15,7 +15,6 @@ const GitGlassesColor = () => {
         });
         setcolors(response.data);
       } catch (error) {
-        console.log("Error fetching data");
       } finally {
         setLoading(false);
       }

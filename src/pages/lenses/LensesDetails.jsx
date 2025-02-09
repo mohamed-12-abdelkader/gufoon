@@ -32,7 +32,6 @@ const LensesDetails = () => {
   if (!lenses) {
     return <h1>لم يتم العثور على المنتج.</h1>;
   }
-  console.log(lenses);
   return (
     <div>
       <ProductDetails products={lenses[0]} />

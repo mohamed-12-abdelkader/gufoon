@@ -1,22 +1,28 @@
-import { ChakraProvider, extendBaseTheme } from "@chakra-ui/react";
-import { ToastContainer } from "react-toastify";
-import Router from "./router/Router.jsx";
-import "react-toastify/dist/ReactToastify.css";
-
-// تخصيص الثيم
-const theme = extendBaseTheme({
-  config: {
-    initialColorMode: "light",
-    useSystemColorMode: false,
-  },
-});
+import { ToastContainer } from 'react-toastify';
+import Router from './router/Router.jsx';
+import 'react-toastify/dist/ReactToastify.css';
+import { BrowserRouter } from 'react-router-dom';
+import Navbar from './components/navbar';
+import Footer from './components/footer/Footer.jsx';
+import { useAuth } from './contexts/AuthContext.js';
+import { useEffect } from 'react';
 
 function App() {
+  const { initializeUser } = useAuth();
+
+  useEffect(() => {
+    initializeUser();
+  }, []);
+
   return (
-    <ChakraProvider theme={theme}>
-      <Router />
-      <ToastContainer />
-    </ChakraProvider>
+    <>
+      <BrowserRouter>
+        <Navbar />
+        <Router />
+        <ToastContainer />
+        <Footer />
+      </BrowserRouter>
+    </>
   );
 }
 

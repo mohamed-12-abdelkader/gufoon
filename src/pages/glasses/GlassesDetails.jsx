@@ -25,7 +25,6 @@ const GlassesDetails = () => {
       </div>
     );
   }
-  console.log("products", products);
   return (
     <>
       <ProductDetails products={products.result[0]} />

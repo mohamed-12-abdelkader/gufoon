@@ -1,5 +1,5 @@
 import React from "react";
-import { Route, Routes } from "react-router-dom";
+import { Outlet, Route, Routes } from "react-router-dom";
 import Admin from "../pages/admin/Admin";
 import Home from "../pages/home/Home";
 import AddBrand from "../components/admin/AddBrand";
@@ -32,53 +32,63 @@ import AddLensesType from "../components/admin/AddLensesType";
 import AddLensesTyme from "../components/admin/AddLensesTime";
 import MyOrders from "../pages/myorder/MyOrders";
 import Profile from "../pages/profile/Profile";
+import { useAuth } from "../contexts/AuthContext";
+import { Navigate } from "react-router-dom";
+import ProductsCategories from "../pages/ProductsCategories";
+
+const ProtectedRoute = () => {
+  const { isAuthenticated } = useAuth();
+
+  return isAuthenticated() ? <Outlet /> : <Navigate to="/login" />;
+};
 
 const Router = () => {
   return (
     <div>
       <Routes>
-        <Route path='/' element={<Home />} />
-        <Route path='/admin/*' element={<Admin />}>
-          <Route path='add_brand' element={<AddBrand />} />
-          <Route path='add_color' element={<AddColore />} />
-          <Route path='add_shapes' element={<AddShap />} />
-          <Route path='add_frame_color' element={<AddFrameColore />} />
-          <Route path='add_size' element={<AddSize />} />
-          <Route path='add_lens_time' element={<AddLensesTyme />} />
-          <Route path='add_lens_type' element={<AddLensesType />} />
-          <Route path='add_lens_color' element={<AddLensesColore />} />
-          <Route path='add_material' element={<AddMaterial />} />
-          <Route path='add_frame_type' element={<AddFrameType />} />
-          <Route path='all_order' element={<AllOrder />} />
-          <Route path='add_discount' element={<AddDiscount />} />
-          <Route path='add_glasses' element={<AddGlasses />} />
-          <Route path='add_lenses' element={<AddLenses />} />
-          <Route path='mange_salary' element={<MangeSalary />} />
-          <Route path='order-done' element={<OrderConfirm />} />
+        {/* Public Routes */}
+        <Route path="/" element={<Home />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/cart" element={<Cart />} />
+        <Route path="/men_sunglasses" element={<MenSunglasses />} />
+        <Route path="/women_sunglasses" element={<WomenSunGlasses />} />
+        <Route path="/men_prescription_glasses" element={<MenPrescriptionGlasses />} />
+        <Route path="/glasses_offer" element={<GlassesOffer />} />
+        <Route path="/lenses_offer" element={<LensesOffer />} />
+        <Route path="/women_prescription_glasses" element={<WomenPrescriptionGlasses />} />
+        <Route path="/children_prescription_glasses" element={<CheldrinPrescriptionGlasses />} />
+        <Route path="/order/:id" element={<Order />} />
+        <Route path="/orders" element={<MyOrders />} />
+        <Route path="/profile" element={<Profile />} />
+        <Route path="product/:id/:type_id" element={<GlassesDetails />} />
+        <Route path="lenses/:id" element={<LensesDetails />} />
+
+        {/* Private Admin Routes */}
+        <Route
+          path="/admin/*"
+          element={
+            <ProtectedRoute>
+              <Admin />
+            </ProtectedRoute>
+          }
+        >
+          <Route path="add_brand" element={<AddBrand />} />
+          <Route path="add_color" element={<AddColore />} />
+          <Route path="add_shapes" element={<AddShap />} />
+          <Route path="add_frame_color" element={<AddFrameColore />} />
+          <Route path="add_size" element={<AddSize />} />
+          <Route path="add_lens_time" element={<AddLensesTyme />} />
+          <Route path="add_lens_type" element={<AddLensesType />} />
+          <Route path="add_lens_color" element={<AddLensesColore />} />
+          <Route path="add_material" element={<AddMaterial />} />
+          <Route path="add_frame_type" element={<AddFrameType />} />
+          <Route path="all_order" element={<AllOrder />} />
+          <Route path="add_discount" element={<AddDiscount />} />
+          <Route path="add_glasses" element={<AddGlasses />} />
+          <Route path="add_lenses" element={<AddLenses />} />
+          <Route path="mange_salary" element={<MangeSalary />} />
+          <Route path="order-done" element={<OrderConfirm />} />
         </Route>
-        <Route path='product/:id/:type_id' element={<GlassesDetails />} />
-        <Route path='lenses/:id' element={<LensesDetails />} />
-        <Route path='/login' element={<Login />} />
-        <Route path='/cart' element={<Cart />} />
-        <Route path='/men_sunglasses' element={<MenSunglasses />} />
-        <Route path='/women_sunglasses' element={<WomenSunGlasses />} />
-        <Route
-          path='/men_prescription_glasses'
-          element={<MenPrescriptionGlasses />}
-        />
-        <Route path='/glasses_offer' element={<GlassesOffer />} />
-        <Route path='/lenses_offer' element={<LensesOffer />} />
-        <Route
-          path='/women_prescription_glasses'
-          element={<WomenPrescriptionGlasses />}
-        />
-        <Route
-          path='/children_prescription_glasses'
-          element={<CheldrinPrescriptionGlasses />}
-        />
-        <Route path='/order/:id' element={<Order />} />
-        <Route path='/orders' element={<MyOrders />} />
-        <Route path='/profile' element={<Profile />} />
       </Routes>
     </div>
   );

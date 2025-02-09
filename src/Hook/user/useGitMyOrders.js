@@ -16,7 +16,6 @@ const useGitMyOrders = () => {
         });
         setOrders(response.data);
       } catch (error) {
-        console.log("Error fetching data");
       } finally {
         setordersLoading(false);
       }

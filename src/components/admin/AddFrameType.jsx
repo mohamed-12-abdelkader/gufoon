@@ -20,7 +20,6 @@ const AddFrameType = () => {
         { headers: { token: token } }
       );
 
-      console.log(response);
       toast.success("تم إضافة نوع الاطار بنجاح");
     } catch (error) {
       console.error(error);
