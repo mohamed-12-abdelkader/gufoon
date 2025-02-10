@@ -20,7 +20,6 @@ const AddMaterial = () => {
         { headers: { token: token } }
       );
 
-      console.log(response);
       toast.success("تم إضافة  المتريال  بنجاح");
     } catch (error) {
       console.error(error);

@@ -30,7 +30,6 @@ const ManageSalary = () => {
     return <h1>جاااار التحميل .....</h1>;
   }
 
-  console.log(offers);
 
   return (
     <div>

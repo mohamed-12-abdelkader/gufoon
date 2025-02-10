@@ -27,7 +27,6 @@ const AddBrand = () => {
         { headers: { token: token } }
       );
 
-      console.log(response);
       toast.success("تم إضافة البراند بنجاح");
     } catch (error) {
       console.error(error);

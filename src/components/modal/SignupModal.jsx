@@ -1,5 +1,19 @@
-import React from "react";
-import { Modal, Button, Form, Spinner, Row, Col } from "react-bootstrap";
+import React, { useState } from "react";
+import {
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalCloseButton,
+  FormControl,
+  FormLabel,
+  Input,
+  Textarea,
+  Button,
+  VStack,
+  Icon,
+} from "@chakra-ui/react";
 import {
   FaUser,
   FaEnvelope,
@@ -8,219 +22,139 @@ import {
   FaMapMarkerAlt,
   FaCity,
 } from "react-icons/fa";
-import userSingup from "../../Hook/user/userSingup";
+import { toast } from "react-toastify";
+import { useAuth } from "../../contexts/AuthContext";
 
 const SignupModal = ({ show, handleClose }) => {
-  const [
-    handleSingup,
-    passChange,
-    mail,
-    mailChange,
-    fName,
-    fnameChange,
-    lName,
-    lNamechange,
-    phone,
-    phonechange,
-    address,
-    addressChange,
-    city,
-    cityChange,
-    pass,
-    userType,
-    setUserType,
-    loading,
-  ] = userSingup();
+  const [formData, setFormData] = useState({
+    fullName: "",
+    email: "",
+    password: "",
+    phone: "",
+    city: "",
+    address: "",
+  });
+  const [loading, setLoading] = useState(false);
+  const { register } = useAuth()
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleSignup = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      await register(formData);
+      toast.success("تم إنشاء الحساب بنجاح!");
+      handleClose(); // Close the modal
+    } catch (error) {
+      toast.error(
+        error.response?.data?.details || "خطأ في تسجيل الدخول، حاول مجددًا"
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
-    <Modal show={show} onHide={handleClose} size='lg' centered>
-      <Modal.Header closeButton className='border-0 pb-0'>
-        <Modal.Title className='w-100 text-center fw-bold'>
-          <h4 className='mb-0'>إنشاء حساب جديد</h4>
-          <p className='text-muted fs-6 mt-2'>
-            انضم إلينا واستمتع بتجربة تسوق فريدة
-          </p>
-        </Modal.Title>
-      </Modal.Header>
-      <Modal.Body className='px-4 pt-0'>
-        <Form className='signup-form'>
-          <Row className='g-3'>
-            <Col md={6}>
-              <Form.Group className='input-group-custom'>
-                <div className='input-icon'>
-                  <FaUser />
-                </div>
-                <Form.Control
-                  value={fName}
-                  onChange={fnameChange}
-                  placeholder='الاسم الأول'
-                  className='form-control-custom'
-                />
-              </Form.Group>
-            </Col>
-            <Col md={6}>
-              <Form.Group className='input-group-custom'>
-                <div className='input-icon'>
-                  <FaUser />
-                </div>
-                <Form.Control
-                  value={lName}
-                  onChange={lNamechange}
-                  placeholder='الاسم الأخير'
-                  className='form-control-custom'
-                />
-              </Form.Group>
-            </Col>
-            <Col md={12}>
-              <Form.Group className='input-group-custom'>
-                <div className='input-icon'>
-                  <FaEnvelope />
-                </div>
-                <Form.Control
-                  value={mail}
-                  onChange={mailChange}
-                  type='email'
-                  placeholder='البريد الإلكتروني'
-                  className='form-control-custom'
-                />
-              </Form.Group>
-            </Col>
-            <Col md={12}>
-              <Form.Group className='input-group-custom'>
-                <div className='input-icon'>
-                  <FaLock />
-                </div>
-                <Form.Control
-                  value={pass}
-                  onChange={passChange}
-                  type='password'
-                  placeholder='كلمة المرور'
-                  className='form-control-custom'
-                />
-              </Form.Group>
-            </Col>
-            <Col md={6}>
-              <Form.Group className='input-group-custom'>
-                <div className='input-icon'>
-                  <FaPhone />
-                </div>
-                <Form.Control
-                  value={phone}
-                  onChange={phonechange}
-                  placeholder='رقم الهاتف'
-                  className='form-control-custom'
-                />
-              </Form.Group>
-            </Col>
-            <Col md={6}>
-              <Form.Group className='input-group-custom'>
-                <div className='input-icon'>
-                  <FaCity />
-                </div>
-                <Form.Control
-                  value={city}
-                  onChange={cityChange}
-                  placeholder='المدينة'
-                  className='form-control-custom'
-                />
-              </Form.Group>
-            </Col>
-            <Col md={12}>
-              <Form.Group className='input-group-custom'>
-                <div className='input-icon'>
-                  <FaMapMarkerAlt />
-                </div>
-                <Form.Control
-                  value={address}
-                  onChange={addressChange}
-                  as='textarea'
-                  rows={2}
-                  placeholder='العنوان بالتفصيل'
-                  className='form-control-custom'
-                />
-              </Form.Group>
-            </Col>
-          </Row>
+    <Modal isOpen={show} onClose={handleClose}>
+      <ModalOverlay />
+      <ModalContent borderRadius="lg">
+        <ModalHeader textAlign="center">إنشاء حساب جديد</ModalHeader>
+        <ModalCloseButton />
+        <ModalBody>
+          <VStack spacing={4} as="form" onSubmit={handleSignup}>
+            <FormControl>
+              <FormLabel>الاسم الكامل</FormLabel>
+              <Input
+                name="fullName"
+                value={formData.fullName}
+                onChange={handleChange}
+                placeholder="الاسم الكامل"
+                icon={<Icon as={FaUser} />}
+              />
+            </FormControl>
 
-          <div className='text-center mt-4'>
+            <FormControl>
+              <FormLabel>البريد الإلكتروني</FormLabel>
+              <Input
+                type="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                placeholder="البريد الإلكتروني"
+                icon={<Icon as={FaEnvelope} />}
+              />
+            </FormControl>
+
+            <FormControl>
+              <FormLabel>كلمة المرور</FormLabel>
+              <Input
+                type="password"
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                placeholder="كلمة المرور"
+                icon={<Icon as={FaLock} />}
+              />
+            </FormControl>
+
+            <FormControl>
+              <FormLabel>رقم الهاتف</FormLabel>
+              <Input
+                name="phone"
+                value={formData.phone}
+                onChange={handleChange}
+                placeholder="رقم الهاتف"
+                icon={<Icon as={FaPhone} />}
+              />
+            </FormControl>
+
+            <FormControl>
+              <FormLabel>المدينة</FormLabel>
+              <Input
+                name="city"
+                value={formData.city}
+                onChange={handleChange}
+                placeholder="المدينة"
+                icon={<Icon as={FaCity} />}
+              />
+            </FormControl>
+
+            <FormControl>
+              <FormLabel>العنوان بالتفصيل</FormLabel>
+              <Textarea
+                name="address"
+                value={formData.address}
+                onChange={handleChange}
+                placeholder="العنوان بالتفصيل"
+                rows={2}
+                icon={<Icon as={FaMapMarkerAlt} />}
+              />
+            </FormControl>
+
             <Button
-              variant='primary'
-              type='submit'
-              onClick={handleSingup}
-              className='signup-btn'
-              disabled={loading}
+              colorScheme="blue"
+              type="submit"
+              isLoading={loading}
+              loadingText="إنشاء الحساب"
+              width="full"
+              mt={4}
             >
-              {loading ? (
-                <Spinner animation='border' size='sm' />
-              ) : (
-                "إنشاء الحساب"
-              )}
+              إنشاء الحساب
             </Button>
-          </div>
-        </Form>
-      </Modal.Body>
-
-      <style jsx>{`
-        .modal-content {
-          border-radius: 15px;
-          border: none;
-          box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-        }
-
-        .input-group-custom {
-          position: relative;
-          margin-bottom: 0;
-        }
-
-        .input-icon {
-          position: absolute;
-          right: 15px;
-          top: 50%;
-          transform: translateY(-50%);
-          color: #6c757d;
-          z-index: 10;
-        }
-
-        .form-control-custom {
-          height: 48px;
-          padding-right: 45px;
-          border-radius: 10px;
-          border: 1px solid #e0e0e0;
-          transition: all 0.3s ease;
-        }
-
-        .form-control-custom:focus {
-          border-color: #0d6efd;
-          box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.1);
-        }
-
-        textarea.form-control-custom {
-          height: auto;
-          padding-top: 12px;
-        }
-
-        .signup-btn {
-          padding: 12px 40px;
-          border-radius: 10px;
-          font-weight: 600;
-          transition: all 0.3s ease;
-        }
-
-        .signup-btn:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 5px 15px rgba(13, 110, 253, 0.2);
-        }
-
-        .signup-form {
-          padding: 20px 0;
-        }
-
-        .text-muted {
-          font-size: 0.9rem;
-        }
-      `}</style>
+          </VStack>
+        </ModalBody>
+      </ModalContent>
     </Modal>
   );
 };
 
 export default SignupModal;
+

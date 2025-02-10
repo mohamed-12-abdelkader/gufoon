@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from "react";
-import baseUrl from "../../api/baseUrl";
+import React, { useEffect, useState } from 'react';
+import baseUrl from '../../api/baseUrl';
 
 const GitAllOffer = ({ id }) => {
-  const token = localStorage.getItem("token");
-  const [offers, setoffers] = useState("");
+  const token = localStorage.getItem('token');
+  const [offers, setoffers] = useState('');
   const [loadingOffers, setLoading] = useState(false);
 
   useEffect(() => {
@@ -15,7 +15,6 @@ const GitAllOffer = ({ id }) => {
         });
         setoffers(response.data);
       } catch (error) {
-        console.log("Error fetching data");
       } finally {
         setLoading(false);
       }

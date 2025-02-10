@@ -149,7 +149,6 @@ const ViewAllProducts = ({ id }) => {
       </div>
     );
   }
-  console.log(products);
   return (
     <div className='products-page' style={{ minHeight: "80vh" }}>
       <div className='products-container'>
@@ -366,95 +365,6 @@ const ViewAllProducts = ({ id }) => {
         deleteGlasses={deleteGlasses}
         loading={deleteLoading}
       />
-
-      <style jsx>{`
-        .products-page {
-          padding: 20px;
-          background-color: #f8f9fa;
-        }
-
-        .products-container {
-          display: flex;
-          gap: 20px;
-          max-width: 1400px;
-          margin: 0 auto;
-        }
-
-        .filter-sidebar {
-          width: 300px;
-          background: white;
-          padding: 20px;
-          border-radius: 12px;
-          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-          height: fit-content;
-          position: sticky;
-          top: 20px;
-        }
-
-        .filter-header {
-          display: flex;
-          align-items: center;
-          gap: 10px;
-          margin-bottom: 20px;
-          padding-bottom: 10px;
-          border-bottom: 1px solid #eee;
-        }
-
-        .filter-icon {
-          color: #4b6cb7;
-          font-size: 1.2rem;
-        }
-
-        .products-grid {
-          flex: 1;
-        }
-
-        .products-wrapper {
-          display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-          gap: 20px;
-          margin-bottom: 30px;
-        }
-
-        .loading-message,
-        .no-products-message {
-          text-align: center;
-          padding: 40px;
-          font-size: 1.2rem;
-          color: #666;
-        }
-
-        .pagination-wrapper {
-          display: flex;
-          justify-content: center;
-          margin-top: 20px;
-        }
-
-        .price-range,
-        .sort-options,
-        .color-options,
-        .brand-options,
-        .frame-type-options {
-          display: flex;
-          flex-direction: column;
-          gap: 10px;
-        }
-
-        @media (max-width: 768px) {
-          .products-container {
-            flex-direction: column;
-          }
-
-          .filter-sidebar {
-            width: 100%;
-            position: static;
-          }
-
-          .products-wrapper {
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-          }
-        }
-      `}</style>
     </div>
   );
 };

@@ -96,7 +96,6 @@ const SectionFour = () => {
       [product.product_id]: false,
     }));
   };
-  console.log(offerProducts);
   return (
     <div className='my-5 p-3'>
       <img

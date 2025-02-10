@@ -20,7 +20,6 @@ const AddLensesType = () => {
         { headers: { token: token } }
       );
 
-      console.log(response);
       toast.success("تم إضافة النوع  بنجاح");
     } catch (error) {
       console.error(error);

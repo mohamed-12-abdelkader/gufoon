@@ -24,7 +24,6 @@ const useGitCart = () => {
       setcarts(response.data);
       shouldRefresh = false;
     } catch (error) {
-      console.log("Error fetching cart data:", error);
       setcarts("");
     } finally {
       setGlassesLoading(false);

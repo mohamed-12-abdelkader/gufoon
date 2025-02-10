@@ -24,7 +24,6 @@ const useDeleateProductFromCart = () => {
         }
       );
 
-      console.log(response);
       toast.success("تم حذف  المنتج من  السلة");
     } catch (error) {
       console.error(error);

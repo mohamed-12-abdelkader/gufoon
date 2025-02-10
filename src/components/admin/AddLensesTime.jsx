@@ -20,7 +20,6 @@ const AddLensesTyme = () => {
         { headers: { token: token } }
       );
 
-      console.log(response);
       toast.success("تم إضافة المدة  بنجاح");
     } catch (error) {
       console.error(error);

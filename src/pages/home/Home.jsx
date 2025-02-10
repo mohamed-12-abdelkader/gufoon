@@ -7,7 +7,7 @@ import GitGlassesProduct from "../../Hook/user/GitGlassesProduct";
 
 const Home = () => {
   const [glasses, glassesLoading] = GitGlassesProduct();
-  console.log(glasses);
+
   return (
     <div>
       <SectionOne />

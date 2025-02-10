@@ -32,7 +32,6 @@ const OrderConfirm = () => {
       }, 500);
     } catch (error) {
       toast.error("فشل تاكيد الطلب");
-      console.log(error);
     } finally {
       setLoading(false);
       setShowModal(false);

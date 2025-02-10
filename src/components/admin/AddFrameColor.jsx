@@ -20,7 +20,6 @@ const AddFrameColore = () => {
         { headers: { token: token } }
       );
 
-      console.log(response);
       toast.success("تم إضافة اللون  بنجاح");
     } catch (error) {
       console.error(error);

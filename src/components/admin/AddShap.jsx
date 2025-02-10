@@ -20,7 +20,6 @@ const AddShap = () => {
         { headers: { token: token } }
       );
 
-      console.log(response);
       toast.success("تم إضافة الشكل   بنجاح");
     } catch (error) {
       console.error(error);

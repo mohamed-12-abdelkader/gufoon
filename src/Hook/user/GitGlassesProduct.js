@@ -11,7 +11,6 @@ const GitGlassesProduct = () => {
         const response = await baseUrl.get(`api/glassesproduct`);
         setGlasses(response.data);
       } catch (error) {
-        console.log("Error fetching data");
       } finally {
         setGlassesLoading(false);
       }

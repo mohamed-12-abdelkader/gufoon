@@ -78,11 +78,9 @@ const useAddGlasses = () => {
       }
     } catch (error) {
       toast.error("حدث خطأ أثناء إضافة النظارة  ");
-      console.log(error);
     } finally {
       setLoading(false);
     }
-    console.log(imgs);
   };
 
   return [

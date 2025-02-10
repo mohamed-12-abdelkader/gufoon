@@ -20,7 +20,6 @@ const AddSize = () => {
         { headers: { token: token } }
       );
 
-      console.log(response);
       toast.success("تم إضافة الحجم  بنجاح");
     } catch (error) {
       console.error(error);

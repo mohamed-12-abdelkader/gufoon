@@ -15,7 +15,6 @@ const GitOrderDetails = ({ id }) => {
         });
         setorder(response.data);
       } catch (error) {
-        console.log("Error fetching data");
       } finally {
         setLoading(false);
       }
