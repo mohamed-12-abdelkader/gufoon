@@ -14,6 +14,7 @@ function NavbarComponent() {
   const [carts, setCarts] = useState([]);
 
   const { isAdmin } = useAuth()
+
   const [show, setShow] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
 
@@ -46,21 +47,21 @@ function NavbarComponent() {
       <div className='w-[100%] flex flex-wrap justify-between'>
         <NavDropdown title='نظارات شمسية' id='navbarScrollingDropdown'>
           <NavDropdown.Item>
-            <Link to={"/men_sunglasses"}>نظارات شمسية رجالى </Link>
+            <Link to={"/categories/men-sunglasses"}>نظارات شمسية رجالى </Link>
           </NavDropdown.Item>
           <NavDropdown.Item>
-            <Link to={"/women_sunglasses"}>نظارات شمسية نسائى </Link>
+            <Link to={"/categories/women-sunglasses"}>نظارات شمسية نسائى </Link>
           </NavDropdown.Item>
         </NavDropdown>
         <NavDropdown title='نظارات طبية' id='navbarScrollingDropdown'>
           <NavDropdown.Item>
-            <Link to={"/men_prescription_glasses"}>نظارات طبية رجالى </Link>
+            <Link to={"/categories/men-eyeglasses"}>نظارات طبية رجالى </Link>
           </NavDropdown.Item>
           <NavDropdown.Item>
-            <Link to={"/women_prescription_glasses"}>نظارات طبية نسائى </Link>
+            <Link to={"/categories/women-eyeglasses"}>نظارات طبية نسائى </Link>
           </NavDropdown.Item>
           <NavDropdown.Item>
-            <Link to={"/children_prescription_glasses"}>
+            <Link to={"/categories/children-glasses"}>
               نظارات طبية اطفالى{" "}
             </Link>
           </NavDropdown.Item>
@@ -71,14 +72,14 @@ function NavbarComponent() {
         </NavDropdown>
         <NavDropdown title='  الخصومات  ' id='navbarScrollingDropdown'>
           <NavDropdown.Item>
-            <Link to={"/glasses_offer"}>خصومات النظارات </Link>
+            <Link to={"/offers"}>خصومات النظارات </Link>
           </NavDropdown.Item>
           <NavDropdown.Item>
-            <Link to={"/lenses_offer"}>خصومات العدسات</Link>
+            <Link to={"/offers"}>خصومات العدسات</Link>
           </NavDropdown.Item>
         </NavDropdown>
       </div>
-      {isAdmin && <div className="mt-2 flex">
+      {isAdmin() && <div className="mt-2 flex">
         <Link
           to={"/admin"}
           className='font-bold text-blue-500 mx-1'

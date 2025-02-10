@@ -1,23 +1,14 @@
 import React from "react";
-import { Outlet, Route, Routes } from "react-router-dom";
+import { Route, Routes, Navigate } from "react-router-dom";
 import Admin from "../pages/admin/Admin";
 import Home from "../pages/home/Home";
 import AddBrand from "../components/admin/AddBrand";
 import AddDiscount from "../components/admin/AddDiscount";
-import GlassesDetails from "../pages/glasses/GlassesDetails";
 import Login from "../pages/login/Login";
 import Cart from "../pages/cart/Cart";
-import MenSunglasses from "../pages/sunGlasses/MenSunglasses";
 import AddGlasses from "../components/admin/AddGlasses";
 import AddLenses from "../components/admin/AddLenses";
-import WomenSunGlasses from "../pages/sunGlasses/WomenSunGlasses";
-import MenPrescriptionGlasses from "../pages/prescriptionGlasses/MenPrescriptionGlasses";
-import WomenPrescriptionGlasses from "../pages/prescriptionGlasses/WomenPrescriptionGlasses";
-import CheldrinPrescriptionGlasses from "../pages/prescriptionGlasses/CheldrinPrescriptionGlasses";
-import GlassesOffer from "../pages/offer/GlassesOffer";
-import LensesDetails from "../pages/lenses/LensesDetails";
 import MangeSalary from "../components/admin/MangeSalary";
-import LensesOffer from "../pages/offer/LensesOffer";
 import AllOrder from "../components/admin/AllOrder";
 import Order from "../pages/order/Order";
 import OrderConfirm from "../components/admin/OrderConfirm";
@@ -33,13 +24,17 @@ import AddLensesTyme from "../components/admin/AddLensesTime";
 import MyOrders from "../pages/myorder/MyOrders";
 import Profile from "../pages/profile/Profile";
 import { useAuth } from "../contexts/AuthContext";
-import { Navigate } from "react-router-dom";
-import ProductsCategories from "../pages/ProductsCategories";
+import Products from "../pages/Products";
+import DetailedProduct from "../pages/DetailedProduct";
 
-const ProtectedRoute = () => {
-  const { isAuthenticated } = useAuth();
+const ProtectedRoute = ({ children, isAdmin }) => {
+  const { isAuthenticated, isAdmin: isAdminFun } = useAuth();
 
-  return isAuthenticated() ? <Outlet /> : <Navigate to="/login" />;
+  if (!isAuthenticated()) return <Navigate to="/login" />;
+
+  if (isAdmin && !isAdminFun()) return <Navigate to="/" />;
+
+  return children;
 };
 
 const Router = () => {
@@ -49,29 +44,27 @@ const Router = () => {
         {/* Public Routes */}
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/products" element={<Products />} />
+        <Route path="/product/:product_id" element={<DetailedProduct />} />
+        <Route path="/categories/:category_slug" element={<Products />} />
+        <Route path="/offers" element={<Products offers={true} />} />
         <Route path="/cart" element={<Cart />} />
-        <Route path="/men_sunglasses" element={<MenSunglasses />} />
-        <Route path="/women_sunglasses" element={<WomenSunGlasses />} />
-        <Route path="/men_prescription_glasses" element={<MenPrescriptionGlasses />} />
-        <Route path="/glasses_offer" element={<GlassesOffer />} />
-        <Route path="/lenses_offer" element={<LensesOffer />} />
-        <Route path="/women_prescription_glasses" element={<WomenPrescriptionGlasses />} />
-        <Route path="/children_prescription_glasses" element={<CheldrinPrescriptionGlasses />} />
         <Route path="/order/:id" element={<Order />} />
         <Route path="/orders" element={<MyOrders />} />
-        <Route path="/profile" element={<Profile />} />
-        <Route path="product/:id/:type_id" element={<GlassesDetails />} />
-        <Route path="lenses/:id" element={<LensesDetails />} />
 
-        {/* Private Admin Routes */}
-        <Route
-          path="/admin/*"
-          element={
-            <ProtectedRoute>
-              <Admin />
-            </ProtectedRoute>
-          }
-        >
+        {/* Protected User Routes */}
+        <Route path="/profile" element={
+          <ProtectedRoute>
+            <Profile />
+          </ProtectedRoute>
+        } />
+
+        {/* Protected Admin Routes */}
+        <Route path="/admin/*" element={
+          <ProtectedRoute isAdmin>
+            <Admin />
+          </ProtectedRoute>
+        }>
           <Route path="add_brand" element={<AddBrand />} />
           <Route path="add_color" element={<AddColore />} />
           <Route path="add_shapes" element={<AddShap />} />

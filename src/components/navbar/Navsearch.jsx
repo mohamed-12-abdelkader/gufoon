@@ -23,30 +23,30 @@ const categories = [
   {
     title: "نظارات شمسية",
     items: [
-      { name: "نظارات شمسية رجالى", path: "/men_sunglasses" },
-      { name: "نظارات شمسية نسائى", path: "/women_sunglasses" },
+      { name: "نظارات شمسية رجالى", path: "/categories/men-sunglasses" },
+      { name: "نظارات شمسية نسائى", path: "/categories/women-sunglasses" },
     ],
   },
   {
     title: "نظارات طبية",
     items: [
-      { name: "نظارات طبية رجالى", path: "/men_prescription_glasses" },
-      { name: "نظارات طبية نسائى", path: "/women_prescription_glasses" },
-      { name: "نظارات طبية اطفالى", path: "/children_prescription_glasses" },
+      { name: "نظارات طبية رجالى", path: "/categories/men-eyeglasses" },
+      { name: "نظارات طبية نسائى", path: "/categories/women-eyeglasses" },
+      { name: "نظارات طبية اطفالى", path: "/categories/children-glasses" },
     ],
   },
   {
     title: "عدسات لاصقة",
     items: [
-      { name: "عدسات طبية", path: "/medical_lenses" },
-      { name: "عدسات ملونة power", path: "/colored_lenses" },
+      { name: "عدسات طبية", path: "/categories/lenses" },
+      { name: "عدسات ملونة power", path: "/categories/lenses/" },
     ],
   },
   {
     title: "الخصومات",
     items: [
-      { name: "خصومات النظارات", path: "/glasses_offer" },
-      { name: "خصومات العدسات", path: "/lenses_offer" },
+      { name: "خصومات النظارات", path: "/offers" },
+      { name: "خصومات العدسات", path: "/offers" },
     ],
   },
 ];
@@ -159,9 +159,9 @@ const Navsearch = () => {
               className='p-2'
               style={{ zIndex: 1050 }}
             >
-              {isAuthenticated ? (
+              {isAuthenticated() ? (
                 <>
-                  {isAdmin && (
+                  {isAdmin() && (
                     <Dropdown.Item as={Link} to='/admin/management'>
                       <div className='d-flex align-items-center gap-2'>
                         <FaTools className='text-primary' />
@@ -213,7 +213,7 @@ const Navsearch = () => {
             </Dropdown.Menu>
           </Dropdown>
 
-          {isAuthenticated && (
+          {isAuthenticated() && (
             <Dropdown show={showNotifications} onToggle={toggleNotifications}>
               <Dropdown.Toggle
                 variant='none'
@@ -243,7 +243,7 @@ const Navsearch = () => {
           )}
         </div>
         <div className='position-relative'>
-          {!isAdmin && (
+          {!isAdmin() && (
             <Link to='/cart'>
               <div style={{ position: "relative" }}>
                 <FaCartPlus className='text-3xl mt-2 mx-2 text-white' />

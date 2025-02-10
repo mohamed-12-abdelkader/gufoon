@@ -28,8 +28,11 @@ export const AuthProvider = ({ children }) => {
   const initializeUser = async () => {
     try {
       const res = await axios.post('/login/test-token');
-      setUser(res.data.user);
-    } catch {}
+      setUser(res.data);
+    } catch {
+      setToken(null);
+      setUser(null);
+    }
   };
 
   const register = async userData => {
@@ -40,7 +43,7 @@ export const AuthProvider = ({ children }) => {
     setUser(user);
   };
 
-  const isAuthenticated = () => !!token;
+  const isAuthenticated = () => !!user;
 
   // Set up axios interceptors to include the token in requests
   useEffect(() => {
@@ -60,6 +63,10 @@ export const AuthProvider = ({ children }) => {
         return Promise.reject(error);
       }
     );
+
+    if (token) {
+      initializeUser();
+    }
   }, [token]);
 
   return (

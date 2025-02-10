@@ -6,7 +6,7 @@ import { Outlet } from "react-router-dom";
 import { Container, Row, Col } from "react-bootstrap";
 
 const Admin = () => {
-  const [currentLink, setCurrentLink] = useState(""); // تخزين الفهم الحالي
+  const [currentLink, setCurrentLink] = useState("");
 
   return (
     <Container dir='rtl' fluid style={{ marginTop: "0px" }}>
