@@ -1,15 +1,15 @@
 import React from "react";
 import { Container, Card, Row, Col } from "react-bootstrap";
 import {
-  FaUser,
   FaEnvelope,
   FaPhone,
   FaMapMarkerAlt,
   FaCity,
 } from "react-icons/fa";
+import { useAuth } from "../../contexts/AuthContext";
 
 const Profile = () => {
-  const user = JSON.parse(localStorage.getItem("user")) || {};
+  const { user } = useAuth()
 
   return (
     <div className='profile-page'>
@@ -25,11 +25,10 @@ const Profile = () => {
               <Card.Body className='p-4'>
                 <div className='profile-header mb-4'>
                   <div className='avatar-placeholder'>
-                    {user.fname?.charAt(0)}
-                    {user.lname?.charAt(0)}
+                    {user.fullName.slice(0, 2).toUpperCase()}
                   </div>
                   <h3 className='user-name'>
-                    {user.fname} {user.lname}
+                    {user.fullName}
                   </h3>
                 </div>
 
@@ -40,7 +39,7 @@ const Profile = () => {
                     </div>
                     <div className='info-content'>
                       <label>البريد الإلكتروني</label>
-                      <p>{user.mail}</p>
+                      <p>{user.email}</p>
                     </div>
                   </div>
 
@@ -50,7 +49,7 @@ const Profile = () => {
                     </div>
                     <div className='info-content'>
                       <label>رقم الهاتف</label>
-                      <p>{user.phone}</p>
+                      <p>{user.phoneNumber}</p>
                     </div>
                   </div>
 

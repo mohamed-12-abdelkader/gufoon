@@ -1,21 +1,38 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Card, Placeholder, Button, Row, Col } from "react-bootstrap";
-import { FaCartPlus } from "react-icons/fa";
-import { GoChevronRight, GoChevronLeft } from "react-icons/go";
-import GitOffer from "../../Hook/offerProducts/GitOffer";
+import { Card, Placeholder, Row, Col } from "react-bootstrap";
 import ProductCard from "../card/ProductCard";
 import EditModal from "../modal/EditModal";
 import DeleteModal from "../modal/DeleteModal";
 import { addToCart } from "../../Hook/addToCart/AddToCart";
 import EditeProduct from "../../Hook/admin/EditeProduct";
 import DeleateLenses from "../../Hook/admin/DeleateLenses";
-import UserType from "../../Hook/userType/UserType";
 import Slider from "../slider/Slider";
+import { getDiscountedLances } from "../../utils/services";
 
 const SectionFour = () => {
-  const [userData, isAdmin, user] = UserType();
-  const [offerProducts, offerProductsLoading] = GitOffer({ id: 2 });
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    async function fetchDiscountedLances() {
+      setLoading(true);
+      setError(null);
+
+      try {
+        const data = await getDiscountedLances({ limit: 10, skip: 0, orderBy: 'price', orderType: 'asc' });
+        setProducts(data?.data || []);
+      } catch (err) {
+        setError('فشل في جلب العدسات المخفضة. يرجى المحاولة مرة أخرى.');
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchDiscountedLances();
+  }, []);
+
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const [editedProduct, setEditedProduct] = useState(null);
   const [deleteLoading, deleteLenses] = DeleateLenses();
@@ -26,7 +43,7 @@ const SectionFour = () => {
   const [startX, setStartX] = useState(0);
   const [scrollLeft, setScrollLeft] = useState(0);
   const [
-    loading,
+    editLoading,
     product_name,
     model_number,
     salary,
@@ -114,7 +131,7 @@ const SectionFour = () => {
         </div>
       </div>
 
-      {offerProductsLoading ? (
+      {loading ? (
         <Row>
           {[...Array(3)].map((_, index) => (
             <Col key={index} md={4} className='mb-4  '>
@@ -137,7 +154,7 @@ const SectionFour = () => {
             </Col>
           ))}
         </Row>
-      ) : offerProducts && offerProducts.data?.length > 0 ? (
+      ) : products.length ? (
         <div
           dir='rtl'
           className='slider-container relative'
@@ -148,20 +165,16 @@ const SectionFour = () => {
           onMouseMove={handleMouseMove}
         >
           <Slider>
-            {offerProducts.data.map(
-              (glasse) =>
-                glasse?.product_id && (
-                  <ProductCard
-                    href={`/lenses/${glasse.product_id}`}
-                    key={glasse.product_id}
-                    glasse={glasse}
-                    isAdmin={isAdmin}
-                    handleAddToCart={handleAddToCart}
-                    loadingItems={loadingItems}
-                    openDeleteModal={openDeleteModal}
-                    openEditModal={openEditModal}
-                  />
-                )
+            {products.map(
+              (product) =>
+                <ProductCard
+                  href={`/product/${product.id}`}
+                  key={product.id}
+                  product={product}
+                  handleAddToCart={handleAddToCart}
+                  openDeleteModal={openDeleteModal}
+                  openEditModal={openEditModal}
+                />
             )}
           </Slider>
         </div>
