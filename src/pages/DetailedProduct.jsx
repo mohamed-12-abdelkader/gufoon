@@ -109,7 +109,7 @@ const DetailedProduct = () => {
                       <Carousel.Item key={i}>
                         <div className='position-relative rounded-4 overflow-hidden'>
                           <img
-                            src={image}
+                            src={image.url}
                             className='d-block w-100 object-fit-cover'
                             style={{ height: "500px" }}
                             alt='Product'
@@ -133,7 +133,7 @@ const DetailedProduct = () => {
                           onClick={() => setIndex(idx)}
                         >
                           <img
-                            src={img}
+                            src={img.url}
                             alt='thumbnail'
                             className='w-100 rounded-3'
                           />

@@ -122,7 +122,7 @@ const SectionFour = () => {
       />
       <div className='h-[60px] w-[95%] p-2 m-auto flex justify-between items-center border shadow my-5 bg-white'>
         <div>
-          <Link to='/lenses_offer'>
+          <Link to='/offers'>
             <h6>عرض المزيد</h6>
           </Link>
         </div>

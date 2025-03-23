@@ -67,8 +67,16 @@ function NavbarComponent() {
           </NavDropdown.Item>
         </NavDropdown>
         <NavDropdown title=' عدسات لاصقة ' id='navbarScrollingDropdown'>
-          <NavDropdown.Item> عدسات طبية </NavDropdown.Item>
-          <NavDropdown.Item> عدسات ملونة power </NavDropdown.Item>
+          <NavDropdown.Item>
+            <Link to={"/categories/lenses"}>
+              عدسات طبية
+            </Link>
+          </NavDropdown.Item>
+          <NavDropdown.Item>
+            <Link to={"/categories/lenses"}>
+              عدسات ملونة power
+            </Link>
+          </NavDropdown.Item>
         </NavDropdown>
         <NavDropdown title='  الخصومات  ' id='navbarScrollingDropdown'>
           <NavDropdown.Item>
@@ -82,7 +90,7 @@ function NavbarComponent() {
       {isAdmin() && <div className="mt-2 flex">
         <Link
           to={"/admin"}
-          className='font-bold text-blue-500 mx-1'
+          className='font-bold text-nowrap text-blue-500 mx-1'
         >
           صفحة الادمن
         </Link>

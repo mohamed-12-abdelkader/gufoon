@@ -1,68 +1,75 @@
 import React, { useState } from "react";
-import {
-  Container,
-  Row,
-  Col,
-  Button,
-  Spinner,
-  Modal,
-  Form,
-} from "react-bootstrap";
+import { Container, Row, Col, Button, Spinner, Modal, Form } from "react-bootstrap";
 import { FaTrash, FaMinus, FaPlus } from "react-icons/fa";
-import SendOrder from "../../Hook/order/SendOrder";
-import useGitCart from "../../Hook/user/useGitCart";
-import useDeleateProductFromCart from "../../Hook/user/useDeleateProductFromCart";
-import useUpdateCartQuantity from "../../Hook/user/useUpdateCartQuantity";
+import { useCart } from "../../contexts/CartContext";
+import axios from "axios";
+import { toast } from "react-toastify";
 
 const Cart = () => {
-  const [carts, cartsLoading, refreshCart] = useGitCart();
-  const { handleDeleateFromToCart, deleatloading } =
-    useDeleateProductFromCart();
-  const { updateQuantity, updatingItemId, updatingAction } =
-    useUpdateCartQuantity();
-  const [setaddress, address, handleSubmit, loading] = SendOrder();
-  const [deletingItemId, setDeletingItemId] = useState(null);
+  const { cart, removeFromCart, updateQuantity, loading, clearCart } = useCart();
+
+  const [updatingItem, setUpdatingItem] = useState(null);
+  const [removingItem, setRemovingItem] = useState(null);
   const [showOrderModal, setShowOrderModal] = useState(false);
-  const [cashOnDelivery, setCashOnDelivery] = useState(true);
-
-  const handleDelete = async (itemId) => {
-    setDeletingItemId(itemId);
-    await handleDeleateFromToCart(itemId);
-    setDeletingItemId(null);
-    refreshCart();
-  };
-
-  const handleQuantityChange = async (item, increment) => {
-    const newQuantity = increment ? item.quentity + 1 : item.quentity - 1;
-    if (newQuantity > 0) {
-      await updateQuantity(item.id, newQuantity, increment ? "plus" : "minus");
-      refreshCart();
-    }
-  };
+  const [address, setAddress] = useState("");
+  const [cashOnDelivery, setCashOnDelivery] = useState(false);
+  const [orderLoading, setOrderLoading] = useState(false);
 
   const handleShowModal = () => setShowOrderModal(true);
   const handleCloseModal = () => setShowOrderModal(false);
 
-  const handleOrderSubmit = (e) => {
-    e.preventDefault();
-    handleSubmit();
-    handleCloseModal();
+  // Calculate order totals
+  const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+  const subtotal = cart.reduce((sum, item) => {
+    const price = item.productInfo.discount
+      ? item.productInfo.price - (item.productInfo.price * item.productInfo.discount) / 100
+      : item.productInfo.price;
+    return sum + item.quantity * price;
+  }, 0);
+  const totalPrice = subtotal;
+
+  // Handle updating quantity
+  const handleUpdateQuantity = async (item, action) => {
+    setUpdatingItem(item.id);
+    const newQuantity = action === "plus" ? item.quantity + 1 : item.quantity - 1;
+    await updateQuantity(item.id, newQuantity);
+    setUpdatingItem(null);
   };
 
-  if (cartsLoading) {
-    return (
-      <div className='min-h-screen flex items-center justify-center'>
-        <Spinner animation='border' variant='primary' />
-      </div>
-    );
+  // Handle removing item
+  const handleRemoveItem = async (cartId) => {
+    setRemovingItem(cartId);
+    await removeFromCart(cartId);
+    setRemovingItem(null);
+  };
+
+  const handleSubmitOrder = async (e) => {
+    e.preventDefault();
+    setOrderLoading(true);
+
+    try {
+      await axios.post("/orders/me", { shippingAddress: address });
+      await clearCart()
+      toast.success("✅ تم تقديم طلبك بنجاح!");
+      handleCloseModal();
+    } catch (error) {
+      toast.error("حدث خطأ أثناء تقديم الطلب، حاول مرة أخرى.");
+    } finally {
+      setOrderLoading(false);
+    }
+  };
+
+
+  if (loading) {
+    return <p className="text-center">جاري تحميل السلة...</p>;
   }
 
-  if (!carts || !carts.data) {
+  if (!cart.length) {
     return (
-      <div className='text-center py-5'>
+      <div className="text-center py-5">
         <h3>السلة فارغة</h3>
-        <p className='text-muted'>لم تقم بإضافة أي منتجات إلى السلة بعد</p>
-        <Button variant='primary' href='/products'>
+        <p className="text-muted">لم تقم بإضافة أي منتجات إلى السلة بعد</p>
+        <Button variant="primary" href="/products">
           تسوق الآن
         </Button>
       </div>
@@ -70,275 +77,128 @@ const Cart = () => {
   }
 
   return (
-    <Container dir='rtl' className='my-5 pt-5'>
-      <h2 className='text-center mb-4 fw-bold'>سلة المشتريات</h2>
+    <Container dir="rtl" className="my-5 pt-5">
+      <h2 className="text-center mb-4 fw-bold">سلة المشتريات</h2>
 
-      {carts?.data?.length > 0 ? (
-        <Row>
-          {/* عرض المنتجات */}
-          <Col lg={8}>
-            <div className='cart-items'>
-              {carts.data.map((item) => (
-                <div
-                  key={item.id}
-                  className='cart-item bg-white p-3 rounded-3 mb-3 shadow-sm'
-                >
-                  <Row className='align-items-center'>
-                    {/* صورة المنتج */}
+      <Row>
+        <Col lg={8}>
+          <div className="cart-items">
+            {cart.map((item) => {
+              const originalPrice = item.productInfo.price;
+              const discount = item.productInfo.discount || 0;
+              const discountedPrice = originalPrice - (originalPrice * discount) / 100;
+
+              return (
+                <div key={item.id} className="cart-item bg-white p-3 rounded-3 mb-3 shadow-sm">
+                  <Row className="align-items-center">
                     <Col sm={3}>
                       <img
-                        src={item.productInfo.images[0].image}
-                        alt={item.productInfo.product_name}
-                        className='img-fluid rounded-3'
+                        src={item.productInfo.cover}
+                        alt={item.productInfo.name}
+                        className="img-fluid rounded-3"
                         style={{ height: "120px", objectFit: "cover" }}
                       />
                     </Col>
 
-                    {/* تفاصيل المنتج */}
                     <Col sm={6}>
-                      <h5 className='mb-2'>{item.productInfo.product_name}</h5>
-                      <div className='product-details text-muted small'>
-                        <p className='mb-1'>
-                          البراند: {item.productInfo.brand_name}
-                        </p>
-                        <p className='mb-1'>المقاس: {item.productInfo.size}</p>
-                        <p className='mb-1'>
-                          اللون: {item.productInfo.frame_color}
-                        </p>
+                      <h5 className="mb-2">{item.productInfo.name}</h5>
+                      <div className="product-details text-muted small">
+                        <p className="mb-1">البراند: {item.productInfo.brand?.name}</p>
+                        <p className="mb-1">اللون: {item.productInfo.color?.name}</p>
                       </div>
-                      <div className='quantity-controls mt-2 d-flex align-items-center gap-2'>
+                      <div className="quantity-controls mt-2 d-flex align-items-center gap-2">
                         <Button
-                          variant='outline-primary'
-                          size='sm'
-                          onClick={() => handleQuantityChange(item, false)}
-                          disabled={
-                            (updatingItemId === item.id &&
-                              updatingAction === "minus") ||
-                            item.quentity <= 1
-                          }
+                          variant="outline-primary"
+                          size="sm"
+                          onClick={() => handleUpdateQuantity(item, "minus")}
+                          disabled={item.quantity <= 1 || updatingItem === item.id}
                         >
-                          {updatingItemId === item.id &&
-                          updatingAction === "minus" ? (
-                            <Spinner size='sm' />
-                          ) : (
-                            <FaMinus />
-                          )}
+                          {updatingItem === item.id ? <Spinner size="sm" /> : <FaMinus />}
                         </Button>
-                        <span className='mx-2'>{item.quentity}</span>
+                        <span className="mx-2">{item.quantity}</span>
                         <Button
-                          variant='outline-primary'
-                          size='sm'
-                          onClick={() => handleQuantityChange(item, true)}
-                          disabled={
-                            updatingItemId === item.id &&
-                            updatingAction === "plus"
-                          }
+                          variant="outline-primary"
+                          size="sm"
+                          onClick={() => handleUpdateQuantity(item, "plus")}
+                          disabled={updatingItem === item.id}
                         >
-                          {updatingItemId === item.id &&
-                          updatingAction === "plus" ? (
-                            <Spinner size='sm' />
-                          ) : (
-                            <FaPlus />
-                          )}
+                          {updatingItem === item.id ? <Spinner size="sm" /> : <FaPlus />}
                         </Button>
                       </div>
                     </Col>
 
-                    {/* السعر وزر الحذف */}
-                    <Col sm={3} className='text-end'>
-                      <div className='price-section'>
-                        <h5 className='text-primary mb-2'>
-                          {item.TotalSalry} ر.س
-                        </h5>
-                        {item.productInfo.percent > 0 && (
-                          <span className='badge bg-danger mb-2'>
-                            خصم {item.productInfo.percent}%
-                          </span>
-                        )}
-                      </div>
+                    <Col sm={3} className="text-end">
+                      {discount > 0 ? (
+                        <>
+                          <h6 className="text-muted mb-1">
+                            <del>{originalPrice} ر.س</del>
+                          </h6>
+                          <h5 className="text-danger">{discountedPrice.toFixed(2)} ر.س</h5>
+                        </>
+                      ) : (
+                        <h5 className="text-primary">{originalPrice} ر.س</h5>
+                      )}
                       <Button
-                        variant='outline-danger'
-                        size='sm'
-                        onClick={() => handleDelete(item.id)}
-                        disabled={deletingItemId === item.id}
+                        variant="outline-danger"
+                        size="sm"
+                        onClick={() => handleRemoveItem(item.id)}
+                        disabled={removingItem === item.id}
                       >
-                        {deletingItemId === item.id ? (
-                          <Spinner size='sm' />
-                        ) : (
-                          <FaTrash />
-                        )}
+                        {removingItem === item.id ? <Spinner size="sm" /> : <FaTrash />}
                       </Button>
                     </Col>
                   </Row>
                 </div>
-              ))}
+              );
+            })}
+          </div>
+        </Col>
+
+        <Col lg={4}>
+          <div className="order-summary bg-white p-4 rounded-3 shadow-sm">
+            <h4 className="mb-4">ملخص الطلب</h4>
+
+            <div className="d-flex justify-content-between mb-3">
+              <span>عدد المنتجات</span>
+              <span>{totalItems}</span>
             </div>
-          </Col>
 
-          {/* ملخص الطلب */}
-          <Col lg={4}>
-            <div className='order-summary bg-white p-4 rounded-3 shadow-sm'>
-              <h4 className='mb-4'>ملخص الطلب</h4>
-
-              <div className='d-flex justify-content-between mb-3'>
-                <span>عدد المنتجات</span>
-                <span>{carts.data.length}</span>
-              </div>
-
-              <div className='d-flex justify-content-between mb-3'>
-                <span>المجموع الفرعي</span>
-                <span>{carts.total} ر.س</span>
-              </div>
-
-              <hr />
-
-              <div className='d-flex justify-content-between mb-4'>
-                <strong>الإجمالي</strong>
-                <strong className='text-primary'>{carts.total} ر.س</strong>
-              </div>
-
-              <Button
-                variant='primary'
-                className='w-100 py-2'
-                onClick={handleShowModal}
-              >
-                إتمام الطلب
-              </Button>
+            <div className="d-flex justify-content-between mb-3">
+              <span>المجموع الفرعي</span>
+              <span>{subtotal.toFixed(2)} ر.س</span>
             </div>
-          </Col>
-        </Row>
-      ) : (
-        <div className='text-center py-5'>
-          <h3>السلة فارغة</h3>
-          <p className='text-muted'>لم تقم بإضافة أي منتجات إلى السلة بعد</p>
-          <Button variant='primary' href='/products'>
-            تسوق الآن
-          </Button>
-        </div>
-      )}
 
-      {/* Order Modal */}
-      <Modal show={showOrderModal} onHide={handleCloseModal} size='xl' centered>
+            <hr />
+
+            <div className="d-flex justify-content-between mb-4">
+              <strong>الإجمالي</strong>
+              <strong className="text-primary">{totalPrice.toFixed(2)} ر.س</strong>
+            </div>
+
+            <Button variant="primary" className="w-100 py-2" onClick={handleShowModal}>
+              إتمام الطلب
+            </Button>
+          </div>
+        </Col>
+      </Row>
+
+      <Modal show={showOrderModal} onHide={handleCloseModal} size="lg" centered>
         <Modal.Header closeButton>
           <Modal.Title>إتمام الطلب</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Row>
-            {/* معلومات العميل */}
-            <Col lg={7}>
-              <Form onSubmit={handleSubmit}>
-                <Form.Group className='mb-3'>
-                  <Form.Label>العنوان بالتفصيل</Form.Label>
-                  <Form.Control
-                    as='textarea'
-                    rows={3}
-                    value={address}
-                    onChange={(e) => setaddress(e.target.value)}
-                    required
-                  />
-                </Form.Group>
+          <Form onSubmit={handleSubmitOrder}>
+            <Form.Group className="mb-3">
+              <Form.Label>العنوان بالتفصيل</Form.Label>
+              <Form.Control as="textarea" rows={3} value={address} onChange={(e) => setAddress(e.target.value)} required />
+            </Form.Group>
 
-                <Form.Group className='mb-4'>
-                  <Form.Check
-                    type='checkbox'
-                    label='الدفع عند الاستلام'
-                    checked={cashOnDelivery}
-                    onChange={(e) => setCashOnDelivery(e.target.checked)}
-                    required
-                  />
-                </Form.Group>
-
-                <Button
-                  variant='primary'
-                  type='submit'
-                  className='w-100'
-                  disabled={loading}
-                >
-                  {loading ? <Spinner size='sm' /> : "تأكيد الطلب"}
-                </Button>
-              </Form>
-            </Col>
-
-            {/* ملخص الطلب */}
-            <Col lg={5} className='bg-light p-4 rounded-3'>
-              <h5 className='mb-4'>ملخص الطلب</h5>
-
-              <div className='order-items mb-4'>
-                {carts?.data?.map((item) => (
-                  <div
-                    key={item.id}
-                    className='d-flex justify-content-between align-items-center mb-2'
-                  >
-                    <div className='d-flex align-items-center'>
-                      <img
-                        src={item.productInfo.images[0].image}
-                        alt={item.productInfo.product_name}
-                        style={{
-                          width: "50px",
-                          height: "50px",
-                          objectFit: "cover",
-                        }}
-                        className='rounded me-2'
-                      />
-                      <div>
-                        <p className='mb-0 fw-bold'>
-                          {item.productInfo.product_name}
-                        </p>
-                        <small className='text-muted'>
-                          الكمية: {item.quentity}
-                        </small>
-                      </div>
-                    </div>
-                    <span className='text-primary fw-bold'>
-                      {item.TotalSalry} ر.س
-                    </span>
-                  </div>
-                ))}
-              </div>
-
-              <hr />
-
-              <div className='summary-details'>
-                <div className='d-flex justify-content-between mb-2'>
-                  <span>المجموع الفرعي</span>
-                  <span>{carts.total} ر.س</span>
-                </div>
-                <div className='d-flex justify-content-between mb-2'>
-                  <span>الشحن</span>
-                  <span className='text-success'>مجاناً</span>
-                </div>
-                <hr />
-                <div className='d-flex justify-content-between'>
-                  <strong>الإجمالي</strong>
-                  <strong className='text-primary'>{carts.total} ر.س</strong>
-                </div>
-              </div>
-            </Col>
-          </Row>
+            <Button variant="primary" type="submit" className="w-100" disabled={orderLoading}>
+              {orderLoading ? <Spinner size="sm" /> : "تأكيد الطلب"}
+            </Button>
+          </Form>
         </Modal.Body>
       </Modal>
-
-      <style jsx>{`
-        .cart-item {
-          transition: all 0.3s ease;
-        }
-        .cart-item:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
-        }
-        .quantity-controls button {
-          width: 30px;
-          height: 30px;
-          padding: 0;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-        }
-        .order-summary {
-          position: sticky;
-          top: 100px;
-        }
-      `}</style>
     </Container>
   );
 };

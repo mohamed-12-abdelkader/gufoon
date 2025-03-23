@@ -1,9 +1,7 @@
 import React, { useEffect, useState } from "react";
 import Pagnation from "../components/pagnation/Pagnation";
 import DeleateGlasses from "../Hook/admin/DeleateGlasses";
-import EditeProduct from "../Hook/admin/EditeProduct";
 import ProductCard from "../components/card/ProductCard";
-import EditModal from "../components/modal/EditModal";
 import DeleteModal from "../components/modal/DeleteModal";
 import { Form, Button, Accordion } from "react-bootstrap";
 import { FaFilter, FaSortAmountDown, FaSortAmountUp } from "react-icons/fa";
@@ -85,36 +83,10 @@ const ViewAllProducts = ({ offers }) => {
     });
   };
 
-  const [modalIsOpen, setModalIsOpen] = useState(false);
-  const [editedProduct, setEditedProduct] = useState(null);
   const [productToDelete, setProductToDelete] = useState(null);
   const [deleteModalIsOpen, setDeleteModalIsOpen] = useState(false);
   const [deleteLoading, deleteGlasses] = DeleateGlasses();
 
-  const [
-    editLoading,
-    product_name,
-    model_number,
-    salary,
-    setproduct_name,
-    setmodel_number,
-    setsalary,
-    handleEditGlasses,
-  ] = EditeProduct();
-
-
-  const openEditModal = (product) => {
-    setEditedProduct(product);
-    setproduct_name(product.product_name);
-    setsalary(product.salary_before);
-    setmodel_number(product.model_number);
-    setModalIsOpen(true);
-  };
-
-  const closeModal = () => {
-    setModalIsOpen(false);
-    setEditedProduct(null);
-  };
 
   const openDeleteModal = (product) => {
     setProductToDelete(product);
@@ -124,17 +96,6 @@ const ViewAllProducts = ({ offers }) => {
   const closeDeleteModal = () => {
     setDeleteModalIsOpen(false);
     setProductToDelete(null);
-  };
-  const handleAddToCart = async (product) => {
-    // setLoadingItems((prevLoading) => ({
-    //   ...prevLoading,
-    //   [product.product_id]: true,
-    // }));
-    // await addToCart(product);
-    // setLoadingItems((prevLoading) => ({
-    //   ...prevLoading,
-    //   [product.product_id]: false,
-    // }));
   };
 
   if (loading) {
@@ -283,9 +244,7 @@ const ViewAllProducts = ({ offers }) => {
               <ProductCard
                 key={product.id}
                 product={product}
-                handleAddToCart={handleAddToCart}
                 openDeleteModal={openDeleteModal}
-                openEditModal={openEditModal}
               />
             ))}
           </div> : <div
@@ -307,24 +266,6 @@ const ViewAllProducts = ({ offers }) => {
       </div>
 
       {/* Modals */}
-      <EditModal
-        show={modalIsOpen}
-        onHide={closeModal}
-        product_name={product_name}
-        setproduct_name={setproduct_name}
-        salary={salary}
-        setsalary={setsalary}
-        model_number={model_number}
-        setmodel_number={setmodel_number}
-        handleEditGlasses={() => {
-          handleEditGlasses(editedProduct.product_id);
-          setTimeout(() => {
-            closeModal();
-            window.location.reload();
-          }, 500);
-        }}
-        loading={editLoading}
-      />
       <DeleteModal
         show={deleteModalIsOpen}
         onHide={closeDeleteModal}

@@ -9,8 +9,6 @@ const Login = () => {
     mailChange,
     user_name,
     pass,
-    userType,
-    setUserType,
     loading,
   ] = LoginAdmin();
 

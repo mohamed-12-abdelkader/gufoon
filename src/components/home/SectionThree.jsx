@@ -85,8 +85,8 @@ const SectionThree = () => {
 
   const openEditModal = (product) => {
     setEditedProduct(product);
-    setproduct_name(product.product_name);
-    setsalary(product.salary_before);
+    setproduct_name(product.name);
+    setsalary(product.price);
     setmodel_number(product.model_number);
     setModalIsOpen(true);
   };
