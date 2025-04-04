@@ -13,6 +13,7 @@ const AdminLinks = ({ currentLink, setCurrentLink }) => {
     { link: "الإشعارات", path: "/admin/notifications", icon: <FaBell className="text-yellow-500" /> },
     { link: "اضافة منتج", path: "/admin/add_product", icon: <AiOutlineAppstoreAdd className="text-red-500" /> },
     { link: "اضافة خصم", path: "/admin/add_discount", icon: <FaPercent className="text-purple-500" /> },
+    { link: "كوبونات الخصم", path: "/admin/coupons", icon: <FaPercent className="text-green-600" /> },
     { link: "اضافة فئة", path: "/admin/add_category", icon: <MdCategory className="text-green-500" /> },
     { link: "اضافة براند", path: "/admin/add_brand", icon: <MdOutlineBrandingWatermark className="text-blue-600" /> },
     { link: "اضافة لون", path: "/admin/add_color", icon: <MdColorLens className="text-orange-500" /> },
@@ -29,8 +30,7 @@ const AdminLinks = ({ currentLink, setCurrentLink }) => {
           key={link.path}
           to={link.path}
           className={({ isActive }) =>
-            `flex items-center gap-3 p-3 rounded shadow-sm transition ${isActive ? "bg-blue-600 text-white" : "bg-white text-black"
-            }`
+            `flex items-center gap-3 p-3 rounded shadow-sm transition ${isActive ? "bg-blue-600 text-white" : "bg-white text-black"}`
           }
           onClick={() => setCurrentLink(link.path)}
         >

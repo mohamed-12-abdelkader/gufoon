@@ -19,6 +19,7 @@ import CategoryManager from "../components/admin/addCategory";
 import UpdateProduct from "../components/admin/UpdateProduct";
 import SalesDashboard from "../components/admin/SalesDashboard";
 import { NotificationBell } from "../contexts/Notifications";
+import Coupons from "../components/admin/Coupons";
 
 const ProtectedRoute = ({ children, isAdmin }) => {
   const { isAuthenticated, isAdmin: isAdminFun } = useAuth();
@@ -59,6 +60,7 @@ const Router = () => {
           </ProtectedRoute>
         }>
           <Route path="add_product" element={<AddProduct />} />
+          <Route path="coupons" element={<Coupons />} />
           <Route path="notifications" element={<NotificationBell />} />
           <Route path="sales" element={<SalesDashboard />} />
           <Route path="update_product/:id" element={<UpdateProduct />} />

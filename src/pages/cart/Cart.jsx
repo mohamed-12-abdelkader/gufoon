@@ -12,13 +12,16 @@ const Cart = () => {
   const [removingItem, setRemovingItem] = useState(null);
   const [showOrderModal, setShowOrderModal] = useState(false);
   const [address, setAddress] = useState("");
-  const [cashOnDelivery, setCashOnDelivery] = useState(false);
   const [orderLoading, setOrderLoading] = useState(false);
+
+  const [couponCode, setCouponCode] = useState("");
+  const [appliedCoupon, setAppliedCoupon] = useState(null);
+  const [couponLoading, setCouponLoading] = useState(false);
+  const [couponError, setCouponError] = useState(null);
 
   const handleShowModal = () => setShowOrderModal(true);
   const handleCloseModal = () => setShowOrderModal(false);
 
-  // Calculate order totals
   const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
   const subtotal = cart.reduce((sum, item) => {
     const price = item.productInfo.discount
@@ -26,9 +29,13 @@ const Cart = () => {
       : item.productInfo.price;
     return sum + item.quantity * price;
   }, 0);
-  const totalPrice = subtotal;
 
-  // Handle updating quantity
+  const discountAmount = appliedCoupon
+    ? Math.min((subtotal * appliedCoupon.discountPercentage) / 100, appliedCoupon.maxDiscountAmount || Infinity)
+    : 0;
+
+  const totalPrice = subtotal - discountAmount;
+
   const handleUpdateQuantity = async (item, action) => {
     setUpdatingItem(item.id);
     const newQuantity = action === "plus" ? item.quantity + 1 : item.quantity - 1;
@@ -36,11 +43,27 @@ const Cart = () => {
     setUpdatingItem(null);
   };
 
-  // Handle removing item
   const handleRemoveItem = async (cartId) => {
     setRemovingItem(cartId);
     await removeFromCart(cartId);
     setRemovingItem(null);
+  };
+
+  const handleApplyCoupon = async () => {
+    if (!couponCode) return;
+    setCouponLoading(true);
+    setCouponError(null);
+
+    try {
+      const { data } = await axios.post("/coupons/validate", { code: couponCode });
+      setAppliedCoupon(data.coupon);
+      toast.success("✅ تم تطبيق الكوبون بنجاح!");
+    } catch (err) {
+      setAppliedCoupon(null);
+      setCouponError("❌ الكوبون غير صالح أو منتهي.");
+    } finally {
+      setCouponLoading(false);
+    }
   };
 
   const handleSubmitOrder = async (e) => {
@@ -48,8 +71,11 @@ const Cart = () => {
     setOrderLoading(true);
 
     try {
-      await axios.post("/orders/me", { shippingAddress: address });
-      await clearCart()
+      await axios.post("/orders/me", {
+        shippingAddress: address,
+        couponCode: appliedCoupon?.code || null,
+      });
+      await clearCart();
       toast.success("✅ تم تقديم طلبك بنجاح!");
       handleCloseModal();
     } catch (error) {
@@ -58,7 +84,6 @@ const Cart = () => {
       setOrderLoading(false);
     }
   };
-
 
   if (loading) {
     return <p className="text-center">جاري تحميل السلة...</p>;
@@ -158,15 +183,51 @@ const Cart = () => {
           <div className="order-summary bg-white p-4 rounded-3 shadow-sm">
             <h4 className="mb-4">ملخص الطلب</h4>
 
+            <Form className="mb-3">
+              <Form.Group controlId="couponCode">
+                <Form.Label>هل لديك كوبون؟</Form.Label>
+                <div className="d-flex">
+                  <Form.Control
+                    type="text"
+                    placeholder="أدخل الكوبون"
+                    value={couponCode}
+                    onChange={(e) => setCouponCode(e.target.value)}
+                    disabled={appliedCoupon}
+                  />
+                  <Button
+                    variant="success"
+                    onClick={handleApplyCoupon}
+                    disabled={couponLoading || appliedCoupon}
+                    className="ms-2"
+                  >
+                    {couponLoading ? <Spinner size="sm" /> : "تطبيق"}
+                  </Button>
+                </div>
+                {couponError && <div className="text-danger mt-2">{couponError}</div>}
+                {appliedCoupon && (
+                  <div className="text-success mt-2">
+                    ✅ كوبون {appliedCoupon.code} يمنحك خصم {appliedCoupon.discountPercentage}%
+                  </div>
+                )}
+              </Form.Group>
+            </Form>
+
             <div className="d-flex justify-content-between mb-3">
               <span>عدد المنتجات</span>
               <span>{totalItems}</span>
             </div>
 
-            <div className="d-flex justify-content-between mb-3">
+            <div className="d-flex justify-content-between mb-2">
               <span>المجموع الفرعي</span>
               <span>{subtotal.toFixed(2)} ر.س</span>
             </div>
+
+            {appliedCoupon && (
+              <div className="d-flex justify-content-between mb-2">
+                <span>الخصم</span>
+                <span className="text-success">-{discountAmount.toFixed(2)} ر.س</span>
+              </div>
+            )}
 
             <hr />
 
@@ -190,7 +251,13 @@ const Cart = () => {
           <Form onSubmit={handleSubmitOrder}>
             <Form.Group className="mb-3">
               <Form.Label>العنوان بالتفصيل</Form.Label>
-              <Form.Control as="textarea" rows={3} value={address} onChange={(e) => setAddress(e.target.value)} required />
+              <Form.Control
+                as="textarea"
+                rows={3}
+                value={address}
+                onChange={(e) => setAddress(e.target.value)}
+                required
+              />
             </Form.Group>
 
             <Button variant="primary" type="submit" className="w-100" disabled={orderLoading}>

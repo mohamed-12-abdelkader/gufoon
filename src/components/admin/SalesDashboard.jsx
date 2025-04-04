@@ -5,7 +5,6 @@ import {
 } from "@chakra-ui/react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { motion } from "framer-motion";
-import { FiFilter } from "react-icons/fi";
 
 const SalesDashboard = () => {
   const [summary, setSummary] = useState(null);
