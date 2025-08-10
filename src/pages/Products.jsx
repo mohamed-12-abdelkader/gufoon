@@ -100,8 +100,194 @@ const ViewAllProducts = ({ offers }) => {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center" style={{ minHeight: "80vh" }}>
-        جار التحميل ...........
+      <div className='products-page' style={{ minHeight: "80vh" }}>
+        <div className='products-container'>
+          {/* Loading skeleton for filter sidebar */}
+          <div className='filter-sidebar'>
+            <div className='filter-header'>
+              <div className='skeleton-icon'></div>
+              <div className='skeleton-title'></div>
+            </div>
+            
+            {/* Skeleton for filter sections */}
+            {[1, 2, 3, 4].map((section) => (
+              <div key={section} className='skeleton-filter-section mb-3'>
+                <div className='skeleton-filter-header'></div>
+                <div className='skeleton-filter-content'>
+                  {[1, 2, 3].map((item) => (
+                    <div key={item} className='skeleton-filter-item'></div>
+                  ))}
+                </div>
+              </div>
+            ))}
+            
+            <div className='skeleton-reset-button'></div>
+          </div>
+
+          {/* Loading skeleton for products grid */}
+          <div className="products-grid">
+            <div className='products-wrapper'>
+              {[1, 2, 3, 4, 5, 6].map((item) => (
+                <div key={item} className='skeleton-product-card'>
+                  <div className='skeleton-card-image'></div>
+                  <div className='skeleton-card-content'>
+                    <div className='skeleton-product-title'></div>
+                    <div className='skeleton-product-specs'>
+                      <div className='skeleton-spec-item'></div>
+                      <div className='skeleton-spec-item'></div>
+                    </div>
+                    <div className='skeleton-price-section'>
+                      <div className='skeleton-price'></div>
+                      <div className='skeleton-button'></div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <style jsx>{`
+          /* Skeleton Loading Styles */
+          .skeleton-icon {
+            width: 24px;
+            height: 24px;
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+            border-radius: 4px;
+          }
+          
+          .skeleton-title {
+            height: 24px;
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+            border-radius: 6px;
+            width: 120px;
+            margin-right: 10px;
+          }
+          
+          .skeleton-filter-section {
+            border: 1px solid #eee;
+            border-radius: 8px;
+            padding: 15px;
+          }
+          
+          .skeleton-filter-header {
+            height: 20px;
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+            border-radius: 4px;
+            width: 80px;
+            margin-bottom: 15px;
+          }
+          
+          .skeleton-filter-content {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+          }
+          
+          .skeleton-filter-item {
+            height: 16px;
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+            border-radius: 4px;
+            width: 100%;
+          }
+          
+          .skeleton-reset-button {
+            height: 40px;
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+            border-radius: 8px;
+            width: 100%;
+            margin-top: 20px;
+          }
+          
+          .skeleton-product-card {
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            height: 380px;
+          }
+          
+          .skeleton-card-image {
+            height: 250px;
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+          }
+          
+          .skeleton-card-content {
+            padding: 15px;
+          }
+          
+          .skeleton-product-title {
+            height: 20px;
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+            border-radius: 4px;
+            width: 80%;
+            margin-bottom: 12px;
+          }
+          
+          .skeleton-product-specs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 15px;
+          }
+          
+          .skeleton-spec-item {
+            height: 16px;
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+            border-radius: 4px;
+            width: 60px;
+          }
+          
+          .skeleton-price-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 12px;
+            border-top: 1px solid #e9ecef;
+          }
+          
+          .skeleton-price {
+            height: 24px;
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+            border-radius: 6px;
+            width: 80px;
+          }
+          
+          .skeleton-button {
+            height: 35px;
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+            border-radius: 50%;
+            width: 35px;
+          }
+          
+          @keyframes shimmer {
+            0% {
+              background-position: -200% 0;
+            }
+            100% {
+              background-position: 200% 0;
+            }
+          }
+        `}</style>
       </div>
     );
   }

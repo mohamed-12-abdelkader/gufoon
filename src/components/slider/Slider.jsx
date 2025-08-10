@@ -74,12 +74,12 @@ const Slider = ({ title, children }) => {
       </div>
 
       <button
-        className='slide-btn prev bg-[#3c4851] h-[50px] w-[30px] flex justify-center items-center absolute top-1/2 left-0 transform -translate-y-1/2 z-10'
+        className='slide-btn prev bg-[#0078FF] h-[50px] w-[30px] flex justify-center items-center absolute top-1/2 left-0 transform -translate-y-1/2 z-10'
         onClick={() =>
           (sliderRef.current.scrollLeft -= sliderRef.current.offsetWidth)
         }
         style={{
-          backgroundColor: "#3c4851",
+         
           height: "50px",
           width: "50px",
           borderRadius: "50%",
@@ -89,12 +89,12 @@ const Slider = ({ title, children }) => {
       </button>
 
       <button
-        className='slide-btn next bg-[#ad7c3c] h-[50px] w-[30px] flex justify-center items-center absolute top-1/2 right-0 transform -translate-y-1/2 z-10'
+        className='slide-btn next bg-[#0078FF] h-[50px] w-[30px] flex justify-center items-center absolute top-1/2 right-0 transform -translate-y-1/2 z-10'
         onClick={() =>
           (sliderRef.current.scrollLeft += sliderRef.current.offsetWidth)
         }
         style={{
-          backgroundColor: "#3c4851",
+          
           height: "50px",
           width: "50px",
           borderRadius: "50%",

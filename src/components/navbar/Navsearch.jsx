@@ -40,7 +40,7 @@ const Navsearch = () => {
   const toggleNotifications = () => setShowNotifications(!showNotifications);
 
   return (
-    <div dir="ltr" className="bg-[#3c4851] h-[70px] flex items-center navsearch w-[100%]" style={{ zIndex: "1000" }}>
+    <div dir="ltr" className="bg-[#0078FF] h-[70px] flex items-center navsearch w-[100%]" style={{ zIndex: "1000" }}>
       <div className="m-auto w-[90%] flex justify-between items-center">
         <div className="mr-3">
           <Link to="/">

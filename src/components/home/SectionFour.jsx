@@ -114,12 +114,8 @@ const SectionFour = () => {
     }));
   };
   return (
-    <div className='my-5 p-3'>
-      <img
-        src={"94254954-4641-453e-92f2-e136cbdf4081.jpg"}
-        className='w-[95%] h-[250px] m-auto'
-        alt='Offer'
-      />
+    <div className=' p-3'>
+    
       <div className='h-[60px] w-[95%] p-2 m-auto flex justify-between items-center border shadow my-5 bg-white'>
         <div>
           <Link to='/offers'>

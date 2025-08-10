@@ -129,7 +129,7 @@
 
 .products-wrapper {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  grid-template-columns: repeat(3, 1fr);
   gap: 20px;
   margin-bottom: 30px;
 }
@@ -170,6 +170,13 @@
 
   .products-wrapper {
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  }
+}
+
+/* For very small screens, show 1 column */
+@media (max-width: 480px) {
+  .products-wrapper {
+    grid-template-columns: 1fr;
   }
 }
 

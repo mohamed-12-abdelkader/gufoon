@@ -120,12 +120,7 @@ const SectionThree = () => {
 
   return (
     <div className='slider my-5 bg-barble-500 p-3 bg-[#]'>
-      <img
-        src={"df058ee4-f4d3-46b8-a050-3cde3f537e04.jpg"}
-        className='w-[95%] m-auto h-[250px]'
-        style={{ borderRadius: "10px" }}
-        alt=""
-      />
+    
       <div className='h-[60px] w-[95%] p-2 m-auto flex justify-between items-center border shadow my-5 bg-white'>
         <div>
           <Link className='flex' to='/offers'>

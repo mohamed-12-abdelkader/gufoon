@@ -7,7 +7,7 @@ import React, {
 } from "react";
 import axios from "axios";
 
-axios.defaults.baseURL = 'http://localhost:8000/api';
+axios.defaults.baseURL = 'https://api.gufoon.shop/api';
 
 const AuthContext = createContext();
 
