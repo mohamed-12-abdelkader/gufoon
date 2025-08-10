@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
-import { Button, Modal, Spinner } from "react-bootstrap";
+import { Spinner } from "react-bootstrap";
 import axios from "axios";
 
 const limit = 20;
@@ -19,10 +19,8 @@ const AllOrder = () => {
   const [loading, setLoading] = useState(true);
   const [skip, setSkip] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
-  const [showModal, setShowModal] = useState(false);
-  const [selectedOrderId, setSelectedOrderId] = useState(null);
-  const [confirming, setConfirming] = useState(false);
   const [statusFilter, setStatusFilter] = useState("");
+  const [updatingOrderId, setUpdatingOrderId] = useState(null);
 
   useEffect(() => {
     fetchOrders();
@@ -32,7 +30,9 @@ const AllOrder = () => {
     setLoading(true);
     try {
       const statusQuery = statusFilter ? `&status=${statusFilter}` : "";
-      const { data } = await axios.get(`/orders?limit=${limit}&skip=${skip}${statusQuery}`);
+      const { data } = await axios.get(
+        `/orders?limit=${limit}&skip=${skip}${statusQuery}`
+      );
       setOrders(data.orders);
       setTotalPages(data.totalPages);
     } catch (error) {
@@ -42,31 +42,21 @@ const AllOrder = () => {
     }
   };
 
-  const confirmOrder = async (id) => {
-    setConfirming(true);
+  const updateOrderStatus = async (orderId, newStatus) => {
+    setUpdatingOrderId(orderId);
     try {
-      await axios.put(`/orders/${id}`, { status: "Delivered" });
-      toast.success("تم تأكيد الطلب بنجاح");
-      setOrders((prevOrders) =>
-        prevOrders.map((order) =>
-          order.id === id ? { ...order, status: "Delivered" } : order
+      await axios.put(`/orders/${orderId}`, { status: newStatus });
+      setOrders((prev) =>
+        prev.map((order) =>
+          order.id === orderId ? { ...order, status: newStatus } : order
         )
       );
+      toast.success("تم تحديث حالة الطلب");
     } catch (error) {
-      toast.error("فشل تأكيد الطلب");
+      toast.error("فشل تحديث حالة الطلب");
     } finally {
-      setConfirming(false);
-      setShowModal(false);
+      setUpdatingOrderId(null);
     }
-  };
-
-  const handleShowModal = (orderId) => {
-    setSelectedOrderId(orderId);
-    setShowModal(true);
-  };
-
-  const handleConfirm = () => {
-    if (selectedOrderId) confirmOrder(selectedOrderId);
   };
 
   const handleNextPage = () => {
@@ -85,8 +75,7 @@ const AllOrder = () => {
         <h4 className="font-bold">كل الطلبات</h4>
       </div>
 
-      {/* ✅ Order Status Filter */}
-      <div className="my-3" dir='rtl'>
+      <div className="my-3" dir="rtl">
         <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
@@ -105,32 +94,41 @@ const AllOrder = () => {
           {orders.map((order) => (
             <div
               key={order.id}
-              className="w-[90%] m-auto border shadow my-2 p-3 flex justify-between"
+              className="w-[90%] m-auto border shadow my-2 p-3 flex justify-between items-center"
             >
               <Link to={`/order/${order.id}`} className="flex-grow">
                 <div>
                   <h6>اسم العميل: {order.user?.fullName || "غير متوفر"}</h6>
-                  <h6>تاريخ الطلب: {new Date(order.orderDate).toLocaleDateString()}</h6>
+                  <h6>
+                    تاريخ الطلب:{" "}
+                    {new Date(order.orderDate).toLocaleDateString()}
+                  </h6>
                   <h6 className="text-sm text-gray-500">
                     📦 الحالة: {STATUS_MAP[order.status] || "غير معروف"}
                   </h6>
                 </div>
               </Link>
-              <button
-                onClick={() => handleShowModal(order.id)}
-                className="bg-blue-500 text-white px-4 py-2 rounded"
-                disabled={confirming || order.status === "Delivered"}
-              >
-                {confirming && selectedOrderId === order.id
-                  ? "جارٍ التأكيد ..."
-                  : order.status === "Delivered"
-                    ? "تم التأكيد"
-                    : "تأكيد الطلب"}
-              </button>
+
+              <div className="ml-3 flex items-center">
+                <select
+                  value={order.status}
+                  onChange={(e) => updateOrderStatus(order.id, e.target.value)}
+                  disabled={updatingOrderId === order.id}
+                  className="px-3 py-2 border rounded-lg bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400 text-sm font-medium"
+                >
+                  {Object.entries(STATUS_MAP).map(([key, label]) => (
+                    <option key={key} value={key}>
+                      {label}
+                    </option>
+                  ))}
+                </select>
+                {updatingOrderId === order.id && (
+                  <Spinner size="sm" className="ml-2" />
+                )}
+              </div>
             </div>
           ))}
 
-          {/* Pagination Controls */}
           <div className="flex justify-center mt-4">
             <button
               className="bg-gray-300 px-4 py-2 mx-2 rounded disabled:opacity-50"
@@ -154,22 +152,6 @@ const AllOrder = () => {
       ) : (
         <h4>لا يوجد طلبات حالياً ...</h4>
       )}
-
-      {/* Confirmation Modal */}
-      <Modal show={showModal} onHide={() => setShowModal(false)}>
-        <Modal.Header closeButton>
-          <Modal.Title>تأكيد الطلب</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>هل أنت متأكد من أنك تريد تأكيد هذا الطلب؟</Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowModal(false)}>
-            إلغاء
-          </Button>
-          <Button variant="primary" onClick={handleConfirm} disabled={confirming}>
-            {confirming ? <Spinner size="sm" /> : "تأكيد الطلب"}
-          </Button>
-        </Modal.Footer>
-      </Modal>
     </div>
   );
 };
