@@ -73,12 +73,13 @@ const Cart = () => {
     try {
       await axios.post("/orders/me", {
         shippingAddress: address,
-        couponCode: appliedCoupon?.code || null,
+        couponCode: appliedCoupon?.code ?? undefined
       });
       await clearCart();
       toast.success("✅ تم تقديم طلبك بنجاح!");
       handleCloseModal();
     } catch (error) {
+      console.log("err", error)
       toast.error("حدث خطأ أثناء تقديم الطلب، حاول مرة أخرى.");
     } finally {
       setOrderLoading(false);
