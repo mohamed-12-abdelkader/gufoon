@@ -1,35 +1,61 @@
-import React, { createContext, useState, useContext, useEffect } from 'react';
-import axios from 'axios';
+import React, {
+  createContext,
+  useState,
+  useContext,
+  useEffect,
+  useRef,
+} from "react";
+import axios from "axios";
 
 axios.defaults.baseURL = 'http://localhost:8000/api';
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  const [token, setToken] = useState(localStorage.getItem('token') || null);
+  const [token, setToken] = useState(localStorage.getItem("token") || null);
   const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true); // New state to track loading
+  const [loading, setLoading] = useState(true);
+
+  // Track if logout is already in progress to avoid infinite reload loops
+  const isLoggingOutRef = useRef(false);
 
   const isAdmin = () => !!user && user.isSuperuser;
 
-  const login = async credentials => {
-    const response = await axios.post('/login/access-token', credentials);
+  const login = async (credentials) => {
+    const response = await axios.post("/login/access-token", credentials);
     const { access_token: token, user } = response.data;
-    localStorage.setItem('token', token);
+    localStorage.setItem("token", token);
     setToken(token);
     setUser(user);
+    window.location.reload();
   };
 
-  const logout = () => {
-    localStorage.removeItem('token');
+  const logout = (doReload = true) => {
+    if (isLoggingOutRef.current) return; // Prevent double logout calls
+    isLoggingOutRef.current = true;
+
+    localStorage.removeItem("token");
     setToken(null);
     setUser(null);
+
+    if (doReload) {
+      window.location.reload();
+    }
+  };
+
+  const register = async (userData) => {
+    const response = await axios.post("/users/signup", userData);
+    const { access_token: token, user } = response.data;
+    localStorage.setItem("token", token);
+    setToken(token);
+    setUser(user);
+    window.location.reload();
   };
 
   const initializeUser = async () => {
     setLoading(true);
     try {
-      const res = await axios.post('/login/test-token');
+      const res = await axios.post("/login/test-token");
       setUser(res.data);
     } catch {
       setToken(null);
@@ -39,18 +65,10 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const register = async userData => {
-    const response = await axios.post('/users/signup', userData);
-    const { access_token: token, user } = response.data;
-    localStorage.setItem('token', token);
-    setToken(token);
-    setUser(user);
-  };
-
   const isAuthenticated = !!user;
 
   useEffect(() => {
-    axios.interceptors.request.use(config => {
+    axios.interceptors.request.use((config) => {
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
       }
@@ -58,10 +76,10 @@ export const AuthProvider = ({ children }) => {
     });
 
     axios.interceptors.response.use(
-      response => response,
-      error => {
+      (response) => response,
+      (error) => {
         if (error.response && error.response.status === 401) {
-          logout();
+          logout(false); // logout without reload to avoid loop
         }
         return Promise.reject(error);
       }
@@ -74,7 +92,6 @@ export const AuthProvider = ({ children }) => {
     }
   }, [token]);
 
-  // If still loading, don't render anything
   if (loading) {
     return null;
   }
@@ -90,7 +107,8 @@ export const AuthProvider = ({ children }) => {
         login,
         logout,
         isAuthenticated,
-      }}>
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
