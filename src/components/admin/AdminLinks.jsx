@@ -9,6 +9,7 @@ const AdminLinks = ({ currentLink, setCurrentLink }) => {
 
   const links = [
     { link: "لوحة تحكم المبيعات", path: "/admin/sales", icon: <FaChartLine className="text-indigo-600" /> },
+    { link: "لوحة تحكم التصنيفات", path: "/admin/categories", icon: <FaChartLine className="text-indigo-600" /> },
     { link: "كل الطلبات", path: "/admin/all_order", icon: <FaClipboardList className="text-teal-500" /> },
     { link: "الإشعارات", path: "/admin/notifications", icon: <FaBell className="text-yellow-500" /> },
     { link: "اضافة منتج", path: "/admin/add_product", icon: <AiOutlineAppstoreAdd className="text-red-500" /> },

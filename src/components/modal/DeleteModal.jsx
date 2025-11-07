@@ -14,8 +14,7 @@ const DeleteModal = ({
         <h6>تأكيد الحذف</h6>
       </Modal.Header>
       <Modal.Body>
-        {productToDelete && productToDelete.id}؟ هل تريد حقًا حذف{" "}
-        {productToDelete && productToDelete.name}؟
+        هل تريد حقًا حذف المنتج "{productToDelete && productToDelete.name}"؟
       </Modal.Body>
       <Modal.Footer>
         <Button variant="secondary" onClick={onHide}>

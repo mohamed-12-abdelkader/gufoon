@@ -78,7 +78,7 @@ const MyOrders = () => {
                   </Badge>
                 ) : (
                   <>
-                    <span className="fw-bold">الإجمالي:</span> {order.totalAmount} ج.م
+                    <span className="fw-bold">الإجمالي:</span> {order.totalAmount} ر.س
                     {["Pending", "Processing"].includes(order.status) && (
                       <Button
                         variant="danger"
@@ -132,7 +132,7 @@ const MyOrders = () => {
                   </div>
                   <div className="text-end">
                     <div>الكمية: {item.quantity}</div>
-                    <div className="fw-bold">{item.product.price} ج.م</div>
+                    <div className="fw-bold">{item.product.price} ر.س</div>
                   </div>
                 </div>
               ))}

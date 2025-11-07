@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import axios from 'axios';
 import { useAuth } from './AuthContext';
 import { toast } from 'react-toastify';
+import baseUrl from '../api/baseUrl';
 
 const CartContext = createContext();
 
@@ -26,7 +27,13 @@ export const CartProvider = ({ children }) => {
   const fetchCart = async () => {
     setLoading(true);
     try {
-      const { data } = await axios.get('/carts');
+      const token = localStorage.getItem('token');
+      const { data } = await baseUrl.get('/carts', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
       setCart(data);
     } catch (error) {
       console.error('Error fetching cart:', error);
@@ -40,7 +47,13 @@ export const CartProvider = ({ children }) => {
     setLoading(true);
     try {
       if (isAuthenticated) {
-        await axios.post('/carts', { productId: product.id, quantity: 1 });
+        const token = localStorage.getItem('token');
+        await baseUrl.post('/carts', { productId: product.id, quantity: 1 }, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
         fetchCart();
       } else {
         let localCart = JSON.parse(localStorage.getItem('cart')) || [];
@@ -75,7 +88,13 @@ export const CartProvider = ({ children }) => {
     setLoading(true);
     try {
       if (isAuthenticated) {
-        await axios.delete(`/carts/${cartId}`);
+        const token = localStorage.getItem('token');
+        await baseUrl.delete(`/carts/${cartId}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
         fetchCart();
       } else {
         let localCart = JSON.parse(localStorage.getItem('cart')) || [];
@@ -102,7 +121,13 @@ export const CartProvider = ({ children }) => {
 
     try {
       if (isAuthenticated) {
-        await axios.put(`/carts/${cartId}`, { quantity: newQuantity });
+        const token = localStorage.getItem('token');
+        await baseUrl.put(`/carts/${cartId}`, { quantity: newQuantity }, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
         fetchCart();
       } else {
         let localCart = JSON.parse(localStorage.getItem('cart')) || [];
@@ -127,9 +152,15 @@ export const CartProvider = ({ children }) => {
     const localCart = JSON.parse(localStorage.getItem('cart')) || [];
     if (localCart.length > 0 && isAuthenticated) {
       try {
+        const token = localStorage.getItem('token');
         await Promise.all(
           localCart.map(item =>
-            axios.post('/carts', { productId: item.productId, quantity: item.quantity })
+            baseUrl.post('/carts', { productId: item.productId, quantity: item.quantity }, {
+              headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+              }
+            })
           )
         );
         localStorage.removeItem('cart');
@@ -143,7 +174,13 @@ export const CartProvider = ({ children }) => {
   const clearCart = async () => {
     try {
       if (isAuthenticated) {
-        await axios.delete('/carts/empty');
+        const token = localStorage.getItem('token');
+        await baseUrl.delete('/carts/empty', {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
         fetchCart();
       } else {
         localStorage.removeItem('cart');

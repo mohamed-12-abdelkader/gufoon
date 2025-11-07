@@ -4,10 +4,15 @@ import { FaTrash, FaMinus, FaPlus } from "react-icons/fa";
 import { useCart } from "../../contexts/CartContext";
 import axios from "axios";
 import { toast } from "react-toastify";
+import baseUrl from "../../api/baseUrl";
+import UserType from "../../Hook/userType/UserType";
+import AuthRequiredModal from "../../components/modal/AuthRequiredModal";
+import LoginModal from "../../components/modal/LoginModal";
+import SignupModal from "../../components/modal/SignupModal";
 
 const Cart = () => {
   const { cart, removeFromCart, updateQuantity, loading, clearCart } = useCart();
-
+  const [userData, isAdmin, user] = UserType();
   const [updatingItem, setUpdatingItem] = useState(null);
   const [removingItem, setRemovingItem] = useState(null);
   const [showOrderModal, setShowOrderModal] = useState(false);
@@ -19,8 +24,36 @@ const Cart = () => {
   const [couponLoading, setCouponLoading] = useState(false);
   const [couponError, setCouponError] = useState(null);
 
-  const handleShowModal = () => setShowOrderModal(true);
+  // Auth modals states
+  const [showAuthRequiredModal, setShowAuthRequiredModal] = useState(false);
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  const [showSignupModal, setShowSignupModal] = useState(false);
+
+  const handleShowModal = () => {
+    // Check if user is logged in
+    if (!userData) {
+      setShowAuthRequiredModal(true);
+      return;
+    }
+    setShowOrderModal(true);
+  };
+  
   const handleCloseModal = () => setShowOrderModal(false);
+
+  // Auth modal handlers
+  const handleShowLoginModal = () => {
+    setShowAuthRequiredModal(false);
+    setShowLoginModal(true);
+  };
+
+  const handleShowSignupModal = () => {
+    setShowAuthRequiredModal(false);
+    setShowSignupModal(true);
+  };
+
+  const handleCloseAuthRequiredModal = () => setShowAuthRequiredModal(false);
+  const handleCloseLoginModal = () => setShowLoginModal(false);
+  const handleCloseSignupModal = () => setShowSignupModal(false);
 
   const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
   const subtotal = cart.reduce((sum, item) => {
@@ -71,10 +104,31 @@ const Cart = () => {
     setOrderLoading(true);
 
     try {
-      await axios.post("/orders/me", {
+      const token = localStorage.getItem('token');
+      const cartItems = cart.map(item => ({
+        productId: item.productId,
+        quantity: item.quantity
+      }));
+
+      const orderData = {
         shippingAddress: address,
-        couponCode: appliedCoupon?.code ?? undefined
+        cartItems: cartItems
+      };
+
+      // Add coupon code if applied
+      if (appliedCoupon?.code) {
+        orderData.couponCode = appliedCoupon.code;
+      }
+
+      console.log('Order Data to be sent:', orderData);
+
+      await baseUrl.post("/api/orders/me", orderData, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
       });
+      
       await clearCart();
       toast.success("✅ تم تقديم طلبك بنجاح!");
       handleCloseModal();
@@ -92,19 +146,50 @@ const Cart = () => {
 
   if (!cart.length) {
     return (
-      <div className="text-center py-5">
-        <h3>السلة فارغة</h3>
-        <p className="text-muted">لم تقم بإضافة أي منتجات إلى السلة بعد</p>
-        <Button variant="primary" href="/products">
-          تسوق الآن
-        </Button>
-      </div>
+      <Container dir="rtl" className="my-5 pt-5">
+        <div className="text-center py-5">
+          <div 
+            className="rounded-circle d-flex align-items-center justify-content-center mx-auto mb-4"
+            style={{
+              width: "120px",
+              height: "120px",
+              backgroundColor: "#f8f9fa",
+              color: "#6c757d"
+            }}
+          >
+            <i className="fas fa-shopping-cart" style={{ fontSize: "3rem" }}></i>
+          </div>
+          <h3 className="mb-3">السلة فارغة</h3>
+          <p className="text-muted mb-4 fs-5">لم تقم بإضافة أي منتجات إلى السلة بعد</p>
+          <Button 
+            variant="primary" 
+            href="/products"
+            size="lg"
+            className="px-5 py-3 fw-bold"
+            style={{
+              background: "linear-gradient(45deg, #0078FF, #0056CC)",
+              border: "none",
+              borderRadius: "12px",
+              boxShadow: "0 4px 15px rgba(0, 120, 255, 0.3)"
+            }}
+          >
+            تسوق الآن
+          </Button>
+        </div>
+      </Container>
     );
   }
-
+console.log(cart)
   return (
     <Container dir="rtl" className="my-5 pt-5">
-      <h2 className="text-center mb-4 fw-bold">سلة المشتريات</h2>
+      <h2 className="text-center mb-4 fw-bold text-shadow" style={{ 
+        fontFamily: 'var(--font-primary)', 
+        fontSize: '2.5rem',
+        fontWeight: '700',
+        color: '#2c3e50'
+      }}>
+        سلة المشتريات
+      </h2>
 
       <Row>
         <Col lg={8}>
@@ -127,10 +212,19 @@ const Cart = () => {
                     </Col>
 
                     <Col sm={6}>
-                      <h5 className="mb-2">{item.productInfo.name}</h5>
-                      <div className="product-details text-muted small">
-                        <p className="mb-1">البراند: {item.productInfo.brand?.name}</p>
-                        <p className="mb-1">اللون: {item.productInfo.color?.name}</p>
+                      <h5 className="mb-2 fw-semibold" style={{ 
+                        fontFamily: 'var(--font-primary)', 
+                        fontSize: '1.25rem',
+                        color: '#2c3e50'
+                      }}>
+                        {item.productInfo.name}
+                      </h5>
+                      <div className="product-details text-muted small" style={{ 
+                        fontFamily: 'var(--font-primary)',
+                        fontSize: '0.9rem'
+                      }}>
+                        <p className="mb-1 fw-medium">البراند: {item.productInfo.brand?.name}</p>
+                        <p className="mb-1 fw-medium">اللون: {item.productInfo.color?.name}</p>
                       </div>
                       <div className="quantity-controls mt-2 d-flex align-items-center gap-2">
                         <Button
@@ -182,11 +276,23 @@ const Cart = () => {
 
         <Col lg={4}>
           <div className="order-summary bg-white p-4 rounded-3 shadow-sm">
-            <h4 className="mb-4">ملخص الطلب</h4>
+            <h4 className="mb-4 fw-bold" style={{ 
+              fontFamily: 'var(--font-primary)', 
+              fontSize: '1.5rem',
+              color: '#2c3e50'
+            }}>
+              ملخص الطلب
+            </h4>
 
             <Form className="mb-3">
               <Form.Group controlId="couponCode">
-                <Form.Label>هل لديك كوبون؟</Form.Label>
+                <Form.Label className="fw-semibold" style={{ 
+                  fontFamily: 'var(--font-primary)',
+                  fontSize: '1rem',
+                  color: '#495057'
+                }}>
+                  هل لديك كوبون؟
+                </Form.Label>
                 <div className="d-flex">
                   <Form.Control
                     type="text"
@@ -213,32 +319,52 @@ const Cart = () => {
               </Form.Group>
             </Form>
 
-            <div className="d-flex justify-content-between mb-3">
-              <span>عدد المنتجات</span>
-              <span>{totalItems}</span>
+            <div className="d-flex justify-content-between mb-3" style={{ fontFamily: 'var(--font-primary)' }}>
+              <span className="fw-medium">عدد المنتجات</span>
+              <span className="fw-semibold">{totalItems}</span>
             </div>
 
-            <div className="d-flex justify-content-between mb-2">
-              <span>المجموع الفرعي</span>
-              <span>{subtotal.toFixed(2)} ر.س</span>
+            <div className="d-flex justify-content-between mb-2" style={{ fontFamily: 'var(--font-primary)' }}>
+              <span className="fw-medium">المجموع الفرعي</span>
+              <span className="fw-semibold">{subtotal.toFixed(2)} ر.س</span>
             </div>
 
             {appliedCoupon && (
-              <div className="d-flex justify-content-between mb-2">
-                <span>الخصم</span>
-                <span className="text-success">-{discountAmount.toFixed(2)} ر.س</span>
+              <div className="d-flex justify-content-between mb-2" style={{ fontFamily: 'var(--font-primary)' }}>
+                <span className="fw-medium">الخصم</span>
+                <span className="text-success fw-semibold">-{discountAmount.toFixed(2)} ر.س</span>
               </div>
             )}
 
             <hr />
 
-            <div className="d-flex justify-content-between mb-4">
-              <strong>الإجمالي</strong>
-              <strong className="text-primary">{totalPrice.toFixed(2)} ر.س</strong>
+            <div className="d-flex justify-content-between mb-4" style={{ fontFamily: 'var(--font-primary)' }}>
+              <strong className="fw-bold fs-5">الإجمالي</strong>
+              <strong className="text-primary fw-bold fs-5">{totalPrice.toFixed(2)} ر.س</strong>
             </div>
 
-            <Button variant="primary" className="w-100 py-2" onClick={handleShowModal}>
-              إتمام الطلب
+            <Button 
+              variant="primary" 
+              className="w-100 py-3 fw-bold" 
+              onClick={handleShowModal}
+              style={{
+                background: "linear-gradient(45deg, #0078FF, #0056CC)",
+                border: "none",
+                fontSize: "1.1rem",
+                borderRadius: "12px",
+                boxShadow: "0 4px 15px rgba(0, 120, 255, 0.3)",
+                transition: "all 0.3s ease"
+              }}
+              onMouseEnter={(e) => {
+                e.target.style.transform = "translateY(-2px)";
+                e.target.style.boxShadow = "0 6px 20px rgba(0, 120, 255, 0.4)";
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.transform = "translateY(0)";
+                e.target.style.boxShadow = "0 4px 15px rgba(0, 120, 255, 0.3)";
+              }}
+            >
+              {userData ? "إتمام الطلب" : "تسجيل الدخول لإتمام الطلب"}
             </Button>
           </div>
         </Col>
@@ -267,6 +393,26 @@ const Cart = () => {
           </Form>
         </Modal.Body>
       </Modal>
+
+      {/* Auth Required Modal */}
+      <AuthRequiredModal
+        show={showAuthRequiredModal}
+        handleClose={handleCloseAuthRequiredModal}
+        onLoginClick={handleShowLoginModal}
+        onSignupClick={handleShowSignupModal}
+      />
+
+      {/* Login Modal */}
+      <LoginModal
+        show={showLoginModal}
+        handleClose={handleCloseLoginModal}
+      />
+
+      {/* Signup Modal */}
+      <SignupModal
+        show={showSignupModal}
+        handleClose={handleCloseSignupModal}
+      />
     </Container>
   );
 };

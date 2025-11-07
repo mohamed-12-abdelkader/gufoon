@@ -10,16 +10,11 @@ const UserType = () => {
 
   useEffect(() => {
     if (userData != null) {
-      if (userData.role === "teacher") {
-        setIsAdmin(false);
-        setuser(false);
-      } else if (userData.role === "admin") {
+      if (userData.isSuperuser === true) {
         setIsAdmin(true);
-
         setuser(false);
       } else {
         setIsAdmin(false);
-
         setuser(true);
       }
     }

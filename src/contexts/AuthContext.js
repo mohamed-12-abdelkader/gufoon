@@ -6,8 +6,9 @@ import React, {
   useRef,
 } from "react";
 import axios from "axios";
+import baseUrl from "../api/baseUrl";
 
-axios.defaults.baseURL = 'https://api.gufoon.shop/api';
+axios.defaults.baseURL = 'http://localhost:8000/api';
 
 const AuthContext = createContext();
 
@@ -22,9 +23,10 @@ export const AuthProvider = ({ children }) => {
   const isAdmin = () => !!user && user.isSuperuser;
 
   const login = async (credentials) => {
-    const response = await axios.post("/login/access-token", credentials);
+    const response = await baseUrl.post("/api/login/access-token", credentials);
     const { access_token: token, user } = response.data;
     localStorage.setItem("token", token);
+    localStorage.setItem("user", JSON.stringify(user));
     setToken(token);
     setUser(user);
     window.location.reload();
@@ -44,9 +46,10 @@ export const AuthProvider = ({ children }) => {
   };
 
   const register = async (userData) => {
-    const response = await axios.post("/users/signup", userData);
+    const response = await baseUrl.post("/api/users/signup", userData);
     const { access_token: token, user } = response.data;
     localStorage.setItem("token", token);
+    localStorage.setItem("user", JSON.stringify(user));
     setToken(token);
     setUser(user);
     window.location.reload();
@@ -55,7 +58,7 @@ export const AuthProvider = ({ children }) => {
   const initializeUser = async () => {
     setLoading(true);
     try {
-      const res = await axios.post("/login/test-token");
+      const res = await baseUrl.post("/login/test-token");
       setUser(res.data);
     } catch {
       setToken(null);

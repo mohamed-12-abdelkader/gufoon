@@ -1,0 +1,394 @@
+/* Component-specific Typography Enhancements */
+
+/* Navigation Bar */
+.navbar {
+  font-family: var(--font-primary) !important;
+}
+
+.navbar-brand {
+  font-weight: 700 !important;
+  font-size: 1.5rem !important;
+  letter-spacing: -0.02em !important;
+}
+
+.nav-link {
+  font-weight: 500 !important;
+  font-size: 1rem !important;
+  transition: all 0.3s ease !important;
+}
+
+/* Search Bar */
+.form-control {
+  font-family: var(--font-primary) !important;
+  font-weight: 400 !important;
+  font-size: 1rem !important;
+}
+
+.form-control::placeholder {
+  font-weight: 400 !important;
+  opacity: 0.7 !important;
+}
+
+/* Buttons */
+.btn {
+  font-family: var(--font-primary) !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.3px !important;
+  text-transform: none !important;
+  transition: all 0.3s ease !important;
+}
+
+.btn-primary {
+  font-weight: 600 !important;
+  box-shadow: 0 2px 4px rgba(0, 120, 255, 0.2) !important;
+}
+
+.btn-primary:hover {
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 8px rgba(0, 120, 255, 0.3) !important;
+}
+
+/* Cards */
+.card {
+  font-family: var(--font-primary) !important;
+  transition: all 0.3s ease !important;
+}
+
+.card-title {
+  font-weight: 600 !important;
+  font-size: 1.25rem !important;
+  line-height: 1.3 !important;
+  color: #2c3e50 !important;
+}
+
+.card-text {
+  font-weight: 400 !important;
+  font-size: 1rem !important;
+  line-height: 1.6 !important;
+  color: #6c757d !important;
+}
+
+.card:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Product Cards */
+.product-card {
+  font-family: var(--font-primary) !important;
+}
+
+.product-title {
+  font-weight: 600 !important;
+  font-size: 1.1rem !important;
+  line-height: 1.3 !important;
+  color: #2c3e50 !important;
+}
+
+.product-price {
+  font-weight: 700 !important;
+  font-size: 1.2rem !important;
+  color: #0078FF !important;
+}
+
+.product-description {
+  font-weight: 400 !important;
+  font-size: 0.9rem !important;
+  line-height: 1.5 !important;
+  color: #6c757d !important;
+}
+
+/* Modals */
+.modal-content {
+  font-family: var(--font-primary) !important;
+}
+
+.modal-title {
+  font-weight: 600 !important;
+  font-size: 1.5rem !important;
+  color: #2c3e50 !important;
+}
+
+.modal-body {
+  font-weight: 400 !important;
+  font-size: 1rem !important;
+  line-height: 1.6 !important;
+}
+
+.modal-footer {
+  font-weight: 500 !important;
+}
+
+/* Forms */
+.form-label {
+  font-weight: 500 !important;
+  font-size: 0.95rem !important;
+  color: #495057 !important;
+  margin-bottom: 0.5rem !important;
+}
+
+.form-control {
+  font-weight: 400 !important;
+  font-size: 1rem !important;
+  border-radius: 8px !important;
+  transition: all 0.3s ease !important;
+}
+
+.form-control:focus {
+  font-weight: 500 !important;
+  border-color: #0078FF !important;
+  box-shadow: 0 0 0 0.2rem rgba(0, 120, 255, 0.25) !important;
+}
+
+/* Tables */
+.table {
+  font-family: var(--font-primary) !important;
+}
+
+.table th {
+  font-weight: 600 !important;
+  font-size: 0.95rem !important;
+  color: #2c3e50 !important;
+  border-bottom: 2px solid #dee2e6 !important;
+}
+
+.table td {
+  font-weight: 400 !important;
+  font-size: 0.9rem !important;
+  color: #495057 !important;
+}
+
+/* Alerts */
+.alert {
+  font-family: var(--font-primary) !important;
+  font-weight: 500 !important;
+  font-size: 1rem !important;
+  border-radius: 8px !important;
+}
+
+.alert-heading {
+  font-weight: 600 !important;
+  font-size: 1.1rem !important;
+}
+
+/* Badges */
+.badge {
+  font-family: var(--font-primary) !important;
+  font-weight: 500 !important;
+  font-size: 0.75rem !important;
+  letter-spacing: 0.5px !important;
+}
+
+/* Dropdowns */
+.dropdown-menu {
+  font-family: var(--font-primary) !important;
+  font-weight: 400 !important;
+  font-size: 0.95rem !important;
+}
+
+.dropdown-item {
+  font-weight: 500 !important;
+  transition: all 0.2s ease !important;
+}
+
+.dropdown-item:hover {
+  font-weight: 600 !important;
+  background-color: #f8f9fa !important;
+}
+
+/* Pagination */
+.pagination {
+  font-family: var(--font-primary) !important;
+}
+
+.page-link {
+  font-weight: 500 !important;
+  font-size: 0.95rem !important;
+  color: #0078FF !important;
+  border-radius: 6px !important;
+  margin: 0 2px !important;
+  transition: all 0.3s ease !important;
+}
+
+.page-link:hover {
+  font-weight: 600 !important;
+  background-color: #0078FF !important;
+  border-color: #0078FF !important;
+  color: white !important;
+}
+
+.page-item.active .page-link {
+  font-weight: 600 !important;
+  background-color: #0078FF !important;
+  border-color: #0078FF !important;
+}
+
+/* Breadcrumbs */
+.breadcrumb {
+  font-family: var(--font-primary) !important;
+  font-weight: 400 !important;
+  font-size: 0.9rem !important;
+}
+
+.breadcrumb-item {
+  color: #6c757d !important;
+}
+
+.breadcrumb-item.active {
+  font-weight: 500 !important;
+  color: #2c3e50 !important;
+}
+
+/* Progress Bars */
+.progress {
+  font-family: var(--font-primary) !important;
+}
+
+.progress-bar {
+  font-weight: 500 !important;
+  font-size: 0.9rem !important;
+}
+
+/* Tooltips */
+.tooltip {
+  font-family: var(--font-primary) !important;
+  font-weight: 400 !important;
+  font-size: 0.875rem !important;
+}
+
+.tooltip-inner {
+  font-weight: 500 !important;
+}
+
+/* Popovers */
+.popover {
+  font-family: var(--font-primary) !important;
+  font-weight: 400 !important;
+  font-size: 0.9rem !important;
+}
+
+.popover-header {
+  font-weight: 600 !important;
+  font-size: 1rem !important;
+}
+
+/* Accordions */
+.accordion {
+  font-family: var(--font-primary) !important;
+}
+
+.accordion-header {
+  font-weight: 500 !important;
+  font-size: 1rem !important;
+}
+
+.accordion-body {
+  font-weight: 400 !important;
+  font-size: 0.95rem !important;
+  line-height: 1.6 !important;
+}
+
+/* List Groups */
+.list-group {
+  font-family: var(--font-primary) !important;
+}
+
+.list-group-item {
+  font-weight: 400 !important;
+  font-size: 1rem !important;
+  line-height: 1.5 !important;
+}
+
+.list-group-item.active {
+  font-weight: 500 !important;
+}
+
+/* Spinners */
+.spinner-border {
+  font-family: var(--font-primary) !important;
+}
+
+/* Custom Components */
+.cart-item {
+  font-family: var(--font-primary) !important;
+}
+
+.cart-item h5 {
+  font-weight: 600 !important;
+  font-size: 1.25rem !important;
+  color: #2c3e50 !important;
+}
+
+.cart-item .product-details {
+  font-weight: 400 !important;
+  font-size: 0.9rem !important;
+  color: #6c757d !important;
+}
+
+.order-summary {
+  font-family: var(--font-primary) !important;
+}
+
+.order-summary h4 {
+  font-weight: 600 !important;
+  font-size: 1.5rem !important;
+  color: #2c3e50 !important;
+}
+
+.order-summary .fw-medium {
+  font-weight: 500 !important;
+}
+
+.order-summary .fw-semibold {
+  font-weight: 600 !important;
+}
+
+.order-summary .fw-bold {
+  font-weight: 700 !important;
+}
+
+/* Responsive Typography */
+@media (max-width: 768px) {
+  .navbar-brand {
+    font-size: 1.25rem !important;
+  }
+  
+  .card-title {
+    font-size: 1.1rem !important;
+  }
+  
+  .modal-title {
+    font-size: 1.25rem !important;
+  }
+  
+  .btn {
+    font-size: 0.9rem !important;
+  }
+  
+  .form-control {
+    font-size: 0.95rem !important;
+  }
+}
+
+@media (max-width: 576px) {
+  .navbar-brand {
+    font-size: 1.1rem !important;
+  }
+  
+  .card-title {
+    font-size: 1rem !important;
+  }
+  
+  .modal-title {
+    font-size: 1.1rem !important;
+  }
+  
+  .btn {
+    font-size: 0.85rem !important;
+  }
+}
+
+
+
+
+

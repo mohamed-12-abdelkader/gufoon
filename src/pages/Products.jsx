@@ -5,20 +5,21 @@ import ProductCard from "../components/card/ProductCard";
 import DeleteModal from "../components/modal/DeleteModal";
 import { Form, Button, Accordion } from "react-bootstrap";
 import { FaFilter, FaSortAmountDown, FaSortAmountUp } from "react-icons/fa";
-import { getProducts } from "../utils/services";
 import { useParams } from "react-router-dom";
+import baseUrl from "../api/baseUrl";
+import ScrollToTop from "../components/scollToTop/ScrollToTop";
 
 const availableFrames = ["Full Frame", "Half Frame", "Rimless"];
 const availableBrands = ["Ray-Ban", "Gucci", "Prada", "Tom Ford"];
 const availableColors = ["Black", "Brown", "Blue", "Gold", "Silver"];
 
 const ViewAllProducts = ({ offers }) => {
-  const { category_slug } = useParams()
+  const { id } = useParams()
 
   const additionalFilters = {}
-  if (category_slug) {
-    // For categories pages
-    additionalFilters.category = category_slug
+  if (id) {
+    // For categories pages - use the category ID from URL params
+    additionalFilters.categoryId = id
   } else if (offers) {
     // For offers page
     additionalFilters.isDiscount = true
@@ -45,18 +46,51 @@ const ViewAllProducts = ({ offers }) => {
       setLoading(true);
       setError(null);
       try {
-        const data = await getProducts(filter);
-        setProducts(data.data || []);
-        setTotalCount(data.count || 0);
+        let data;
+        if (id) {
+          // Use the new category-specific API endpoint
+          const response = await baseUrl.get(`api/products/category/${id}`, {
+            params: {
+              limit: filter.limit,
+              skip: filter.skip,
+              orderBy: filter.orderBy,
+              orderType: filter.orderType,
+              minPrice: filter.minPrice,
+              maxPrice: filter.maxPrice,
+              colors: filter.colors,
+              brands: filter.brands,
+              framesTypes: filter.framesTypes
+            }
+          });
+          data = response.data;
+        } else {
+          // Fallback to general products API for offers or other cases
+          const response = await baseUrl.get('/products', {
+            params: filter
+          });
+          data = response.data;
+        }
+        
+        // معالجة البيانات من الـ API
+        console.log('API Response:', data);
+        const productsData = data.data || data.products || [];
+        const totalCountData = data.count || data.totalCount || 0;
+        
+        console.log('Products Data:', productsData);
+        console.log('Total Count:', totalCountData);
+        
+        setProducts(Array.isArray(productsData) ? productsData : []);
+        setTotalCount(typeof totalCountData === 'number' ? totalCountData : 0);
       } catch (err) {
-        setError("فشل في جلب المنتجات المخفضة. يرجى المحاولة مرة أخرى.");
+        console.error("Error fetching products:", err);
+        setError("فشل في جلب المنتجات. يرجى المحاولة مرة أخرى.");
       } finally {
         setLoading(false);
       }
     }
 
     fetchProducts();
-  }, [filter]);
+  }, [filter, id]);
 
   const handlePageChange = (page) => {
     setCurrentPage(page);
@@ -97,6 +131,29 @@ const ViewAllProducts = ({ offers }) => {
     setDeleteModalIsOpen(false);
     setProductToDelete(null);
   };
+
+  if (error) {
+    return (
+      <div className='products-page' style={{ minHeight: "80vh" }}>
+        <div className='d-flex justify-content-center align-items-center h-100'>
+          <div className='text-center'>
+            <div className='text-danger mb-3'>
+              <i className='fas fa-exclamation-triangle fa-3x'></i>
+            </div>
+            <h4 className='text-danger'>{error}</h4>
+            <p className='text-muted'>يرجى المحاولة مرة أخرى لاحقاً</p>
+            <Button 
+              variant='primary' 
+              onClick={() => window.location.reload()}
+              className='mt-3'
+            >
+              إعادة المحاولة
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (loading) {
     return (
@@ -299,7 +356,13 @@ const ViewAllProducts = ({ offers }) => {
         <div className='filter-sidebar'>
           <div className='filter-header'>
             <FaFilter className='filter-icon' />
-            <h4>تصفية المنتجات</h4>
+            <h4 className="fw-bold" style={{ 
+              fontFamily: 'var(--font-primary)', 
+              fontSize: '1.5rem',
+              color: '#2c3e50'
+            }}>
+              تصفية المنتجات
+            </h4>
           </div>
 
           <Accordion defaultActiveKey={["0"]} alwaysOpen>
@@ -416,7 +479,16 @@ const ViewAllProducts = ({ offers }) => {
             variant='outline-secondary'
             className='reset-filters mt-3 w-100'
             onClick={() => {
-              setFilter({ limit: 30, skip: 0, orderBy: "createdAt", orderType: "desc" })
+              setFilter({ 
+                ...additionalFilters,
+                limit: 30, 
+                skip: 0, 
+                orderBy: "createdAt", 
+                orderType: "desc",
+                colors: [],
+                brands: [],
+                framesTypes: []
+              })
             }}
           >
             إعادة تعيين الفلاتر
@@ -425,29 +497,39 @@ const ViewAllProducts = ({ offers }) => {
 
         {/* Products Grid */}
         <div className="products-grid">
-          {products.length ? <div className='products-wrapper'>
-            {products.map((product) => (
-              <ProductCard
-                key={product.id}
-                product={product}
-                openDeleteModal={openDeleteModal}
-              />
-            ))}
-          </div> : <div
-            className='flex justify-center items-center'
-            style={{ minHeight: "80vh" }}
-          >
-            لا يوجد منتجات ...........
-          </div>}
+          {products && products.length > 0 ? (
+            <div className='products-wrapper'>
+              {products.map((product) => (
+                <ProductCard
+                  href={`/product/${product.id}`}
+                  key={product.id}
+                  product={product}
+                  openDeleteModal={openDeleteModal}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className='d-flex justify-content-center align-items-center' style={{ minHeight: "60vh" }}>
+              <div className='text-center'>
+                <div className='text-muted mb-3'>
+                  <i className='fas fa-box-open fa-3x'></i>
+                </div>
+                <h4 className='text-muted'>لا توجد منتجات</h4>
+                <p className='text-muted'>لا توجد منتجات متاحة في هذا التصنيف حالياً</p>
+              </div>
+            </div>
+          )}
 
           {/* Pagination */}
-          <div className="pagination-wrapper">
-            <Pagnation
-              setPage={handlePageChange}
-              pageCount={Math.ceil(totalCount / filter.limit)}
-              currentPage={currentPage}
-            />
-          </div>
+          {products && products.length > 0 && totalCount > filter.limit && (
+            <div className="pagination-wrapper">
+              <Pagnation
+                setPage={handlePageChange}
+                pageCount={Math.ceil(totalCount / filter.limit)}
+                currentPage={currentPage}
+              />
+            </div>
+          )}
         </div>
       </div>
 
@@ -459,6 +541,7 @@ const ViewAllProducts = ({ offers }) => {
         deleteGlasses={deleteGlasses}
         loading={deleteLoading}
       />
+      <ScrollToTop/>
     </div>
   );
 };

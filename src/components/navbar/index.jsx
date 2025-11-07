@@ -9,11 +9,17 @@ import {
 import { Link } from "react-router-dom";
 import Navsearch from "./Navsearch";
 import { useAuth } from "../../contexts/AuthContext";
+import { useChat } from "../../contexts/ChatContext";
+import ChatNotificationBadge from "../chat/ChatNotificationBadge";
+import baseUrl from "../../api/baseUrl";
 
 function NavbarComponent() {
   const [carts, setCarts] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const { isAdmin } = useAuth()
+  const { isAdmin, isAuthenticated } = useAuth()
+  const { isConnected } = useChat()
 
   const [show, setShow] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
@@ -38,54 +44,65 @@ function NavbarComponent() {
     setCarts(storedCarts);
   };
 
+  const fetchCategories = async () => {
+    try {
+      setLoading(true);
+      const response = await baseUrl.get("/api/categories/hierarchy");
+      setCategories(response.data);
+    } catch (error) {
+      console.error("Error fetching categories:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     fetchCarts();
+    fetchCategories();
   }, []);
 
   const navLinks = (
     <Nav dir='rtl' className='me-auto mb- ' style={{ zIndex: "1000" }}>
       <div className='w-[100%] flex flex-wrap justify-between'>
-        <NavDropdown title='نظارات شمسية' id='navbarScrollingDropdown'>
-          <NavDropdown.Item>
-            <Link to={"/categories/men-sunglasses"}>نظارات شمسية رجالى </Link>
-          </NavDropdown.Item>
-          <NavDropdown.Item>
-            <Link to={"/categories/women-sunglasses"}>نظارات شمسية نسائى </Link>
-          </NavDropdown.Item>
-        </NavDropdown>
-        <NavDropdown title='نظارات طبية' id='navbarScrollingDropdown'>
-          <NavDropdown.Item>
-            <Link to={"/categories/men-eyeglasses"}>نظارات طبية رجالى </Link>
-          </NavDropdown.Item>
-          <NavDropdown.Item>
-            <Link to={"/categories/women-eyeglasses"}>نظارات طبية نسائى </Link>
-          </NavDropdown.Item>
-          <NavDropdown.Item>
-            <Link to={"/categories/children-glasses"}>
-              نظارات طبية اطفالى{" "}
-            </Link>
-          </NavDropdown.Item>
-        </NavDropdown>
-        <NavDropdown title=' عدسات لاصقة ' id='navbarScrollingDropdown'>
-          <NavDropdown.Item>
-            <Link to={"/categories/lenses"}>
-              عدسات طبية
-            </Link>
-          </NavDropdown.Item>
-          <NavDropdown.Item>
-            <Link to={"/categories/lenses"}>
-              عدسات ملونة power
-            </Link>
-          </NavDropdown.Item>
-        </NavDropdown>
-        <NavDropdown title='  الخصومات  ' id='navbarScrollingDropdown'>
-          <NavDropdown.Item>
-            <Link to={"/offers"}>خصومات النظارات </Link>
-          </NavDropdown.Item>
-          <NavDropdown.Item>
-            <Link to={"/offers"}>خصومات العدسات</Link>
-          </NavDropdown.Item>
-        </NavDropdown>
+        {loading ? (
+          <div className="flex items-center justify-center w-full py-2">
+            <span className="text-gray-500">جاري التحميل...</span>
+          </div>
+        ) : (
+          categories.map((category) => (
+            <NavDropdown 
+              key={category.id} 
+              title={category.name} 
+              id={`navbarScrollingDropdown-${category.id}`}
+              className="category-dropdown"
+            >
+              {category.children && category.children.length > 0 ? (
+                category.children.map((child) => (
+                  <NavDropdown.Item key={child.id} className="category-item">
+                    <Link 
+                      to={`/categories/${child.id}`}
+                      className="block w-full text-right py-2 px-3 hover:bg-gray-100 transition-colors"
+                    >
+                      {child.name}
+                    </Link>
+                  </NavDropdown.Item>
+                ))
+              ) : (
+                <NavDropdown.Item className="category-item">
+                  <Link 
+                    to={`/categories/${category.id}`}
+                    className="block w-full text-right py-2 px-3 hover:bg-gray-100 transition-colors"
+                  >
+                    عرض جميع المنتجات
+                  </Link>
+                </NavDropdown.Item>
+              )}
+            </NavDropdown>
+          ))
+        )}
+        
+        {/* Special offers dropdown */}
+       
       </div>
       {isAdmin() && <div className="mt-2 flex">
         <Link
@@ -95,6 +112,28 @@ function NavbarComponent() {
           صفحة الادمن
         </Link>
       </div>}
+      
+      {/* Chat Links */}
+      {isAuthenticated && (
+        <div className="mt-2 flex items-center space-x-2">
+          <Link
+            to={isAdmin() ? "/admin/chat" : "/chat"}
+            className="flex items-center space-x-2 text-green-600 hover:text-green-800 transition-colors"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+            </svg>
+            <span className="text-sm font-medium">
+              {isAdmin() ? 'إدارة المحادثات' : 'الدردشة'}
+            </span>
+            <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-500' : 'bg-red-500'}`}></div>
+          </Link>
+          
+          {isAuthenticated && (
+            <ChatNotificationBadge />
+          )}
+        </div>
+      )}
     </Nav>
   );
 

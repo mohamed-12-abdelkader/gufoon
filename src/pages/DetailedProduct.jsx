@@ -1,17 +1,34 @@
 import React, { useEffect, useState } from "react";
 import ScrollToTop from "../components/scollToTop/ScrollToTop";
 import { Button, Carousel, Row, Col, Badge } from "react-bootstrap";
-import { FaCartPlus, FaShippingFast, FaRegClock } from "react-icons/fa";
+import { FaCartPlus, FaShippingFast, FaRegClock, FaShoppingBag } from "react-icons/fa";
 import { BsBox2Heart, BsStarFill } from "react-icons/bs";
 import { MdLocalOffer } from "react-icons/md";
 import { useParams } from "react-router-dom";
 import { getProductById } from "../utils/services";
+import { toast } from "react-toastify";
+import UserType from "../Hook/userType/UserType";
+import BuyNowModal from "../components/modal/BuyNowModal";
+import AuthRequiredModal from "../components/modal/AuthRequiredModal";
+import LoginModal from "../components/modal/LoginModal";
+import SignupModal from "../components/modal/SignupModal";
+import { useCart } from "../contexts/CartContext";
 
 const DetailedProduct = () => {
   const { product_id } = useParams()
   const [loading, setLoading] = useState(false)
   const [product, setProduct] = useState(null)
   const [index, setIndex] = useState(0);
+  
+  // Modal states
+  const [showBuyNowModal, setShowBuyNowModal] = useState(false);
+  const [showAuthRequiredModal, setShowAuthRequiredModal] = useState(false);
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  const [showSignupModal, setShowSignupModal] = useState(false);
+  
+  // User authentication
+  const [userData, isAdmin, user] = UserType();
+  const { addToCart } = useCart();
 
   useEffect(() => {
     async function fetchProduct() {
@@ -27,6 +44,50 @@ const DetailedProduct = () => {
 
     fetchProduct();
   }, []);
+
+  // Handle Add to Cart
+  const handleAddToCart = async () => {
+    if (!userData) {
+      setShowAuthRequiredModal(true);
+      return;
+    }
+
+    try {
+      await addToCart(product);
+      // Toast message is handled by CartContext
+    } catch (error) {
+      console.error('Error adding to cart:', error);
+      toast.error("خطأ في إضافة المنتج للسلة، حاول مجدداً");
+    }
+  };
+
+  // Handle Buy Now
+  const handleBuyNow = () => {
+    if (!userData) {
+      setShowAuthRequiredModal(true);
+      return;
+    }
+    setShowBuyNowModal(true);
+  };
+
+  // Handle Auth Required Modal Actions
+  const handleShowLoginModal = () => {
+    setShowAuthRequiredModal(false);
+    setShowLoginModal(true);
+  };
+
+  const handleShowSignupModal = () => {
+    setShowAuthRequiredModal(false);
+    setShowSignupModal(true);
+  };
+
+  // Close all modals
+  const handleCloseAllModals = () => {
+    setShowBuyNowModal(false);
+    setShowAuthRequiredModal(false);
+    setShowLoginModal(false);
+    setShowSignupModal(false);
+  };
 
 
   if (loading) return (
@@ -138,6 +199,23 @@ const DetailedProduct = () => {
           padding: 12px 24px;
           border-radius: 12px;
         }
+        .buy-now-btn {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          padding: 12px 24px;
+          border-radius: 12px;
+          background: linear-gradient(45deg, #28a745, #20c997);
+          border: none;
+          color: white;
+          font-weight: 500;
+          transition: all 0.3s ease;
+        }
+        .buy-now-btn:hover {
+          background: linear-gradient(45deg, #218838, #1ea085);
+          transform: translateY(-2px);
+          box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+        }
         .price-tag {
           display: flex;
           flex-direction: column;
@@ -205,46 +283,43 @@ const DetailedProduct = () => {
       icon: <BsBox2Heart size={24} />,
       items: [
         { key: "اسم المنتج", value: product.name },
-        { key: "الموديل", value: product.model_number },
-        { key: "البراند", value: product.brand.name },
+        { key: "البراند", value: product.brand?.name },
+        { key: "اللون", value: product.color?.name },
+        { key: "المخزون", value: `${product.stock} قطعة متاحة` },
         {
           key: "السعر",
           value: product.discount && product.discount > 0
-            ? `${product.price - product.discount} ج.م (بدلاً من ${product.price} ج.م بخصم ${product.discount} ج.م)`
-            : `${product.price} ج.م`
+            ? `${(product.price - (product.price * product.discount / 100)).toFixed(2)} ر.س (بدلاً من ${product.price} ر.س بخصم ${product.discount}%)`
+            : `${product.price} ر.س`
         },
-        {
-          key: "الضمان",
-          value: product.warranty ? `${product.warranty} أشهر` : null,
-        },
+        
       ],
     },
     {
-      title: "مواصفات الإطار",
+      title: "تفاصيل المنتج",
       icon: <FaShippingFast size={24} />,
       items: [
-        { key: "مقاس النظارة", value: product?.frameSize?.size },
-        { key: "مادة الإطار", value: product?.frameMaterial?.material },
-        { key: "لون الإطار", value: product?.frameColor?.color },
-        { key: "نوع الإطار", value: product?.frameType?.name },
-        { key: "شكل الإطار", value: product?.frameShape?.shape },
+        { key: "رقم المنتج", value: `#${product.id}` },
+        { key: "تاريخ الإضافة", value: new Date(product.createdAt).toLocaleDateString('ar-EG') },
+        { key: "آخر تحديث", value: new Date(product.updatedAt).toLocaleDateString('ar-EG') },
+        { key: "التصنيف", value: `تصنيف رقم ${product.categoryId}` },
       ],
     },
     {
-      title: "مواصفات العدسات",
+      title: "معلومات إضافية",
       icon: <BsStarFill size={24} />,
       items: [
-        { key: "نوع العدسة", value: product?.lenseType?.name },
-        { key: "لون العدسة", value: product?.lenseColor?.color },
-        { key: "مادة العدسة", value: product?.lenseMaterial?.material },
-        { key: "طلاء العدسة", value: product?.lensCoating?.coating },
+        { key: "عدد الصور", value: `${product.ProductImages?.length || 0} صورة` },
+        { key: "حالة المنتج", value: product.stock > 0 ? "متوفر" : "غير متوفر" },
+        { key: "نوع الخصم", value: product.discount > 0 ? "خصم نسبة" : "بدون خصم" },
+        { key: "مبلغ التوفير", value: product.discount > 0 ? `${(product.price * product.discount / 100).toFixed(2)} ر.س` : "0 ر.س " },
       ],
     },
   ];
 
   return (
     <div className='product-details-page' dir='rtl'>
-      <div className='product-header py-4 bg-primary text-white'>
+      <div className='product-header py-4 bg-blue-500 text-white'>
         <div className='container'>
           <h2 className='mb-0 fw-bold'>{product.name}</h2>
           <div className='d-flex align-items-center gap-2 mt-2'>
@@ -259,7 +334,7 @@ const DetailedProduct = () => {
           {/* Product images */}
           <Col lg={6}>
             <div className='product-gallery bg-white rounded-4 p-3 shadow-sm'>
-              {product.productImages ? (
+              {product.ProductImages && product.ProductImages.length > 0 ? (
                 <>
                   <Carousel
                     activeIndex={index}
@@ -268,7 +343,7 @@ const DetailedProduct = () => {
                     indicators={false}
                     interval={null}
                   >
-                    {product.productImages.map((image, i) => (
+                    {product.ProductImages.map((image, i) => (
                       <Carousel.Item key={i}>
                         <div className='position-relative rounded-4 overflow-hidden'>
                           <img
@@ -288,7 +363,7 @@ const DetailedProduct = () => {
                     ))}
                   </Carousel>
                   <Row className='g-2 thumbnail-gallery'>
-                    {product.productImages.map((img, idx) => (
+                    {product.ProductImages.map((img, idx) => (
                       <Col key={idx} xs={3}>
                         <div
                           className={`thumbnail-item ${idx === index ? "active" : ""
@@ -305,15 +380,29 @@ const DetailedProduct = () => {
                     ))}
                   </Row>
                 </>
+              ) : product.cover ? (
+                <div className='single-image-display'>
+                  <div className='position-relative rounded-4 overflow-hidden'>
+                    <img
+                      src={product.cover}
+                      className='d-block w-100 object-fit-cover'
+                      style={{ height: "500px" }}
+                      alt={product.name}
+                    />
+                    {product.discount && (
+                      <div className='discount-badge'>
+                        <MdLocalOffer className='me-1' />
+                        خصم {product.discount}%
+                      </div>
+                    )}
+                  </div>
+                </div>
               ) : (
                 <div className='no-image-placeholder'>
                   <div className='text-center p-5'>
-                    <img
-                      src='/path-to-no-image.png'
-                      alt=''
-                      className='mb-3'
-                      style={{ width: "120px" }}
-                    />
+                    <div className='mb-3' style={{ fontSize: "120px", color: "#6c757d" }}>
+                      🖼️
+                    </div>
                     <p className='text-muted'>لا توجد صور متاحة</p>
                   </div>
                 </div>
@@ -330,12 +419,12 @@ const DetailedProduct = () => {
                     <h3 className='mb-0 text-success fw-bold'>
                       {product.discount > 0
                         ? (product.price - (product.price * product.discount) / 100).toFixed(2)
-                        : product.price} ج.م
+                        : product.price} ر.س
                     </h3>
 
                     {product.discount > 0 && (
                       <div className='old-price'>
-                        <del className='text-muted'>{product.price} ج.م</del>
+                        <del className='text-muted'>{product.price} ر.س</del>
                         <Badge bg='danger' className='ms-2'>
                           توفير {product.discount}%
                         </Badge>
@@ -343,14 +432,26 @@ const DetailedProduct = () => {
                     )}
 
                   </div>
-                  <Button
-                    variant='primary'
-                    size='lg'
-                    className='add-to-cart-btn'
-                  >
-                    <FaCartPlus size={20} />
-                    <span>إضافة للسلة</span>
-                  </Button>
+                  <div className='d-flex gap-2'>
+                    <Button
+                      variant='primary'
+                      size='lg'
+                     className="d-flex"
+                      onClick={handleAddToCart}
+                    >
+                      <FaCartPlus size={20} />
+                      <span className="text-white mx-1">إضافة للسلة</span>
+                    </Button>
+                    <Button
+                      variant='success'
+                      size='lg'
+                      className='buy-now-btn'
+                      onClick={handleBuyNow}
+                    >
+                      <FaShoppingBag size={20} />
+                      <span  className="text-white m-1">شراء الآن</span>
+                    </Button>
+                  </div>
                 </div>
                 {product.warranty && (
                   <div className='warranty-info'>
@@ -387,15 +488,68 @@ const DetailedProduct = () => {
               {/* Additional Information Section */}
               {product.description && (
                 <div className='additional-info bg-white rounded-4 p-4 shadow-sm mt-4'>
-                  <h5 className='fw-bold mb-3'>معلومات إضافية</h5>
+                  <h5 className='fw-bold mb-3'>وصف المنتج</h5>
                   <p className='text-muted mb-0'>{product.description}</p>
                 </div>
               )}
+
+              {/* Stock Status */}
+              <div className='stock-info bg-white rounded-4 p-4 shadow-sm mt-4'>
+                <div className='d-flex align-items-center justify-content-between'>
+                  <div>
+                    <h6 className='mb-1 fw-bold'>حالة المخزون</h6>
+                    <p className='mb-0 text-muted'>
+                      {product.stock > 0 ? (
+                        <span className='text-success'>
+                          <i className='fas fa-check-circle me-1'></i>
+                          متوفر ({product.stock} قطعة)
+                        </span>
+                      ) : (
+                        <span className='text-danger'>
+                          <i className='fas fa-times-circle me-1'></i>
+                          غير متوفر
+                        </span>
+                      )}
+                    </p>
+                  </div>
+                  {product.stock > 0 && (
+                    <div className='text-center'>
+                      <div className='badge bg-success fs-6 px-3 py-2'>
+                        جاهز للشحن
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
           </Col>
         </Row>
       </div>
       <ScrollToTop />
+
+      {/* Modals */}
+      <BuyNowModal 
+        show={showBuyNowModal} 
+        handleClose={() => setShowBuyNowModal(false)} 
+        product={product} 
+      />
+      
+      <AuthRequiredModal 
+        show={showAuthRequiredModal} 
+        handleClose={() => setShowAuthRequiredModal(false)}
+        onLoginClick={handleShowLoginModal}
+        onSignupClick={handleShowSignupModal}
+      />
+      
+      <LoginModal 
+        show={showLoginModal} 
+        handleClose={() => setShowLoginModal(false)} 
+      />
+      
+      <SignupModal 
+        show={showSignupModal} 
+        handleClose={() => setShowSignupModal(false)} 
+      />
 
       <style jsx>{`
         .product-details-page {
@@ -444,6 +598,23 @@ const DetailedProduct = () => {
           gap: 8px;
           padding: 12px 24px;
           border-radius: 12px;
+        }
+        .buy-now-btn {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          padding: 12px 24px;
+          border-radius: 12px;
+          background: linear-gradient(45deg, #28a745, #20c997);
+          border: none;
+          color: white;
+          font-weight: 500;
+          transition: all 0.3s ease;
+        }
+        .buy-now-btn:hover {
+          background: linear-gradient(45deg, #218838, #1ea085);
+          transform: translateY(-2px);
+          box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
         }
         .price-tag {
           display: flex;

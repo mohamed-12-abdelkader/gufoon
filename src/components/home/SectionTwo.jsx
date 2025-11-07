@@ -1,54 +1,52 @@
 import React, { useEffect, useState } from "react";
-import Slider from "../slider/Slider";
-import { getTopLevelCategories } from "../../utils/services";
+import axios from "axios";
+import { Container, Row, Col, Card, Button, Spinner } from "react-bootstrap";
+import { Fade } from "react-awesome-reveal";
 import { Link } from "react-router-dom";
+import Slider from "../slider/Slider";
+import baseUrl from "../../api/baseUrl";
 
 const SectionTwo = () => {
-  const [categories, setCategories] = useState([])
+  const [subCategories, setSubCategories] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    getTopLevelCategories().then((result) => setCategories(result))
-  }, [])
+    const fetchSubCategories = async () => {
+      try {
+        const { data } = await baseUrl.get("/api/categories/sub");
+        setSubCategories(data);
+      } catch (error) {
+        console.error("Error fetching subcategories:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchSubCategories();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="d-flex justify-content-center align-items-center py-5">
+        <Spinner animation="border" variant="primary" />
+      </div>
+    );
+  }
 
   return (
-    <>
-      {categories.length && <div className='my-[50px]'>
-        <div className='flex justify-center'>
-          <div>
-            <h3 className='font-bold '> اقسام الموقع</h3>
-            <p
-              className='h-1 w-[160px] my-3 bg-slate-700'
-              style={{ borderRadius: "10px" }}
-            ></p>
-          </div>
-        </div>
-        <div dir='ltr'>
-          <Slider>
-            {categories.map((category) => {
-              return (
-                <Link key={category.id} to={`/categories/${category.slug}`}>
-                  <div className='m-3 text-center'>
-                    <img
-                      src={category.cover}
-                      alt={category.name}
-                      style={{
-                        height: "120px",
-                        width: "120px",
-                        borderRadius: "50%",
-                        border: "2px solid black",
-                      }}
-                    />
-                    <h6 className='my-2'>{category.name}</h6>
-                  </div>
-                </Link>
-              );
-            })}
-          </Slider>
-        </div>
-        <hr className='w-[90%] m-auto' />
-      </div>}
-
-    </>
+    <Container className="py-2">
+     
+      <Slider>
+        {subCategories.map((cat) => (
+          <Link key={cat.id} to={`/categories/${cat.id}`}>
+         <div  className="mx-3 text-center">
+<img src={cat.cover || "https://via.placeholder.com/300x200?text=No+Image"} style={{borderRadius:"50%"}}  className="w-[100px] border h-[100px]  mx-3" />
+   <p>{cat.name}</p>
+         </div>
+          </Link>
+        ))}
+      </Slider>
+    </Container>
   );
 };
 

@@ -1,0 +1,429 @@
+/* Global Typography and Font Improvements */
+
+/* Import the best Arabic fonts */
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@200;300;400;500;600;700;800;900&family=Tajawal:wght@200;300;400;500;700;800;900&family=Noto+Sans+Arabic:wght@100;200;300;400;500;600;700;800;900&family=IBM+Plex+Sans+Arabic:wght@100;200;300;400;500;600;700&family=Changa:wght@200;300;400;500;600;700;800&family=Amiri:wght@400;700&family=Scheherazade+New:wght@400;500;600;700&display=swap');
+
+/* CSS Variables for Fonts */
+:root {
+  --font-primary: 'Cairo', 'Noto Sans Arabic', 'Arial', sans-serif;
+  --font-secondary: 'Tajawal', 'IBM Plex Sans Arabic', 'Arial', sans-serif;
+  --font-elegant: 'Amiri', 'Scheherazade New', serif;
+  --font-display: 'Scheherazade New', 'Changa', serif;
+  --font-mono: 'IBM Plex Sans Arabic', monospace;
+  
+  /* Font Sizes */
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.875rem;
+  --font-size-base: 1rem;
+  --font-size-lg: 1.125rem;
+  --font-size-xl: 1.25rem;
+  --font-size-2xl: 1.5rem;
+  --font-size-3xl: 1.875rem;
+  --font-size-4xl: 2.25rem;
+  --font-size-5xl: 3rem;
+  
+  /* Font Weights */
+  --font-weight-light: 300;
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  --font-weight-extrabold: 800;
+  --font-weight-black: 900;
+  
+  /* Line Heights */
+  --line-height-tight: 1.25;
+  --line-height-snug: 1.375;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.625;
+  --line-height-loose: 2;
+  
+  /* Letter Spacing */
+  --letter-spacing-tighter: -0.05em;
+  --letter-spacing-tight: -0.025em;
+  --letter-spacing-normal: 0em;
+  --letter-spacing-wide: 0.025em;
+  --letter-spacing-wider: 0.05em;
+  --letter-spacing-widest: 0.1em;
+}
+
+/* Global Font Reset */
+* {
+  font-family: var(--font-primary) !important;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* HTML and Body */
+html {
+  font-size: 16px;
+  line-height: var(--line-height-normal);
+}
+
+body {
+  font-family: var(--font-primary) !important;
+  font-weight: var(--font-weight-normal) !important;
+  font-size: var(--font-size-base) !important;
+  line-height: var(--line-height-normal) !important;
+  color: #2c3e50 !important;
+  background-color: #ffffff !important;
+}
+
+/* Headings */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-primary) !important;
+  font-weight: var(--font-weight-semibold) !important;
+  line-height: var(--line-height-tight) !important;
+  letter-spacing: var(--letter-spacing-tight) !important;
+  margin-bottom: 0.5rem !important;
+  color: #2c3e50 !important;
+}
+
+h1 {
+  font-size: clamp(2rem, 5vw, 3.5rem) !important;
+  font-weight: var(--font-weight-bold) !important;
+  line-height: var(--line-height-tight) !important;
+}
+
+h2 {
+  font-size: clamp(1.5rem, 4vw, 2.5rem) !important;
+  font-weight: var(--font-weight-semibold) !important;
+}
+
+h3 {
+  font-size: clamp(1.25rem, 3vw, 2rem) !important;
+  font-weight: var(--font-weight-semibold) !important;
+}
+
+h4 {
+  font-size: clamp(1.1rem, 2.5vw, 1.5rem) !important;
+  font-weight: var(--font-weight-medium) !important;
+}
+
+h5 {
+  font-size: clamp(1rem, 2vw, 1.25rem) !important;
+  font-weight: var(--font-weight-medium) !important;
+}
+
+h6 {
+  font-size: clamp(0.9rem, 1.5vw, 1.1rem) !important;
+  font-weight: var(--font-weight-medium) !important;
+}
+
+/* Paragraphs and Text */
+p, span, div {
+  font-family: var(--font-primary) !important;
+  font-weight: var(--font-weight-normal) !important;
+  line-height: var(--line-height-normal) !important;
+  color: #495057 !important;
+}
+
+p {
+  margin-bottom: 1rem !important;
+}
+
+/* Links */
+a {
+  font-family: var(--font-primary) !important;
+  font-weight: var(--font-weight-medium) !important;
+  text-decoration: none !important;
+  transition: all 0.3s ease !important;
+}
+
+a:hover {
+  font-weight: var(--font-weight-semibold) !important;
+}
+
+/* Lists */
+ul, ol, li {
+  font-family: var(--font-primary) !important;
+  font-weight: var(--font-weight-normal) !important;
+  line-height: var(--line-height-normal) !important;
+}
+
+/* Buttons */
+button, .btn {
+  font-family: var(--font-primary) !important;
+  font-weight: var(--font-weight-medium) !important;
+  letter-spacing: var(--letter-spacing-wide) !important;
+  text-transform: none !important;
+  transition: all 0.3s ease !important;
+}
+
+.btn-lg {
+  font-size: var(--font-size-lg) !important;
+  font-weight: var(--font-weight-semibold) !important;
+  padding: 0.75rem 1.5rem !important;
+}
+
+.btn-sm {
+  font-size: var(--font-size-sm) !important;
+  font-weight: var(--font-weight-medium) !important;
+  padding: 0.375rem 0.75rem !important;
+}
+
+/* Form Elements */
+input, textarea, select, .form-control {
+  font-family: var(--font-primary) !important;
+  font-weight: var(--font-weight-normal) !important;
+  font-size: var(--font-size-base) !important;
+  line-height: var(--line-height-normal) !important;
+  border-radius: 8px !important;
+  transition: all 0.3s ease !important;
+}
+
+input:focus, textarea:focus, select:focus, .form-control:focus {
+  font-weight: var(--font-weight-medium) !important;
+  border-color: #0078FF !important;
+  box-shadow: 0 0 0 0.2rem rgba(0, 120, 255, 0.25) !important;
+}
+
+.form-label {
+  font-family: var(--font-primary) !important;
+  font-weight: var(--font-weight-medium) !important;
+  font-size: var(--font-size-sm) !important;
+  margin-bottom: 0.5rem !important;
+  color: #495057 !important;
+}
+
+/* Tables */
+table, th, td {
+  font-family: var(--font-primary) !important;
+}
+
+th {
+  font-weight: var(--font-weight-semibold) !important;
+  font-size: var(--font-size-sm) !important;
+  color: #2c3e50 !important;
+}
+
+td {
+  font-weight: var(--font-weight-normal) !important;
+  font-size: var(--font-size-sm) !important;
+  color: #495057 !important;
+}
+
+/* Cards */
+.card, .card-title, .card-text {
+  font-family: var(--font-primary) !important;
+}
+
+.card-title {
+  font-weight: var(--font-weight-semibold) !important;
+  font-size: var(--font-size-xl) !important;
+  line-height: var(--line-height-tight) !important;
+  color: #2c3e50 !important;
+}
+
+.card-text {
+  font-weight: var(--font-weight-normal) !important;
+  font-size: var(--font-size-base) !important;
+  line-height: var(--line-height-normal) !important;
+  color: #6c757d !important;
+}
+
+/* Modals */
+.modal-content {
+  font-family: var(--font-primary) !important;
+}
+
+.modal-title {
+  font-weight: var(--font-weight-semibold) !important;
+  font-size: var(--font-size-2xl) !important;
+  color: #2c3e50 !important;
+}
+
+.modal-body {
+  font-weight: var(--font-weight-normal) !important;
+  font-size: var(--font-size-base) !important;
+  line-height: var(--line-height-normal) !important;
+}
+
+/* Navigation */
+.navbar, .nav-link, .navbar-brand {
+  font-family: var(--font-primary) !important;
+  font-weight: var(--font-weight-medium) !important;
+  font-size: var(--font-size-base) !important;
+}
+
+.navbar-brand {
+  font-weight: var(--font-weight-bold) !important;
+  font-size: var(--font-size-xl) !important;
+  letter-spacing: var(--letter-spacing-tight) !important;
+}
+
+/* Alerts */
+.alert {
+  font-family: var(--font-primary) !important;
+  font-weight: var(--font-weight-medium) !important;
+  font-size: var(--font-size-base) !important;
+  border-radius: 8px !important;
+}
+
+.alert-heading {
+  font-weight: var(--font-weight-semibold) !important;
+  font-size: var(--font-size-lg) !important;
+}
+
+/* Badges */
+.badge {
+  font-family: var(--font-primary) !important;
+  font-weight: var(--font-weight-medium) !important;
+  font-size: var(--font-size-xs) !important;
+  letter-spacing: var(--letter-spacing-wide) !important;
+}
+
+/* Dropdowns */
+.dropdown-menu {
+  font-family: var(--font-primary) !important;
+  font-weight: var(--font-weight-normal) !important;
+  font-size: var(--font-size-sm) !important;
+}
+
+.dropdown-item {
+  font-weight: var(--font-weight-medium) !important;
+  transition: all 0.2s ease !important;
+}
+
+/* Pagination */
+.pagination {
+  font-family: var(--font-primary) !important;
+}
+
+.page-link {
+  font-weight: var(--font-weight-medium) !important;
+  font-size: var(--font-size-sm) !important;
+  color: #0078FF !important;
+  border-radius: 6px !important;
+  transition: all 0.3s ease !important;
+}
+
+/* Utility Classes */
+.text-elegant {
+  font-family: var(--font-elegant) !important;
+  font-style: italic !important;
+}
+
+.text-display {
+  font-family: var(--font-display) !important;
+  font-weight: var(--font-weight-semibold) !important;
+}
+
+.text-mono {
+  font-family: var(--font-mono) !important;
+  font-weight: var(--font-weight-normal) !important;
+}
+
+/* Text Shadows */
+.text-shadow-sm {
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.05) !important;
+}
+
+.text-shadow {
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
+}
+
+.text-shadow-md {
+  text-shadow: 0 4px 6px rgba(0, 0, 0, 0.1) !important;
+}
+
+.text-shadow-lg {
+  text-shadow: 0 10px 15px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Responsive Typography */
+@media (max-width: 768px) {
+  html {
+    font-size: 14px;
+  }
+  
+  .btn-lg {
+    font-size: var(--font-size-base) !important;
+  }
+  
+  .modal-title {
+    font-size: var(--font-size-xl) !important;
+  }
+}
+
+@media (max-width: 576px) {
+  html {
+    font-size: 13px;
+  }
+  
+  .btn {
+    font-size: var(--font-size-sm) !important;
+  }
+  
+  .form-control {
+    font-size: var(--font-size-sm) !important;
+  }
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+  body {
+    color: #e9ecef !important;
+    background-color: #121212 !important;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    color: #ffffff !important;
+  }
+  
+  p, span, div {
+    color: #adb5bd !important;
+  }
+  
+  .text-muted {
+    color: #6c757d !important;
+  }
+}
+
+/* Print Styles */
+@media print {
+  * {
+    font-family: 'Times New Roman', serif !important;
+    color: #000000 !important;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    page-break-after: avoid !important;
+  }
+  
+  p {
+    orphans: 3 !important;
+    widows: 3 !important;
+  }
+}
+
+/* Accessibility Improvements */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* High Contrast Mode */
+@media (prefers-contrast: high) {
+  body {
+    color: #000000 !important;
+    background-color: #ffffff !important;
+  }
+  
+  .btn {
+    border-width: 2px !important;
+  }
+  
+  .form-control {
+    border-width: 2px !important;
+  }
+}
+
+
+
+
+

@@ -1,0 +1,223 @@
+/* Import Google Fonts - Arabic Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@200;300;400;500;600;700;800;900&family=Tajawal:wght@200;300;400;500;700;800;900&family=Amiri:wght@400;700&family=Scheherazade+New:wght@400;500;600;700&display=swap');
+
+/* Font Variables */
+:root {
+  --font-primary: 'Cairo', 'Tajawal', 'Arial', sans-serif;
+  --font-secondary: 'Tajawal', 'Cairo', 'Arial', sans-serif;
+  --font-elegant: 'Amiri', 'Cairo', serif;
+  --font-display: 'Scheherazade New', 'Cairo', serif;
+}
+
+/* Global Font Settings */
+* {
+  font-family: var(--font-primary) !important;
+}
+
+/* Headings */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-primary) !important;
+  font-weight: 600 !important;
+  line-height: 1.4 !important;
+}
+
+h1 {
+  font-size: 2.5rem !important;
+  font-weight: 700 !important;
+}
+
+h2 {
+  font-size: 2rem !important;
+  font-weight: 600 !important;
+}
+
+h3 {
+  font-size: 1.75rem !important;
+  font-weight: 600 !important;
+}
+
+h4 {
+  font-size: 1.5rem !important;
+  font-weight: 500 !important;
+}
+
+h5 {
+  font-size: 1.25rem !important;
+  font-weight: 500 !important;
+}
+
+h6 {
+  font-size: 1.1rem !important;
+  font-weight: 500 !important;
+}
+
+/* Body Text */
+body, p, span, div {
+  font-family: var(--font-primary) !important;
+  font-weight: 400 !important;
+  line-height: 1.6 !important;
+}
+
+/* Buttons */
+.btn, button {
+  font-family: var(--font-primary) !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.5px !important;
+}
+
+/* Form Elements */
+input, textarea, select, .form-control {
+  font-family: var(--font-primary) !important;
+  font-weight: 400 !important;
+}
+
+/* Navigation */
+.navbar, .nav-link, .navbar-brand {
+  font-family: var(--font-primary) !important;
+  font-weight: 500 !important;
+}
+
+/* Cards */
+.card, .card-title, .card-text {
+  font-family: var(--font-primary) !important;
+}
+
+.card-title {
+  font-weight: 600 !important;
+}
+
+/* Modals */
+.modal-title, .modal-body {
+  font-family: var(--font-primary) !important;
+}
+
+.modal-title {
+  font-weight: 600 !important;
+}
+
+/* Tables */
+table, th, td {
+  font-family: var(--font-primary) !important;
+}
+
+th {
+  font-weight: 600 !important;
+}
+
+/* Special Classes */
+.font-elegant {
+  font-family: var(--font-elegant) !important;
+}
+
+.font-display {
+  font-family: var(--font-display) !important;
+}
+
+.font-secondary {
+  font-family: var(--font-secondary) !important;
+}
+
+/* Font Weights */
+.fw-light {
+  font-weight: 300 !important;
+}
+
+.fw-normal {
+  font-weight: 400 !important;
+}
+
+.fw-medium {
+  font-weight: 500 !important;
+}
+
+.fw-semibold {
+  font-weight: 600 !important;
+}
+
+.fw-bold {
+  font-weight: 700 !important;
+}
+
+.fw-bolder {
+  font-weight: 800 !important;
+}
+
+/* Responsive Font Sizes */
+@media (max-width: 768px) {
+  h1 {
+    font-size: 2rem !important;
+  }
+  
+  h2 {
+    font-size: 1.75rem !important;
+  }
+  
+  h3 {
+    font-size: 1.5rem !important;
+  }
+  
+  h4 {
+    font-size: 1.25rem !important;
+  }
+  
+  h5 {
+    font-size: 1.1rem !important;
+  }
+  
+  h6 {
+    font-size: 1rem !important;
+  }
+}
+
+/* Arabic Text Direction */
+[dir="rtl"] {
+  text-align: right !important;
+}
+
+[dir="ltr"] {
+  text-align: left !important;
+}
+
+/* Text Shadows for Better Readability */
+.text-shadow {
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
+}
+
+.text-shadow-lg {
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* Letter Spacing */
+.letter-spacing-1 {
+  letter-spacing: 0.5px !important;
+}
+
+.letter-spacing-2 {
+  letter-spacing: 1px !important;
+}
+
+.letter-spacing-3 {
+  letter-spacing: 1.5px !important;
+}
+
+/* Line Height */
+.line-height-1 {
+  line-height: 1.2 !important;
+}
+
+.line-height-2 {
+  line-height: 1.4 !important;
+}
+
+.line-height-3 {
+  line-height: 1.6 !important;
+}
+
+.line-height-4 {
+  line-height: 1.8 !important;
+}
+
+
+
+
+

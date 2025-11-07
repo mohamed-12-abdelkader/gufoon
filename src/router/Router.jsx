@@ -20,15 +20,20 @@ import UpdateProduct from "../components/admin/UpdateProduct";
 import SalesDashboard from "../components/admin/SalesDashboard";
 import { NotificationBell } from "../contexts/Notifications";
 import Coupons from "../components/admin/Coupons";
+import UserType from "../Hook/userType/UserType";
+import Categories from "../components/admin/Categories";
+import UserChat from "../pages/chat/UserChat";
+import AdminChatNew from "../pages/chat/AdminChatNew";
 
-const ProtectedRoute = ({ children, isAdmin }) => {
-  const { isAuthenticated, isAdmin: isAdminFun } = useAuth();
 
-  if (!isAuthenticated) return <Navigate to="/login" />;
+const ProtectedRoute = () => {
+   const [userData, isAdmin, user] = UserType()
 
-  if (isAdmin && !isAdminFun()) return <Navigate to="/" />;
 
-  return children;
+  if (!userData) return <Navigate to="/login" />;
+
+  
+
 };
 
 const Router = () => {
@@ -40,11 +45,12 @@ const Router = () => {
         <Route path="/login" element={<Login />} />
         <Route path="/products" element={<Products />} />
         <Route path="/product/:product_id" element={<DetailedProduct />} />
-        <Route path="/categories/:category_slug" element={<Products />} />
+        <Route path="/categories/:id" element={<Products />} />
         <Route path="/offers" element={<Products offers={true} />} />
         <Route path="/cart" element={<Cart />} />
         <Route path="/order/:id" element={<Order />} />
         <Route path="/orders" element={<MyOrders />} />
+        <Route path="/chat" element={<UserChat />} />
 
         {/* Protected User Routes */}
         <Route path="/profile" element={
@@ -55,11 +61,12 @@ const Router = () => {
 
         {/* Protected Admin Routes */}
         <Route path="/admin/*" element={
-          <ProtectedRoute isAdmin>
+         
             <Admin />
-          </ProtectedRoute>
+       
         }>
           <Route path="add_product" element={<AddProduct />} />
+          <Route path="categories" element={<Categories />} />
           <Route path="coupons" element={<Coupons />} />
           <Route path="notifications" element={<NotificationBell />} />
           <Route path="sales" element={<SalesDashboard />} />
@@ -69,6 +76,7 @@ const Router = () => {
           <Route path="add_color" element={<AddColore />} />
           <Route path="all_order" element={<AllOrder />} />
           <Route path="add_discount" element={<AddDiscount />} />
+          <Route path="chat" element={<AdminChatNew />} />
         </Route>
       </Routes>
     </div>

@@ -5,12 +5,13 @@ import { MdDelete } from "react-icons/md";
 import { Spinner, Badge } from "react-bootstrap";
 import { useAuth } from "../../contexts/AuthContext";
 import { useCart } from "../../contexts/CartContext";
+import UserType from "../../Hook/userType/UserType";
 
 const ProductCard = ({ product, openDeleteModal, openEditModal, href }) => {
   const [isFavorite, setIsFavorite] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const { isAdmin, isAuthenticated } = useAuth();
+  const  [userData, isAdmin, user] =UserType()
   const { addToCart } = useCart();
 
   const handleFavoriteClick = (e) => {
@@ -30,7 +31,7 @@ const ProductCard = ({ product, openDeleteModal, openEditModal, href }) => {
         <Link to={href} className="product-image-link">
           <div className="image-wrapper">
             <img
-              src={product.cover}
+              src={product.cover || (product.ProductImages && product.ProductImages.length > 0 ? product.ProductImages[0].url : 'https://via.placeholder.com/300x200?text=No+Image')}
               alt={product.name}
               className="product-image h-[200px] border"
             />
@@ -57,7 +58,7 @@ const ProductCard = ({ product, openDeleteModal, openEditModal, href }) => {
                 <h6 className="product-title">{product.name}</h6>
               </Link>
 
-              {isAdmin() ? (
+              {isAdmin? (
                 <div className="admin-controls">
                   <button
                     className="control-btn delete"
