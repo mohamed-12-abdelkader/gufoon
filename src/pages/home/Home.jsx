@@ -7,6 +7,7 @@ import DeleteModal from "../../components/modal/DeleteModal";
 import UserType from "../../Hook/userType/UserType";
 import DeleateGlasses from "../../Hook/admin/DeleateGlasses";
 import SectionTwo from "../../components/home/SectionTwo";
+import Slider from "../../components/slider/Slider";
 import { Link } from "react-router-dom";
 import baseUrl from "../../api/baseUrl";
 
@@ -137,23 +138,47 @@ const Home = () => {
           </Card>
 
            {/* المنتجات الخاصة بالتصنيف */}
-           <Row xs={1} sm={2} md={3} lg={4} className="g-4">
-             {category.products && Array.isArray(category.products) ? category.products.map((product) => (
-               <Col key={product.id}>
-                 <ProductCard 
-                   product={product}
-                   openDeleteModal={openDeleteModal}
-                   href={`/product/${product.id}`}
-                 />
-               </Col>
-             )) : (
-               <Col>
-                 <div className="text-center py-4">
-                   <p className="text-muted">لا توجد منتجات في هذا التصنيف</p>
-                 </div>
-               </Col>
+           {/* Slider للموبايل */}
+           <div className="mobile-products-slider d-md-none">
+             {category.products && Array.isArray(category.products) && category.products.length > 0 ? (
+               <Slider>
+                 {category.products.map((product) => (
+                   <div key={product.id} className="product-slide-item" style={{ minWidth: "280px", margin: "0 10px" }}>
+                     <ProductCard 
+                       product={product}
+                       openDeleteModal={openDeleteModal}
+                       href={`/product/${product.id}`}
+                     />
+                   </div>
+                 ))}
+               </Slider>
+             ) : (
+               <div className="text-center py-4">
+                 <p className="text-muted">لا توجد منتجات في هذا التصنيف</p>
+               </div>
              )}
-           </Row>
+           </div>
+
+           {/* Grid للشاشات الكبيرة */}
+           <div className="desktop-products-grid d-none d-md-block">
+             <Row xs={1} sm={2} md={3} lg={4} className="g-4">
+               {category.products && Array.isArray(category.products) ? category.products.map((product) => (
+                 <Col key={product.id}>
+                   <ProductCard 
+                     product={product}
+                     openDeleteModal={openDeleteModal}
+                     href={`/product/${product.id}`}
+                   />
+                 </Col>
+               )) : (
+                 <Col>
+                   <div className="text-center py-4">
+                     <p className="text-muted">لا توجد منتجات في هذا التصنيف</p>
+                   </div>
+                 </Col>
+               )}
+             </Row>
+           </div>
         </div>
       )) : (
         <div className="text-center py-5">
@@ -173,6 +198,54 @@ const Home = () => {
       deleteGlasses={deleteGlasses}
       loading={deleteLoading}
     />
+    
+    <style>{`
+      .mobile-products-slider {
+        margin: 1rem 0;
+      }
+      
+      .product-slide-item {
+        display: inline-block;
+        vertical-align: top;
+      }
+      
+      .mobile-products-slider .slider-container {
+        display: flex;
+        overflow-x: auto;
+        scroll-behavior: smooth;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+        gap: 1rem;
+        padding: 0.5rem 0;
+      }
+      
+      .mobile-products-slider .slider-container::-webkit-scrollbar {
+        display: none;
+      }
+      
+      .mobile-products-slider .slider-container.active {
+        cursor: grabbing;
+        cursor: -webkit-grabbing;
+      }
+      
+      @media (max-width: 767px) {
+        .mobile-products-slider {
+          margin: 1rem -10px;
+        }
+        
+        .product-slide-item {
+          min-width: 260px !important;
+          margin: 0 8px !important;
+        }
+      }
+      
+      @media (min-width: 768px) {
+        .desktop-products-grid {
+          display: block !important;
+        }
+      }
+    `}</style>
           </>
   );
 };

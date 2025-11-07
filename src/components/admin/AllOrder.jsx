@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
 import { Spinner } from "react-bootstrap";
 import axios from "axios";
+import baseUrl from "../../api/baseUrl";
 
 const limit = 20;
 
@@ -29,9 +30,15 @@ const AllOrder = () => {
   const fetchOrders = async () => {
     setLoading(true);
     try {
+      const token = localStorage.getItem("token");
       const statusQuery = statusFilter ? `&status=${statusFilter}` : "";
-      const { data } = await axios.get(
-        `/orders?limit=${limit}&skip=${skip}${statusQuery}`
+      const { data } = await baseUrl.get(
+        `api/orders?limit=${limit}&skip=${skip}${statusQuery}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
       setOrders(data.orders);
       setTotalPages(data.totalPages);
@@ -45,7 +52,12 @@ const AllOrder = () => {
   const updateOrderStatus = async (orderId, newStatus) => {
     setUpdatingOrderId(orderId);
     try {
-      await axios.put(`/orders/${orderId}`, { status: newStatus });
+      const token = localStorage.getItem("token");
+      await baseUrl.put(`api/orders/${orderId}`, { status: newStatus }, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       setOrders((prev) =>
         prev.map((order) =>
           order.id === orderId ? { ...order, status: newStatus } : order

@@ -15,6 +15,7 @@ import {
 } from "@chakra-ui/react";
 import axios from "axios";
 import EditCouponModal from "../modal/EditCouponModal";
+import baseUrl from "../../api/baseUrl";
 
 const Coupons = () => {
   const [coupons, setCoupons] = useState([]);
@@ -26,7 +27,12 @@ const Coupons = () => {
   const fetchCoupons = async () => {
     setLoading(true);
     try {
-      const res = await axios.get("/coupons");
+      const token = localStorage.getItem("token");
+      const res = await baseUrl.get("api/coupons", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       setCoupons(res.data);
     } catch (err) {
       toast({
@@ -45,7 +51,12 @@ const Coupons = () => {
 
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`/coupons/${id}`);
+      const token = localStorage.getItem("token");
+      await baseUrl.delete(`api/coupons/${id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       toast({ title: "تم حذف الكوبون", status: "success" });
       fetchCoupons();
     } catch {

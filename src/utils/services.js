@@ -1,10 +1,16 @@
 import axios from 'axios';
+import baseUrl from '../api/baseUrl';
 
 // Note: We set axis base URL in `AuthProvider`
 
 export async function getTopLevelCategories() {
   try {
-    const res = await axios.get('/categories/top-level');
+    const token = localStorage.getItem("token");
+    const res = await baseUrl.get('/categories/top-level', {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
     return res.data;
   } catch {
     return [];
@@ -47,6 +53,6 @@ export async function getProducts(query) {
 }
 
 export async function getProductById(id) {
-  const res = await axios.get(`/products/${id}`);
+  const res = await baseUrl.get(`api/products/${id}`);
   return res.data;
 }

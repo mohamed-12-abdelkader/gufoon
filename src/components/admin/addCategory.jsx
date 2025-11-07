@@ -3,6 +3,7 @@ import { useForm } from "react-hook-form";
 import { useDropzone } from "react-dropzone";
 import axios from "axios";
 import { toast } from "react-toastify";
+import baseUrl from "../../api/baseUrl";
 
 const AddCategory = () => {
   const { register, handleSubmit, reset } = useForm();
@@ -13,7 +14,12 @@ const AddCategory = () => {
   // Fetch categories
   const fetchCategories = async () => {
     try {
-      const res = await axios.get("/categories");
+      const token = localStorage.getItem("token");
+      const res = await baseUrl.get("api/categories", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       setCategories(res.data);
     } catch {
       toast.error("فشل في تحميل الفئات");
@@ -48,8 +54,12 @@ const AddCategory = () => {
     if (cover) formData.append("cover", cover);
 
     try {
-      await axios.post("/categories", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
+      const token = localStorage.getItem("token");
+      await baseUrl.post("api/categories", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          Authorization: `Bearer ${token}`,
+        },
       });
       toast.success("تمت إضافة الفئة بنجاح");
       reset();

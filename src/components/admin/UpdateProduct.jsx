@@ -4,6 +4,7 @@ import { useDropzone } from "react-dropzone";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { toast } from "react-toastify";
+import baseUrl from "../../api/baseUrl";
 
 const UpdateProduct = () => {
   const { id } = useParams();
@@ -19,11 +20,28 @@ const UpdateProduct = () => {
   useEffect(() => {
     const fetchProductData = async () => {
       try {
+        const token = localStorage.getItem("token");
         const [productRes, catRes, brandRes, colorRes] = await Promise.all([
-          axios.get(`/products/${id}`),
-          axios.get("/categories"),
-          axios.get("/brands"),
-          axios.get("/colors"),
+          baseUrl.get(`api/products/${id}`, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }),
+          baseUrl.get("api/categories", {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }),
+          baseUrl.get("api/brands", {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }),
+          baseUrl.get("api/colors", {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }),
         ]);
 
         const product = productRes.data;
@@ -92,8 +110,12 @@ const UpdateProduct = () => {
     });
 
     try {
-      await axios.patch(`/products/${id}`, formData, {
-        headers: { "Content-Type": "multipart/form-data" },
+      const token = localStorage.getItem("token");
+      await baseUrl.patch(`api/products/${id}`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          Authorization: `Bearer ${token}`,
+        },
       });
       toast.success("تم تحديث المنتج بنجاح");
       navigate("/");

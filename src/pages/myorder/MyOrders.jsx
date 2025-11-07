@@ -3,6 +3,7 @@ import { Card, Badge, Spinner, Container, Button } from "react-bootstrap";
 import { FaBox, FaCheck, FaTruck, FaSpinner, FaTimes, FaBan } from "react-icons/fa";
 import axios from "axios";
 import { toast } from "react-toastify";
+import baseUrl from "../../api/baseUrl";
 
 const orderStatusSteps = {
   Pending: 1,
@@ -20,7 +21,12 @@ const MyOrders = () => {
   useEffect(() => {
     const fetchOrders = async () => {
       try {
-        const { data } = await axios.get("/orders/me");
+        const token = localStorage.getItem("token");
+        const { data } = await baseUrl.get("api/orders/me", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
         setOrders(data);
       } catch (error) {
         toast.error("فشل تحميل الطلبات!");
@@ -38,7 +44,12 @@ const MyOrders = () => {
     setCanceling(orderId); // Set loading for this order
 
     try {
-      await axios.patch(`/orders/me/${orderId}/cancel`);
+      const token = localStorage.getItem("token");
+      await baseUrl.patch(`api/orders/me/${orderId}/cancel`, {}, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       setOrders((prevOrders) =>
         prevOrders.map((order) =>
           order.id === orderId ? { ...order, status: "Cancelled" } : order

@@ -18,7 +18,7 @@ export const ChatProvider = ({ children }) => {
   // Initialize Socket.IO connection
   useEffect(() => {
     if (token && user) {
-      const newSocket = io("http://localhost:8000", {
+      const newSocket = io("https://api.gufoon.shop/", {
         auth: {
           token: token
         },

@@ -15,6 +15,7 @@ import {
   useToast,
 } from "@chakra-ui/react";
 import axios from "axios";
+import baseUrl from "../../api/baseUrl";
 
 const EditCouponModal = ({ isOpen, onClose, coupon, onSuccess }) => {
   const [form, setForm] = useState({
@@ -60,11 +61,20 @@ const EditCouponModal = ({ isOpen, onClose, coupon, onSuccess }) => {
         expiryDate: new Date(form.expiryDate).toISOString(),
       };
 
+      const token = localStorage.getItem("token");
       if (coupon?.id) {
-        await axios.put(`/coupons/${coupon.id}`, payload);
+        await baseUrl.put(`api/coupons/${coupon.id}`, payload, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
         toast({ title: "تم التحديث", status: "success" });
       } else {
-        await axios.post("/coupons", payload);
+        await baseUrl.post("api/coupons", payload, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
         toast({ title: "تمت الإضافة", status: "success" });
       }
 

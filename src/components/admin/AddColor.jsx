@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Button, Form, Spinner } from "react-bootstrap";
 import { toast } from "react-toastify";
 import axios from "axios";
+import baseUrl from "../../api/baseUrl";
 
 const AddColor = () => {
     const [color, setColor] = useState("");
@@ -17,9 +18,15 @@ const AddColor = () => {
 
         try {
             setLoading(true);
-            await axios.post(
-                "/colors",
+            const token = localStorage.getItem("token");
+            await baseUrl.post(
+                "api/colors",
                 { name: color },
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                }
             );
 
             toast.success("تم إضافة اللون بنجاح");

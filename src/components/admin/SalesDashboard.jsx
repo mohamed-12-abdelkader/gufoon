@@ -5,6 +5,7 @@ import {
 } from "@chakra-ui/react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { motion } from "framer-motion";
+import baseUrl from "../../api/baseUrl";
 
 const SalesDashboard = () => {
   const [summary, setSummary] = useState(null);
@@ -22,13 +23,20 @@ const SalesDashboard = () => {
   const fetchSalesData = async () => {
     setLoading(true);
     try {
-      const summaryRes = await axios.get("/sales/summary", {
+      const token = localStorage.getItem("token");
+      const summaryRes = await baseUrl.get("api/sales/summary", {
         params: { status: statusFilter, startDate, endDate },
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       });
       setSummary(summaryRes.data);
 
-      const trendsRes = await axios.get("/sales/trends", {
+      const trendsRes = await baseUrl.get("api/sales/trends", {
         params: { period: periodFilter, status: statusFilter, startDate, endDate },
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       });
       setTrends(trendsRes.data);
     } catch (error) {

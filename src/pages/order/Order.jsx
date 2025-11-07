@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom";
 import { Card } from "react-bootstrap";
 import { toast } from "react-toastify";
 import axios from "axios";
+import baseUrl from "../../api/baseUrl";
 
 const Order = () => {
   const { id } = useParams();
@@ -12,7 +13,12 @@ const Order = () => {
   useEffect(() => {
     const fetchOrder = async () => {
       try {
-        const { data } = await axios.get(`/orders/${id}`);
+        const token = localStorage.getItem("token");
+        const { data } = await baseUrl.get(`api/orders/${id}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
         setOrder(data);
       } catch (error) {
         toast.error("تعذر تحميل الطلب. تأكد من أنك مسجل الدخول أو أن الطلب موجود.");

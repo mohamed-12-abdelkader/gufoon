@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Button, Form, Spinner } from "react-bootstrap";
 import { toast } from "react-toastify";
 import axios from "axios";
+import baseUrl from "../../api/baseUrl";
 
 const AddBrand = () => {
   const [brand_name, setBrand] = useState("");
@@ -16,9 +17,15 @@ const AddBrand = () => {
 
     setLoading(true);
     try {
-      await axios.post(
-        "/brands",
+      const token = localStorage.getItem("token");
+      await baseUrl.post(
+        "api/brands",
         { name: brand_name },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
 
       toast.success("تم إضافة البراند بنجاح");

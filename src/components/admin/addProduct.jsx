@@ -3,6 +3,7 @@ import { useForm } from "react-hook-form";
 import { useDropzone } from "react-dropzone";
 import axios from "axios";
 import { toast } from "react-toastify";
+import baseUrl from "../../api/baseUrl";
 
 const AddProduct = () => {
   const { register, handleSubmit, reset } = useForm();
@@ -16,10 +17,23 @@ const AddProduct = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        const token = localStorage.getItem("token");
         const [catRes, brandRes, colorRes] = await Promise.all([
-          axios.get("/categories"),
-          axios.get("/brands"),
-          axios.get("/colors"),
+          baseUrl.get("api/categories", {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }),
+         baseUrl.get("api/brands", {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }),
+          baseUrl.get("api/colors", {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }),
         ]);
         setCategories(catRes.data);
         setBrands(brandRes.data);
@@ -59,8 +73,12 @@ const AddProduct = () => {
     productImages.forEach((image) => formData.append("productImages", image));
 
     try {
-      await axios.post("/products", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
+      const token = localStorage.getItem("token");
+      await baseUrl.post("api/products", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          Authorization: `Bearer ${token}`,
+        },
       });
       toast.success("تمت إضافة المنتج بنجاح");
       reset();

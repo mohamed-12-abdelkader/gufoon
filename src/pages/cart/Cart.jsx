@@ -88,7 +88,12 @@ const Cart = () => {
     setCouponError(null);
 
     try {
-      const { data } = await axios.post("/coupons/validate", { code: couponCode });
+      const token = localStorage.getItem("token");
+      const { data } = await baseUrl.post("api/coupons/validate", { code: couponCode }, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       setAppliedCoupon(data.coupon);
       toast.success("✅ تم تطبيق الكوبون بنجاح!");
     } catch (err) {

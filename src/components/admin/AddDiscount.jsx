@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Form, Button, Spinner, Alert } from "react-bootstrap";
 import { toast } from "react-toastify";
 import axios from "axios";
+import baseUrl from "../../api/baseUrl";
 
 const AddDiscount = () => {
   const token = localStorage.getItem("token");
@@ -16,7 +17,12 @@ const AddDiscount = () => {
     const getBrands = async () => {
       setLoading(true);
       try {
-        const response = await axios.get("/brands");
+        const token = localStorage.getItem("token");
+        const response = await baseUrl.get("api/brands", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
         setBrands(response.data);
       } catch (err) {
         setError("فشل تحميل البراندات");
@@ -45,9 +51,15 @@ const AddDiscount = () => {
     setLoading(true);
 
     try {
-      await axios.post(
-        `/brands/discount/${selectedBrand}`,
+      const token = localStorage.getItem("token");
+      await baseUrl.post(
+        `api/brands/discount/${selectedBrand}`,
         { discount: percent },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
       toast.success("تمت إضافة الخصم بنجاح");
       setPercent("");

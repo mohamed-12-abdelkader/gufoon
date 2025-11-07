@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import axios from "axios";
 import { Button } from "@chakra-ui/react";
+import baseUrl from "../api/baseUrl";
 
 const NotificationContext = createContext(null);
 
@@ -10,7 +11,12 @@ export const NotificationProvider = ({ children }) => {
 
   const fetchNotifications = async (skip = 0, limit = 10) => {
     try {
-      const response = await axios.get(`/notifications?skip=${skip}&limit=${limit}`);
+      const token = localStorage.getItem("token");
+      const response = await baseUrl.get(`api/notifications?skip=${skip}&limit=${limit}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       setNotifications(response.data.notifications);
       setUnreadCount(response.data.unread);
     } catch (error) {
@@ -20,7 +26,12 @@ export const NotificationProvider = ({ children }) => {
 
   const getUnreadCount = async () => {
     try {
-      const response = await axios.get("/notifications/count");
+      const token = localStorage.getItem("token");
+      const response = await baseUrl.get("api/notifications/count", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       setUnreadCount(response.data.unread);
     } catch (error) {
       console.error("Error fetching unread count", error);
@@ -29,7 +40,12 @@ export const NotificationProvider = ({ children }) => {
 
   const clearNotifications = async () => {
     try {
-      await axios.delete("/notifications");
+      const token = localStorage.getItem("token");
+      await baseUrl.delete("api/notifications", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       setNotifications([]);
       setUnreadCount(0);
     } catch (error) {
