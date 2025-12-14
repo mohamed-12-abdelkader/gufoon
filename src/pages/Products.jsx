@@ -350,7 +350,136 @@ const ViewAllProducts = ({ offers }) => {
   }
 
   return (
-    <div className='products-page' style={{ minHeight: "80vh" }}>
+    <div className='products-page' style={{ minHeight: "80vh", backgroundColor: "var(--bg-primary)" }}>
+      <style jsx>{`
+        .products-page {
+          background-color: var(--bg-primary);
+          color: var(--text-primary);
+          transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .products-container {
+          display: flex;
+          gap: 20px;
+          padding: 20px;
+          max-width: 1400px;
+          margin: 0 auto;
+        }
+
+        .filter-sidebar {
+          width: 280px;
+          background: var(--card-bg);
+          padding: 20px;
+          border-radius: 12px;
+          box-shadow: 0 2px 8px var(--shadow);
+          border: 1px solid var(--border-color);
+          position: sticky;
+          top: 20px;
+          height: fit-content;
+          max-height: calc(100vh - 40px);
+          overflow-y: auto;
+        }
+
+        .filter-header {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          margin-bottom: 20px;
+          padding-bottom: 10px;
+          border-bottom: 1px solid var(--border-color);
+        }
+
+        .filter-icon {
+          color: #0078FF;
+          font-size: 1.2rem;
+        }
+
+        .filter-header h4 {
+          color: var(--text-primary);
+        }
+
+        .products-grid {
+          flex: 1;
+        }
+
+        .products-wrapper {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+          gap: 20px;
+          margin-bottom: 30px;
+        }
+
+        .accordion-item {
+          background: var(--bg-secondary);
+          border-color: var(--border-color);
+        }
+
+        .accordion-button {
+          background: var(--bg-secondary);
+          color: var(--text-primary);
+        }
+
+        .accordion-button:not(.collapsed) {
+          background: var(--bg-tertiary);
+          color: var(--text-primary);
+        }
+
+        .accordion-body {
+          background: var(--bg-secondary);
+          color: var(--text-primary);
+        }
+
+        .form-control {
+          background: var(--bg-secondary);
+          border-color: var(--border-color);
+          color: var(--text-primary);
+        }
+
+        .form-control:focus {
+          background: var(--bg-secondary);
+          border-color: #0078FF;
+          color: var(--text-primary);
+        }
+
+        .form-check-label {
+          color: var(--text-primary);
+        }
+
+        [data-theme="dark"] .skeleton-icon,
+        [data-theme="dark"] .skeleton-title,
+        [data-theme="dark"] .skeleton-filter-header,
+        [data-theme="dark"] .skeleton-filter-item,
+        [data-theme="dark"] .skeleton-reset-button,
+        [data-theme="dark"] .skeleton-product-card,
+        [data-theme="dark"] .skeleton-card-image,
+        [data-theme="dark"] .skeleton-product-title,
+        [data-theme="dark"] .skeleton-spec-item,
+        [data-theme="dark"] .skeleton-price,
+        [data-theme="dark"] .skeleton-button {
+          background: linear-gradient(90deg, var(--bg-tertiary) 25%, var(--bg-secondary) 50%, var(--bg-tertiary) 75%);
+        }
+
+        @media (max-width: 768px) {
+          .products-container {
+            flex-direction: column;
+          }
+
+          .filter-sidebar {
+            width: 100%;
+            position: static;
+          }
+
+          .products-wrapper {
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+          }
+        }
+
+        @media (max-width: 480px) {
+          .products-wrapper {
+            grid-template-columns: 1fr;
+          }
+        }
+      `}</style>
       <div className='products-container'>
         {/* Sidebar Filter */}
         <div className='filter-sidebar'>

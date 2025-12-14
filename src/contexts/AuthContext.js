@@ -47,11 +47,26 @@ export const AuthProvider = ({ children }) => {
 
   const register = async (userData) => {
     const response = await baseUrl.post("/api/users/signup", userData);
-    const { access_token: token, user } = response.data;
+    
+    // Handle different response formats
+    const token = response.data?.access_token || response.data?.token;
+    const user = response.data?.user || response.data?.data || response.data;
+    
+    if (!token) {
+      throw new Error("لم يتم استلام التوكين من الخادم");
+    }
+    
+    // Save token and user to localStorage
     localStorage.setItem("token", token);
-    localStorage.setItem("user", JSON.stringify(user));
+    if (user) {
+      localStorage.setItem("user", JSON.stringify(user));
+    }
+    
+    // Update state
     setToken(token);
     setUser(user);
+    
+    // Reload to refresh the app state
     window.location.reload();
   };
 

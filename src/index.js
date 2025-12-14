@@ -8,19 +8,22 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import { AuthProvider } from './contexts/AuthContext';
 import { CartProvider } from './contexts/CartContext';
 import { NotificationProvider } from './contexts/Notifications';
+import { ThemeProvider } from './contexts/ThemeContext';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 
 root.render(
   <React.StrictMode>
-    <ChakraProvider>
-      <AuthProvider>
-        <CartProvider>
-          <NotificationProvider>
-            <App />
-          </NotificationProvider>
-        </CartProvider>
-      </AuthProvider>
-    </ChakraProvider>
+    <ThemeProvider>
+      <ChakraProvider>
+        <AuthProvider>
+          <CartProvider>
+            <NotificationProvider>
+              <App />
+            </NotificationProvider>
+          </CartProvider>
+        </AuthProvider>
+      </ChakraProvider>
+    </ThemeProvider>
   </React.StrictMode>
 );

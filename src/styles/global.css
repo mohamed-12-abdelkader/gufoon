@@ -3,7 +3,7 @@
 /* Import the best Arabic fonts */
 @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@200;300;400;500;600;700;800;900&family=Tajawal:wght@200;300;400;500;700;800;900&family=Noto+Sans+Arabic:wght@100;200;300;400;500;600;700;800;900&family=IBM+Plex+Sans+Arabic:wght@100;200;300;400;500;600;700&family=Changa:wght@200;300;400;500;600;700;800&family=Amiri:wght@400;700&family=Scheherazade+New:wght@400;500;600;700&display=swap');
 
-/* CSS Variables for Fonts */
+/* CSS Variables for Fonts and Theme */
 :root {
   --font-primary: 'Cairo', 'Noto Sans Arabic', 'Arial', sans-serif;
   --font-secondary: 'Tajawal', 'IBM Plex Sans Arabic', 'Arial', sans-serif;
@@ -45,6 +45,30 @@
   --letter-spacing-wide: 0.025em;
   --letter-spacing-wider: 0.05em;
   --letter-spacing-widest: 0.1em;
+
+  /* Light Theme Colors */
+  --bg-primary: #ffffff;
+  --bg-secondary: #f8f9fa;
+  --bg-tertiary: #e9ecef;
+  --text-primary: #2c3e50;
+  --text-secondary: #6c757d;
+  --text-muted: #adb5bd;
+  --border-color: #dee2e6;
+  --card-bg: #ffffff;
+  --shadow: rgba(0, 0, 0, 0.1);
+}
+
+/* Dark Theme Colors */
+[data-theme="dark"] {
+  --bg-primary: #1a1a1a;
+  --bg-secondary: #2d2d2d;
+  --bg-tertiary: #3d3d3d;
+  --text-primary: #ffffff;
+  --text-secondary: #e9ecef;
+  --text-muted: #adb5bd;
+  --border-color: #404040;
+  --card-bg: #2d2d2d;
+  --shadow: rgba(0, 0, 0, 0.3);
 }
 
 /* Global Font Reset */
@@ -66,8 +90,9 @@ body {
   font-weight: var(--font-weight-normal) !important;
   font-size: var(--font-size-base) !important;
   line-height: var(--line-height-normal) !important;
-  color: #2c3e50 !important;
-  background-color: #ffffff !important;
+  color: var(--text-primary) !important;
+  background-color: var(--bg-primary) !important;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 /* Headings */
@@ -77,7 +102,7 @@ h1, h2, h3, h4, h5, h6 {
   line-height: var(--line-height-tight) !important;
   letter-spacing: var(--letter-spacing-tight) !important;
   margin-bottom: 0.5rem !important;
-  color: #2c3e50 !important;
+  color: var(--text-primary) !important;
 }
 
 h1 {
@@ -116,7 +141,7 @@ p, span, div {
   font-family: var(--font-primary) !important;
   font-weight: var(--font-weight-normal) !important;
   line-height: var(--line-height-normal) !important;
-  color: #495057 !important;
+  color: var(--text-secondary) !important;
 }
 
 p {
@@ -361,24 +386,133 @@ td {
   }
 }
 
-/* Dark Mode Support */
-@media (prefers-color-scheme: dark) {
-  body {
-    color: #e9ecef !important;
-    background-color: #121212 !important;
-  }
-  
-  h1, h2, h3, h4, h5, h6 {
-    color: #ffffff !important;
-  }
-  
-  p, span, div {
-    color: #adb5bd !important;
-  }
-  
-  .text-muted {
-    color: #6c757d !important;
-  }
+/* Dark Mode Support - Applied via data-theme attribute */
+[data-theme="dark"] .text-muted {
+  color: var(--text-muted) !important;
+}
+
+[data-theme="dark"] .card {
+  background-color: var(--card-bg) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .bg-white {
+  background-color: var(--card-bg) !important;
+}
+
+[data-theme="dark"] .bg-light {
+  background-color: var(--bg-secondary) !important;
+}
+
+[data-theme="dark"] .border {
+  border-color: var(--border-color) !important;
+}
+
+[data-theme="dark"] .modal-content {
+  background-color: var(--card-bg) !important;
+  color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .form-control {
+  background-color: var(--bg-secondary) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .form-control:focus {
+  background-color: var(--bg-secondary) !important;
+  border-color: #0078FF !important;
+  color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .form-select {
+  background-color: var(--bg-secondary) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .dropdown-menu {
+  background-color: var(--card-bg) !important;
+  border-color: var(--border-color) !important;
+}
+
+[data-theme="dark"] .dropdown-item {
+  color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .dropdown-item:hover {
+  background-color: var(--bg-tertiary) !important;
+  color: var(--text-primary) !important;
+}
+
+/* Additional Dark Mode Styles */
+[data-theme="dark"] .alert {
+  background-color: var(--bg-secondary) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .list-group-item {
+  background-color: var(--bg-secondary) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .table {
+  color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .table-striped > tbody > tr:nth-of-type(odd) {
+  background-color: var(--bg-secondary) !important;
+}
+
+[data-theme="dark"] .offcanvas {
+  background-color: var(--card-bg) !important;
+  color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .offcanvas-header {
+  border-bottom-color: var(--border-color) !important;
+}
+
+[data-theme="dark"] .toast {
+  background-color: var(--card-bg) !important;
+  color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .toast-header {
+  background-color: var(--bg-secondary) !important;
+  border-bottom-color: var(--border-color) !important;
+  color: var(--text-primary) !important;
+}
+
+/* Navbar Dark Mode */
+[data-theme="dark"] .navsearch {
+  background-color: #0056b3 !important;
+}
+
+/* Footer and other components */
+[data-theme="dark"] footer {
+  background-color: var(--bg-secondary) !important;
+  color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .bg-light {
+  background-color: var(--bg-secondary) !important;
+}
+
+[data-theme="dark"] .text-dark {
+  color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .text-muted {
+  color: var(--text-muted) !important;
+}
+
+/* Smooth transitions for theme changes */
+* {
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
 }
 
 /* Print Styles */
@@ -422,6 +556,7 @@ td {
     border-width: 2px !important;
   }
 }
+
 
 
 

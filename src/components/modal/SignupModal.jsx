@@ -101,9 +101,20 @@ const SignupModal = ({ show, handleClose }) => {
 
     try {
       await register(formData);
-      handleClose()
+      
+      // Verify token was saved
+      const savedToken = localStorage.getItem("token");
+      if (savedToken) {
+        toast.success("✅ تم إنشاء الحساب بنجاح! تم حفظ التوكين.");
+      } else {
+        toast.warning("تم إنشاء الحساب لكن لم يتم حفظ التوكين");
+      }
+      
+      handleClose();
     } catch (error) {
-      toast.error(error.response?.data?.message || "خطأ في التسجيل، حاول مجددًا");
+      console.error("Signup error:", error);
+      const errorMessage = error.response?.data?.message || error.message || "خطأ في التسجيل، حاول مجددًا";
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }

@@ -24,6 +24,7 @@ import UserType from "../Hook/userType/UserType";
 import Categories from "../components/admin/Categories";
 import UserChat from "../pages/chat/UserChat";
 import AdminChatNew from "../pages/chat/AdminChatNew";
+import PaymentCallback from "../pages/payment/PaymentCallback";
 
 
 const ProtectedRoute = () => {
@@ -51,6 +52,7 @@ const Router = () => {
         <Route path="/order/:id" element={<Order />} />
         <Route path="/orders" element={<MyOrders />} />
         <Route path="/chat" element={<UserChat />} />
+        <Route path="/payment/callback" element={<PaymentCallback />} />
 
         {/* Protected User Routes */}
         <Route path="/profile" element={

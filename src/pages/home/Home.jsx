@@ -54,7 +54,7 @@ const Home = () => {
     setProductToDelete(null);
   };
 
-  return (
+    return (
     <>
      <SectionOne/>
      <SectionTwo/>
@@ -70,13 +70,13 @@ const Home = () => {
               جاري تحميل المنتجات...
             </p>
           </div>
-        </div>
+      </div>
       ) : error ? (
         <div className="d-flex justify-content-center align-items-center py-5">
-          <div className="text-center">
-            <div className="text-danger mb-3">
-              <i className="fas fa-exclamation-triangle fa-3x"></i>
-            </div>
+        <div className="text-center">
+          <div className="text-danger mb-3">
+            <i className="fas fa-exclamation-triangle fa-3x"></i>
+          </div>
             <h4 className="text-danger" style={{ 
               fontFamily: 'var(--font-primary)'
             }}>
@@ -87,18 +87,18 @@ const Home = () => {
             }}>
               يرجى المحاولة مرة أخرى لاحقاً
             </p>
-            <Button 
-              variant="primary" 
-              onClick={() => window.location.reload()}
-              className="mt-3"
+          <Button 
+            variant="primary" 
+            onClick={() => window.location.reload()}
+            className="mt-3"
               style={{ 
                 fontFamily: 'var(--font-primary)'
               }}
-            >
-              إعادة المحاولة
-            </Button>
-          </div>
+          >
+            إعادة المحاولة
+          </Button>
         </div>
+      </div>
       ) : categories && Array.isArray(categories) ? categories.map((category) => (
          <div key={category.id} className="mb-5">
            {/* الكارت الخاص بالتصنيف */}
@@ -161,23 +161,23 @@ const Home = () => {
 
            {/* Grid للشاشات الكبيرة */}
            <div className="desktop-products-grid d-none d-md-block">
-             <Row xs={1} sm={2} md={3} lg={4} className="g-4">
-               {category.products && Array.isArray(category.products) ? category.products.map((product) => (
-                 <Col key={product.id}>
-                   <ProductCard 
-                     product={product}
-                     openDeleteModal={openDeleteModal}
-                     href={`/product/${product.id}`}
-                   />
-                 </Col>
-               )) : (
-                 <Col>
-                   <div className="text-center py-4">
-                     <p className="text-muted">لا توجد منتجات في هذا التصنيف</p>
-                   </div>
-                 </Col>
-               )}
-             </Row>
+           <Row xs={1} sm={2} md={3} lg={4} className="g-4">
+             {category.products && Array.isArray(category.products) ? category.products.map((product) => (
+               <Col key={product.id}>
+                 <ProductCard 
+                   product={product}
+                   openDeleteModal={openDeleteModal}
+                   href={`/product/${product.id}`}
+                 />
+               </Col>
+             )) : (
+               <Col>
+                 <div className="text-center py-4">
+                   <p className="text-muted">لا توجد منتجات في هذا التصنيف</p>
+                 </div>
+               </Col>
+             )}
+           </Row>
            </div>
         </div>
       )) : (

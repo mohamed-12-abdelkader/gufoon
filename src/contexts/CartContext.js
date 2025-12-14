@@ -3,6 +3,7 @@ import axios from 'axios';
 import { useAuth } from './AuthContext';
 import { toast } from 'react-toastify';
 import baseUrl from '../api/baseUrl';
+import { getProductById } from '../utils/services';
 
 const CartContext = createContext();
 
@@ -15,94 +16,144 @@ export const CartProvider = ({ children }) => {
 
   // Load cart on startup
   useEffect(() => {
-    if (isAuthenticated) {
+    const token = localStorage.getItem('token');
+    if (token) {
       fetchCart();
     } else {
-      const localCart = JSON.parse(localStorage.getItem('cart')) || [];
-      setCart(localCart);
+      // For non-authenticated users, show empty cart
+      setCart([]);
     }
   }, [isAuthenticated]);
 
-  // Fetch cart from API for authenticated users
+  // Fetch product details for a product ID
+  const fetchProductDetails = async (productId) => {
+    try {
+      const product = await getProductById(productId);
+      return product;
+    } catch (error) {
+      console.error(`Error fetching product ${productId}:`, error);
+      return null;
+    }
+  };
+
+  // Fetch cart from API - new response format: { items: [...], pricing: {...}, coupon: {...} }
   const fetchCart = async () => {
+    const token = localStorage.getItem('token');
+    
+    if (!token) {
+      setCart([]);
+      return;
+    }
+
     setLoading(true);
     try {
-      const token = localStorage.getItem('token');
-      const { data } = await baseUrl.get('/carts', {
+      const { data } = await baseUrl.get('api/carts', {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         }
       });
-      setCart(data);
+
+      // API returns: { items: [...], pricing: {...}, coupon: {...} }
+      if (data && data.items && Array.isArray(data.items)) {
+        // Map items to cart format - product info is already included
+        const cartItems = data.items.map((cartItem) => ({
+          id: cartItem.id,
+          productId: cartItem.productId,
+          quantity: cartItem.quantity,
+          userId: cartItem.userId,
+          productInfo: cartItem.product || {
+            id: cartItem.productId,
+            name: 'منتج غير متاح',
+            price: 0,
+            cover: null
+          }
+        }));
+        setCart(cartItems);
+      } else {
+        setCart([]);
+      }
     } catch (error) {
       console.error('Error fetching cart:', error);
+      setCart([]);
+      toast.error('حدث خطأ أثناء تحميل السلة');
     } finally {
       setLoading(false);
     }
   };
 
   // Add item to cart
-  const addToCart = async product => {
+  const addToCart = async (product) => {
+    // Check for token directly from localStorage
+    const token = localStorage.getItem('token');
+    
+    if (!token) {
+      toast.error('يرجى تسجيل الدخول لإضافة منتجات للسلة');
+      return;
+    }
+
     setLoading(true);
     try {
-      if (isAuthenticated) {
-        const token = localStorage.getItem('token');
-        await baseUrl.post('/carts', { productId: product.id, quantity: 1 }, {
+      
+      // Check if product already exists in cart
+      const existingCartItem = cart.find(item => item.productId === product.id);
+      
+      if (existingCartItem) {
+        // Update quantity if product exists
+        await baseUrl.put(`api/carts/${existingCartItem.id}`, {
+          productId: product.id,
+          quantity: existingCartItem.quantity + 1
+        }, {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
           }
         });
-        fetchCart();
       } else {
-        let localCart = JSON.parse(localStorage.getItem('cart')) || [];
-        const existingItem = localCart.find(item => item.productId === product.id);
-
-        if (existingItem) {
-          existingItem.quantity += 1;
-        } else {
-          localCart.push({
-            id: Date.now(), // Temporary ID for local cart
-            productId: product.id,
-            quantity: 1,
-            productInfo: product,
-          });
-        }
-
-        localStorage.setItem('cart', JSON.stringify(localCart));
-        setCart(localCart);
+        // Add new product to cart
+        await baseUrl.post('api/carts', {
+          productId: product.id,
+          quantity: 1
+        }, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
       }
-
+      
+      // Refresh cart to get updated data
+      await fetchCart();
       toast.success(`${product.name} تم إضافته إلى السلة ✅`);
     } catch (error) {
       console.error('Error adding to cart:', error);
-      toast.error('حدث خطأ أثناء إضافة المنتج للسلة ❌');
+      const errorMessage = error.response?.data?.message || error.response?.data?.error || 'حدث خطأ أثناء إضافة المنتج للسلة';
+      toast.error(errorMessage + ' ❌');
     } finally {
       setLoading(false);
     }
   };
 
   // Remove item from cart using `cartId`
-  const removeFromCart = async cartId => {
+  const removeFromCart = async (cartId) => {
+    const token = localStorage.getItem('token');
+    
+    if (!token) {
+      toast.error('يرجى تسجيل الدخول');
+      return;
+    }
+
     setLoading(true);
     try {
-      if (isAuthenticated) {
-        const token = localStorage.getItem('token');
-        await baseUrl.delete(`/carts/${cartId}`, {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
-        });
-        fetchCart();
-      } else {
-        let localCart = JSON.parse(localStorage.getItem('cart')) || [];
-        localCart = localCart.filter(item => item.id !== cartId);
-        localStorage.setItem('cart', JSON.stringify(localCart));
-        setCart(localCart);
-      }
-
+      await baseUrl.delete(`api/carts/${cartId}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      // Refresh cart
+      await fetchCart();
       toast.info('تمت إزالة المنتج من السلة 🛒');
     } catch (error) {
       console.error('Error removing from cart:', error);
@@ -114,32 +165,39 @@ export const CartProvider = ({ children }) => {
 
   // Update item quantity using `cartId`
   const updateQuantity = async (cartId, newQuantity) => {
+    const token = localStorage.getItem('token');
+    
+    if (!token) {
+      toast.error('يرجى تسجيل الدخول');
+      return;
+    }
+
     if (newQuantity < 1) {
       removeFromCart(cartId);
       return;
     }
 
     try {
-      if (isAuthenticated) {
-        const token = localStorage.getItem('token');
-        await baseUrl.put(`/carts/${cartId}`, { quantity: newQuantity }, {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
-        });
-        fetchCart();
-      } else {
-        let localCart = JSON.parse(localStorage.getItem('cart')) || [];
-        const itemIndex = localCart.findIndex(item => item.id === cartId);
-
-        if (itemIndex !== -1) {
-          localCart[itemIndex].quantity = newQuantity;
-          localStorage.setItem('cart', JSON.stringify(localCart));
-          setCart(localCart);
-        }
+      
+      // Get the cart item to find productId
+      const cartItem = cart.find(item => item.id === cartId);
+      if (!cartItem) {
+        toast.error('عنصر السلة غير موجود');
+        return;
       }
 
+      await baseUrl.put(`api/carts/${cartId}`, {
+        productId: cartItem.productId,
+        quantity: newQuantity
+      }, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      // Refresh cart
+      await fetchCart();
       toast.success('تم تحديث كمية المنتج 🔄');
     } catch (error) {
       console.error('Error updating quantity:', error);
@@ -147,59 +205,67 @@ export const CartProvider = ({ children }) => {
     }
   };
 
-  // Merge local cart with backend after login
-  const mergeCartAfterLogin = async () => {
-    const localCart = JSON.parse(localStorage.getItem('cart')) || [];
-    if (localCart.length > 0 && isAuthenticated) {
-      try {
-        const token = localStorage.getItem('token');
-        await Promise.all(
-          localCart.map(item =>
-            baseUrl.post('/carts', { productId: item.productId, quantity: item.quantity }, {
-              headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
-              }
-            })
-          )
-        );
-        localStorage.removeItem('cart');
-        fetchCart();
-      } catch (error) {
-        console.error('Error merging cart:', error);
-      }
-    }
-  };
-
+  // Clear all cart items
   const clearCart = async () => {
+    if (!isAuthenticated) {
+      setCart([]);
+      return;
+    }
+
     try {
-      if (isAuthenticated) {
-        const token = localStorage.getItem('token');
-        await baseUrl.delete('/carts/empty', {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
-        });
-        fetchCart();
-      } else {
-        localStorage.removeItem('cart');
-        setCart([]);
-      }
+      const token = localStorage.getItem('token');
+      await baseUrl.delete('api/carts/empty', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      setCart([]);
+      toast.success('تم تفريغ السلة بنجاح');
     } catch (error) {
       console.error('Error clearing cart:', error);
+      toast.error('حدث خطأ أثناء تفريغ السلة');
     }
   };
 
-  useEffect(() => {
-    if (isAuthenticated) {
-      mergeCartAfterLogin();
+  // Update cart from API response (used when applying coupons)
+  const updateCartFromResponse = (cartResponse) => {
+    if (cartResponse && cartResponse.items && Array.isArray(cartResponse.items)) {
+      const cartItems = cartResponse.items.map((cartItem) => {
+        const productId = cartItem.product?.id || cartItem.productId;
+        const product = cartItem.product || {};
+        
+        return {
+          id: cartItem.id,
+          productId: productId,
+          quantity: cartItem.quantity,
+          userId: cartItem.userId || null, // userId might not be in coupon response
+          productInfo: {
+            id: product.id || productId,
+            name: product.name || 'منتج غير متاح',
+            price: product.price || 0,
+            discount: product.discount || 0,
+            cover: product.cover || null,
+            description: product.description || null,
+            stock: product.stock || 0,
+            brandId: product.brandId,
+            colorId: product.colorId,
+            categoryId: product.categoryId,
+            // Include any other product fields that might be needed
+            brand: product.brand,
+            color: product.color,
+            category: product.category
+          }
+        };
+      });
+      setCart(cartItems);
     }
-  }, [isAuthenticated]);
+  };
 
   return (
     <CartContext.Provider
-      value={{ cart, addToCart, removeFromCart, updateQuantity, fetchCart, loading, clearCart }}>
+      value={{ cart, addToCart, removeFromCart, updateQuantity, fetchCart, loading, clearCart, updateCartFromResponse }}>
       {children}
     </CartContext.Provider>
   );

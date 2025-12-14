@@ -318,7 +318,7 @@ const DetailedProduct = () => {
   ];
 
   return (
-    <div className='product-details-page' dir='rtl'>
+    <div className='' dir='rtl'>
       <div className=' py-4 bg-blue-500 text-white'>
         <div className='container'>
           <h2 className='mb-0 fw-bold'>{product.name}</h2>
@@ -671,7 +671,7 @@ const DetailedProduct = () => {
           width: 100%;
           aspect-ratio: 1 / 1;
           max-height: 600px;
-          background: #f8f9fa;
+          background: var(--bg-secondary);
           display: flex;
           align-items: center;
           justify-content: center;
@@ -920,6 +920,52 @@ const DetailedProduct = () => {
           100% {
             background-position: 200% 0;
           }
+        }
+
+        /* Dark Mode Support */
+        .product-gallery {
+          background: var(--card-bg) !important;
+          border: 1px solid var(--border-color) !important;
+        }
+
+        .price-section {
+          background: var(--card-bg) !important;
+          border: 1px solid var(--border-color) !important;
+        }
+
+        .specs-section {
+          background: var(--card-bg) !important;
+          border: 1px solid var(--border-color) !important;
+        }
+
+        .stock-info {
+          background: var(--card-bg) !important;
+          border: 1px solid var(--border-color) !important;
+        }
+
+        .spec-item {
+          background-color: var(--bg-secondary) !important;
+        }
+
+        .spec-item:hover {
+          background-color: var(--bg-tertiary) !important;
+        }
+
+        .spec-key {
+          color: var(--text-muted) !important;
+        }
+
+        .spec-value {
+          color: var(--text-primary) !important;
+        }
+
+        .warranty-info {
+          background-color: var(--bg-secondary) !important;
+          color: var(--text-primary) !important;
+        }
+
+        .section-header {
+          border-bottom-color: var(--border-color) !important;
         }
       `}</style>
     </div>
