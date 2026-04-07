@@ -4,7 +4,7 @@ import { SiTiktok } from "react-icons/si";
 
 const Footer = () => {
   return (
-    <footer dir="rtl" className="bg-blue-600 text-white">
+    <footer dir="rtl" className="text-white" style={{ backgroundColor: "#012148" }}>
       <div className="container mx-auto px-6 py-8">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           

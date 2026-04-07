@@ -23,16 +23,15 @@ import {
   useColorModeValue,
   InputRightElement,
 } from "@chakra-ui/react";
-import { FaUser, FaEnvelope, FaLock, FaPhone, FaEye, FaEyeSlash } from "react-icons/fa";
+import { FaUser, FaLock, FaPhone, FaEye, FaEyeSlash } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { useAuth } from "../../contexts/AuthContext";
 
 const SignupModal = ({ show, handleClose }) => {
   const [formData, setFormData] = useState({
     fullName: "",
-    email: "",
-    password: "",
     phoneNumber: "",
+    password: "",
   });
 
   const [errors, setErrors] = useState({});
@@ -62,24 +61,10 @@ const SignupModal = ({ show, handleClose }) => {
       newErrors.fullName = "الاسم يجب أن يكون أكثر من حرفين";
     }
 
-    if (!formData.email.trim()) {
-      newErrors.email = "البريد الإلكتروني مطلوب";
-    } else if (!formData.email.includes("@") || !formData.email.includes(".")) {
-      newErrors.email = "بريد إلكتروني غير صالح";
-    }
-
     if (!formData.phoneNumber.trim()) {
       newErrors.phoneNumber = "رقم الهاتف مطلوب";
     } else if (!formData.phoneNumber.match(/^\d+$/) || formData.phoneNumber.length < 10) {
       newErrors.phoneNumber = "رقم الهاتف يجب أن يحتوي على 10 أرقام على الأقل";
-    }
-
-    if (!formData.password.trim()) {
-      newErrors.password = "كلمة المرور مطلوبة";
-    } else if (formData.password.length < 8) {
-      newErrors.password = "يجب أن تحتوي كلمة المرور على 8 أحرف على الأقل";
-    } else if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(formData.password)) {
-      newErrors.password = "كلمة المرور يجب أن تحتوي على حروف كبيرة وصغيرة وأرقام";
     }
 
     setErrors(newErrors);
@@ -100,7 +85,12 @@ const SignupModal = ({ show, handleClose }) => {
     toast.info("جارٍ إنشاء الحساب، يرجى الانتظار...");
 
     try {
-      await register(formData);
+      const payload = {
+        fullName: formData.fullName.trim(),
+        phoneNumber: formData.phoneNumber.trim(),
+        password: formData.password,
+      };
+      await register(payload);
       
       // Verify token was saved
       const savedToken = localStorage.getItem("token");
@@ -192,21 +182,20 @@ const SignupModal = ({ show, handleClose }) => {
                   <FormErrorMessage>{errors.fullName}</FormErrorMessage>
                 </FormControl>
 
-                {/* Email */}
-                <FormControl isInvalid={!!errors.email} w="full">
+                {/* Phone Number */}
+                <FormControl isInvalid={!!errors.phoneNumber} w="full">
                   <FormLabel fontSize="sm" fontWeight="medium" color={textColor}>
-                    البريد الإلكتروني
+                    رقم الهاتف
                   </FormLabel>
                   <InputGroup>
                     <InputLeftElement pointerEvents="none">
-                      <Icon as={FaEnvelope} color="gray.400" />
+                      <Icon as={FaPhone} color="gray.400" />
                     </InputLeftElement>
                     <Input
-                      type="email"
-                      name="email"
-                      value={formData.email}
+                      name="phoneNumber"
+                      value={formData.phoneNumber}
                       onChange={handleChange}
-                      placeholder="أدخل بريدك الإلكتروني"
+                      placeholder="مثال: 01012345678"
                       size="lg"
                       borderRadius="lg"
                       borderColor={borderColor}
@@ -219,11 +208,11 @@ const SignupModal = ({ show, handleClose }) => {
                       }}
                     />
                   </InputGroup>
-                  <FormErrorMessage>{errors.email}</FormErrorMessage>
+                  <FormErrorMessage>{errors.phoneNumber}</FormErrorMessage>
                 </FormControl>
 
-                {/* Password */}
-                <FormControl isInvalid={!!errors.password} w="full">
+                {/* Password — بدون فالديشن على المحتوى */}
+                <FormControl w="full">
                   <FormLabel fontSize="sm" fontWeight="medium" color={textColor}>
                     كلمة المرور
                   </FormLabel>
@@ -258,36 +247,6 @@ const SignupModal = ({ show, handleClose }) => {
                       </Button>
                     </InputRightElement>
                   </InputGroup>
-                  <FormErrorMessage>{errors.password}</FormErrorMessage>
-                </FormControl>
-
-                {/* Phone Number */}
-                <FormControl isInvalid={!!errors.phoneNumber} w="full">
-                  <FormLabel fontSize="sm" fontWeight="medium" color={textColor}>
-                    رقم الهاتف
-                  </FormLabel>
-                  <InputGroup>
-                    <InputLeftElement pointerEvents="none">
-                      <Icon as={FaPhone} color="gray.400" />
-                    </InputLeftElement>
-                    <Input
-                      name="phoneNumber"
-                      value={formData.phoneNumber}
-                      onChange={handleChange}
-                      placeholder="أدخل رقم هاتفك"
-                      size="lg"
-                      borderRadius="lg"
-                      borderColor={borderColor}
-                      _focus={{
-                        borderColor: "blue.500",
-                        boxShadow: "0 0 0 1px #3182ce"
-                      }}
-                      _hover={{
-                        borderColor: "blue.300"
-                      }}
-                    />
-                  </InputGroup>
-                  <FormErrorMessage>{errors.phoneNumber}</FormErrorMessage>
                 </FormControl>
               </VStack>
             </VStack>

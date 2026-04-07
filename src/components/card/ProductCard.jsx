@@ -1,9 +1,8 @@
 import React, { useState } from "react";
-import { Link, Links } from "react-router-dom";
-import { FaCartPlus, FaRegEdit, FaRegHeart } from "react-icons/fa";
+import { Link } from "react-router-dom";
+import { FaShoppingCart, FaRegEdit, FaRegHeart } from "react-icons/fa";
 import { MdDelete } from "react-icons/md";
 import { Spinner, Badge } from "react-bootstrap";
-import { useAuth } from "../../contexts/AuthContext";
 import { useCart } from "../../contexts/CartContext";
 import UserType from "../../Hook/userType/UserType";
 
@@ -11,7 +10,7 @@ const ProductCard = ({ product, openDeleteModal, openEditModal, href }) => {
   const [isFavorite, setIsFavorite] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const  [userData, isAdmin, user] =UserType()
+  const [userData, isAdmin, user] = UserType();
   const { addToCart } = useCart();
 
   const handleFavoriteClick = (e) => {
@@ -32,9 +31,16 @@ const ProductCard = ({ product, openDeleteModal, openEditModal, href }) => {
           <Link to={href} className="product-image-link">
             <div className="image-wrapper">
               <img
-                src={product.cover || (product.ProductImages && product.ProductImages.length > 0 ? product.ProductImages[0].url : 'https://via.placeholder.com/300x200?text=No+Image')}
+                src={
+                  product.cover ||
+                  (product.ProductImages && product.ProductImages.length > 0
+                    ? product.ProductImages[0].url
+                    : "https://via.placeholder.com/400x400?text=No+Image")
+                }
                 alt={product.name}
-                className="product-image h-[200px] border"
+                className="product-image"
+                loading="lazy"
+                decoding="async"
               />
               <div className="card-badges">
                 {product.discount && (
@@ -59,7 +65,7 @@ const ProductCard = ({ product, openDeleteModal, openEditModal, href }) => {
                   <h6 className="product-title">{product.name}</h6>
                 </Link>
 
-                {isAdmin? (
+                {isAdmin ? (
                   <div className="admin-controls">
                     <button
                       className="control-btn delete"
@@ -67,15 +73,28 @@ const ProductCard = ({ product, openDeleteModal, openEditModal, href }) => {
                     >
                       <MdDelete />
                     </button>
-                    <Link className="control-btn edit" to={`/admin/update_product/${product.id}`} title="Update Product"><FaRegEdit /> </Link>
+                    <Link
+                      className="control-btn edit"
+                      to={`/admin/update_product/${product.id}`}
+                      title="Update Product"
+                    >
+                      <FaRegEdit />{" "}
+                    </Link>
                   </div>
                 ) : (
                   <button
+                    type="button"
                     className="add-to-cart-btn"
                     onClick={handleAddToCart}
                     disabled={loading}
+                    aria-label="إضافة للسلة"
+                    title="إضافة للسلة"
                   >
-                    {loading ? <Spinner size="sm" /> : <FaCartPlus />}
+                    {loading ? (
+                      <Spinner animation="border" size="sm" className="cart-spinner" />
+                    ) : (
+                      <FaShoppingCart className="cart-icon" aria-hidden />
+                    )}
                   </button>
                 )}
               </div>
@@ -86,57 +105,84 @@ const ProductCard = ({ product, openDeleteModal, openEditModal, href }) => {
                       {product.price.toFixed(2)} ر.س
                     </span>
                     <span className="current-price discount-price">
-                      {(product.price * (1 - product.discount / 100)).toFixed(2)} ر.س
+                      {(product.price * (1 - product.discount / 100)).toFixed(
+                        2,
+                      )}{" "}
+                      ر.س
                     </span>
                   </>
                 ) : (
-                  <span className="current-price">{product.price.toFixed(2)} ر.س</span>
+                  <span className="current-price">
+                    {product.price.toFixed(2)} ر.س
+                  </span>
                 )}
               </div>
-
             </div>
           </div>
         </div>
       </div>
       <style jsx>{`
         .product-card {
-          flex: 0 0 auto;
-          width: 280px;
-          height: 380px;
-          padding: 10px;
+          width: 100%;
+          max-width: 100%;
+          min-width: 0;
+          min-height: 380px;
+          height: auto;
+          padding: 8px;
+          box-sizing: border-box;
           perspective: 1000px;
         }
 
         .card-inner {
           position: relative;
           width: 100%;
+          min-height: 364px;
           height: 100%;
           background: var(--card-bg);
-          border-radius: 16px;
+          border-radius: 18px;
           overflow: hidden;
-          box-shadow: 0 4px 15px var(--shadow);
-          transition: all 0.3s ease;
+          box-shadow:
+            0 2px 8px var(--shadow),
+            0 12px 28px -12px rgba(0, 0, 0, 0.12);
+          transition: box-shadow 0.35s ease, transform 0.35s ease,
+            border-color 0.25s ease;
           border: 1px solid var(--border-color);
         }
 
         .card-inner:hover {
-          box-shadow: 0 8px 25px var(--shadow);
-          transform: translateY(-5px);
+          box-shadow:
+            0 8px 24px var(--shadow),
+            0 20px 40px -16px rgba(0, 120, 255, 0.12);
+          transform: translateY(-4px);
+          border-color: rgba(0, 120, 255, 0.2);
         }
 
         .image-wrapper {
           position: relative;
           width: 100%;
-          height: 250px;
+          aspect-ratio: 1 / 1;
           overflow: hidden;
-          background: var(--bg-secondary);
+          background: radial-gradient(
+            ellipse 85% 75% at 50% 40%,
+            var(--bg-secondary) 0%,
+            var(--bg-tertiary) 55%,
+            var(--bg-secondary) 100%
+          );
         }
 
         .product-image {
+          display: block;
           width: 100%;
           height: 100%;
           object-fit: cover;
-          transition: transform 0.5s ease;
+          object-position: center;
+          transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+          -webkit-backface-visibility: hidden;
+          backface-visibility: hidden;
+        }
+
+        .card-inner:hover .product-image {
+          transform: scale(1.06);
         }
 
         .card-badges {
@@ -173,7 +219,12 @@ const ProductCard = ({ product, openDeleteModal, openEditModal, href }) => {
         }
 
         .product-content {
-          padding: 15px;
+          padding: 14px 16px 16px;
+        }
+
+        .product-content .flex {
+          align-items: flex-start;
+          gap: 10px;
         }
 
         .product-title-link {
@@ -203,7 +254,7 @@ const ProductCard = ({ product, openDeleteModal, openEditModal, href }) => {
 
         .current-price {
           font-weight: 700;
-          color: #0078FF;
+          color: #0078ff;
           font-size: 16px;
         }
 
@@ -218,27 +269,60 @@ const ProductCard = ({ product, openDeleteModal, openEditModal, href }) => {
         }
 
         .add-to-cart-btn {
-          background: #0d6efd;
-          color: white;
+          flex-shrink: 0;
+          background: linear-gradient(145deg, #012148 0%, #0a4a8c 100%);
+          color: #fff;
           border: none;
-          width: 35px;
-          height: 35px;
-          border-radius: 50%;
-          display: flex;
+          width: 46px;
+          height: 46px;
+          border-radius: 14px;
+          display: inline-flex;
           align-items: center;
           justify-content: center;
           cursor: pointer;
-          transition: all 0.3s ease;
+          transition: transform 0.25s ease, box-shadow 0.25s ease,
+            filter 0.25s ease;
+          box-shadow:
+            0 4px 14px rgba(1, 33, 72, 0.35),
+            inset 0 1px 0 rgba(255, 255, 255, 0.12);
         }
 
-        .add-to-cart-btn:hover {
-          background: #0b5ed7;
-          transform: scale(1.1);
+        .add-to-cart-btn .cart-icon {
+          width: 24px;
+          height: 24px;
+          flex-shrink: 0;
+          filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.25));
+        }
+
+        .add-to-cart-btn .cart-spinner {
+          width: 1.1rem;
+          height: 1.1rem;
+          border-width: 2px;
+          color: #fff;
+        }
+
+        .add-to-cart-btn:hover:not(:disabled) {
+          filter: brightness(1.08);
+          transform: scale(1.06);
+          box-shadow:
+            0 6px 20px rgba(0, 120, 255, 0.4),
+            inset 0 1px 0 rgba(255, 255, 255, 0.15);
+        }
+
+        .add-to-cart-btn:active:not(:disabled) {
+          transform: scale(0.98);
         }
 
         .add-to-cart-btn:disabled {
           background: var(--text-muted);
           cursor: not-allowed;
+          box-shadow: none;
+          filter: none;
+        }
+
+        .add-to-cart-btn:focus-visible {
+          outline: 2px solid #0078ff;
+          outline-offset: 2px;
         }
 
         .admin-controls {
@@ -296,6 +380,13 @@ const ProductCard = ({ product, openDeleteModal, openEditModal, href }) => {
         [data-theme="dark"] .control-btn {
           background: var(--bg-tertiary);
           border-color: var(--border-color);
+        }
+
+        [data-theme="dark"] .add-to-cart-btn:not(:disabled) {
+          background: linear-gradient(145deg, #1a3a6e 0%, #2563a8 100%);
+          box-shadow:
+            0 4px 14px rgba(0, 0, 0, 0.35),
+            inset 0 1px 0 rgba(255, 255, 255, 0.08);
         }
       `}</style>
     </>

@@ -1,35 +1,50 @@
 import React from "react";
 import ReactPaginate from "react-paginate";
+import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
+import "./Pagnation.css";
 
-const Pagnation = ({ id, setPage, pageCount, currentPage }) => {
+const Pagnation = ({ setPage, pageCount, currentPage }) => {
   const handlePageClick = (data) => {
     setPage(data.selected + 1);
   };
 
+  if (pageCount < 2) return null;
+
   return (
-    <div>
+    <nav className="products-pagination" dir="rtl" aria-label="تصفح الصفحات">
       <ReactPaginate
-        breakLabel="..."
-        nextLabel="التالى >"
+        breakLabel="…"
+        nextLabel={
+          <span className="products-pagination__nav-inner">
+            <span className="products-pagination__nav-text">التالي</span>
+            <FaChevronLeft className="products-pagination__icon" aria-hidden />
+          </span>
+        }
         onPageChange={handlePageClick}
-        marginPagesDisplayed={2}
+        marginPagesDisplayed={1}
         pageRangeDisplayed={2}
         pageCount={pageCount}
-        forcePage={currentPage - 1} // تحديث الصفحة الحالية
-        previousLabel="< السابق"
-        containerClassName="pagination justify-content-center p-3"
+        disabledClassName="is-disabled"
+        forcePage={currentPage - 1}
+        previousLabel={
+          <span className="products-pagination__nav-inner">
+            <FaChevronRight className="products-pagination__icon" aria-hidden />
+            <span className="products-pagination__nav-text">السابق</span>
+          </span>
+        }
+        containerClassName="products-pagination__list"
         renderOnZeroPageCount={null}
-        pageClassName="page-item"
-        pageLinkClassName="page-link"
-        previousClassName="page-item"
-        previousLinkClassName="page-link"
-        nextClassName="page-item"
-        nextLinkClassName="page-link"
-        breakClassName="page-item"
-        breakLinkClassName="page-link"
-        activeClassName="active"
+        pageClassName="products-pagination__page"
+        pageLinkClassName="products-pagination__link"
+        previousClassName="products-pagination__prev"
+        previousLinkClassName="products-pagination__link products-pagination__link--nav"
+        nextClassName="products-pagination__next"
+        nextLinkClassName="products-pagination__link products-pagination__link--nav"
+        breakClassName="products-pagination__break"
+        breakLinkClassName="products-pagination__link products-pagination__link--break"
+        activeClassName="is-active"
       />
-    </div>
+    </nav>
   );
 };
 

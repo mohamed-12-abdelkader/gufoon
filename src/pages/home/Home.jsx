@@ -58,7 +58,7 @@ const Home = () => {
     <>
      <SectionOne/>
      <SectionTwo/>
-    <div className="py-5 w-[90%] mx-auto" dir="rtl">
+    <div className="home-page py-5 w-[90%] mx-auto" dir="rtl">
       {loading ? (
         <div className="d-flex justify-content-center align-items-center py-5">
           <div className="text-center">
@@ -102,21 +102,22 @@ const Home = () => {
       ) : categories && Array.isArray(categories) ? categories.map((category) => (
          <div key={category.id} className="mb-5">
            {/* الكارت الخاص بالتصنيف */}
-           <Card className="mb-4 border-0 h-[100px] bg-blue-500 shadow-sm rounded-4 p-3">
+<Card className="home-category-card mb-4 border-0 h-[100px] bg-light shadow-sm rounded-4 p-3">
              <Card.Body className="d-flex justify-content-between align-items-center">
                <div>
-                 <Card.Title className="fs-3 fw-bold text-primary mb-0" style={{ 
+                 <Card.Title className="home-category-title fs-3 fw-bold mb-0" style={{ 
                    fontFamily: 'var(--font-primary)', 
                    fontSize: '2rem',
                    fontWeight: '700',
-                   color: '#0078FF'
+                   color: '#012148'
                  }}>
                    {category.name}
                  </Card.Title>
-                 <Card.Text className="text-muted mt-1" style={{ 
+                 <Card.Text className="home-category-desc text-muted mt-1" style={{ 
                    fontFamily: 'var(--font-primary)',
                    fontSize: '1.1rem',
-                   fontWeight: '400'
+                   fontWeight: '400',
+                   color: '#012148'
                  }}>
                    {category.description}
                  </Card.Text>
@@ -124,13 +125,15 @@ const Home = () => {
               <Link to={`/categories/${category.id}`}>
               <Button
                 variant="outline-primary"
-                className="fw-semibold rounded-pill px-4"
+                className="home-category-btn fw-semibold rounded-pill px-4"
                 style={{ 
                   fontFamily: 'var(--font-primary)',
                   fontSize: '1rem',
-                  fontWeight: '600'
+                  fontWeight: '600',
+                  color: '#012148',
+                  borderColor: '#012148'
                 }}
-                >
+              >
                 عرض المزيد
               </Button>
                 </Link>
@@ -200,6 +203,36 @@ const Home = () => {
     />
     
     <style>{`
+      /* دارك مود: نصوص الصفحة الرئيسية أبيض */
+      [data-theme="dark"] .home-page .home-category-title,
+      [data-theme="dark"] .home-page .home-category-desc {
+        color: #ffffff !important;
+      }
+      [data-theme="dark"] .home-page .home-category-desc {
+        opacity: 0.9;
+      }
+      [data-theme="dark"] .home-page .home-category-btn {
+        color: #ffffff !important;
+        border-color: #ffffff !important;
+      }
+      [data-theme="dark"] .home-page .home-category-btn:hover {
+        background-color: rgba(255, 255, 255, 0.15) !important;
+        color: #ffffff !important;
+        border-color: #ffffff !important;
+      }
+      [data-theme="dark"] .home-page .text-muted,
+      [data-theme="dark"] .home-page .text-center.py-4 p,
+      [data-theme="dark"] .home-page .text-center.py-5 .text-muted {
+        color: rgba(255, 255, 255, 0.85) !important;
+      }
+      [data-theme="dark"] .home-page .text-center.py-5 h4,
+      [data-theme="dark"] .home-page .text-center.py-5 p {
+        color: rgba(255, 255, 255, 0.9) !important;
+      }
+      [data-theme="dark"] .home-page .mt-3.text-muted {
+        color: rgba(255, 255, 255, 0.8) !important;
+      }
+
       .mobile-products-slider {
         margin: 1rem 0;
       }

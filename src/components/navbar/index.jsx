@@ -107,9 +107,10 @@ function NavbarComponent() {
       {isAdmin() && <div className="mt-2 flex">
         <Link
           to={"/admin"}
-          className='font-bold text-nowrap text-blue-500 mx-1'
+          className='font-bold text-nowrap mx-1'
+          style={{ color: '#012148' }}
         >
-          صفحة الادمن
+          صفحة الأدمن
         </Link>
       </div>}
       
@@ -118,7 +119,8 @@ function NavbarComponent() {
         <div className="mt-2 flex items-center space-x-2">
           <Link
             to={isAdmin() ? "/admin/chat" : "/chat"}
-            className="flex items-center space-x-2 text-green-600 hover:text-green-800 transition-colors"
+            className="flex items-center space-x-2 transition-colors"
+            style={{ color: '#012148' }}
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
@@ -138,37 +140,107 @@ function NavbarComponent() {
   );
 
   return (
-    <div className='relative z-10' style={{ zIndex: "1000" }}>
+    <div className='sticky top-0' style={{ zIndex: 1050 }}>
       <Navsearch />
       <Navbar
         dir='rtl'
         expand='lg'
-        className='navbar bg-body-tertiary block shadow'
+        className='navbar navbar-categories'
       >
-        <Container>
+        <Container className='navbar-categories-container'>
           <Navbar.Toggle
             aria-controls='responsive-navbar-nav'
             onClick={isMobile ? handleShow : null}
+            className='navbar-toggler-custom'
           />
           <Navbar.Collapse
             id='responsive-navbar-nav'
-            className='flex justify-center'
+            className='navbar-collapse-custom'
           >
             {!isMobile && navLinks}
           </Navbar.Collapse>
         </Container>
       </Navbar>
-      <Offcanvas show={show} onHide={handleClose} className='offcanvas-custom'>
-        <Offcanvas.Header closeButton>
-          <Offcanvas.Title>
-            <h1>raha</h1>
+      <Offcanvas show={show} onHide={handleClose} className='offcanvas-custom' placement='end' dir='rtl'>
+        <Offcanvas.Header closeButton className='offcanvas-header-custom'>
+          <Offcanvas.Title className='offcanvas-title-custom'>
+            التصنيفات
           </Offcanvas.Title>
         </Offcanvas.Header>
-        <hr />
-        <Offcanvas.Body className='flex items-start'>
-          <div className='w-[80%] mx-auto'>{navLinks}</div>
+        <Offcanvas.Body className='offcanvas-body-custom'>
+          <div className='offcanvas-nav-wrap'>{navLinks}</div>
         </Offcanvas.Body>
       </Offcanvas>
+      <style>{`
+        .navbar-categories {
+          background: #f8fafc !important;
+          border-bottom: 1px solid rgba(1, 33, 72, 0.08);
+          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+          padding: 0.5rem 0;
+        }
+        .navbar-categories-container {
+          max-width: 1400px;
+          margin: 0 auto;
+        }
+        .navbar-toggler-custom {
+          border: 1px solid rgba(1, 33, 72, 0.2);
+          border-radius: 8px;
+          padding: 0.4rem 0.6rem;
+        }
+        .navbar-toggler-custom:focus {
+          box-shadow: 0 0 0 2px rgba(1, 33, 72, 0.2);
+        }
+        .navbar-collapse-custom {
+          justify-content: center;
+        }
+        .category-dropdown .nav-link,
+        .navbar-categories .nav-dropdown-toggle {
+          color: #012148 !important;
+          font-weight: 600;
+          font-size: 0.95rem;
+          padding: 0.5rem 1rem;
+          border-radius: 8px;
+          transition: background 0.2s ease, color 0.2s ease;
+        }
+        .category-dropdown .nav-link:hover,
+        .navbar-categories .nav-link:hover {
+          background: rgba(1, 33, 72, 0.06);
+          color: #013060 !important;
+        }
+        .category-dropdown .dropdown-menu {
+          border-radius: 12px;
+          border: 1px solid rgba(0, 0, 0, 0.06);
+          box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+          padding: 0.5rem;
+          margin-top: 4px;
+        }
+        .category-item .dropdown-item {
+          border-radius: 8px;
+          padding: 0.5rem 1rem;
+          color: #012148;
+          font-weight: 500;
+        }
+        .category-item .dropdown-item:hover {
+          background: rgba(1, 33, 72, 0.08);
+          color: #013060;
+        }
+        .offcanvas-header-custom {
+          border-bottom: 1px solid #eee;
+          padding: 1rem 1.25rem;
+        }
+        .offcanvas-title-custom {
+          font-weight: 700;
+          font-size: 1.35rem;
+          color: #012148;
+          font-family: var(--font-primary);
+        }
+        .offcanvas-body-custom {
+          padding: 1rem 1.25rem;
+        }
+        .offcanvas-nav-wrap {
+          width: 100%;
+        }
+      `}</style>
     </div>
   );
 }

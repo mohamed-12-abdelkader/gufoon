@@ -146,48 +146,44 @@ const Navsearch = () => {
   };
 
   return (
-    <div dir="ltr" className="bg-[#0078FF] h-[70px] flex items-center navsearch w-[100%]" style={{ zIndex: "1000" }}>
-      <div className="m-auto w-[90%] flex justify-between items-center">
-        <div className="">
-          <Link to="/">
-          <img src={logo} className="h-[50px] w-[200px]"/>
-          </Link>
-        </div>
+    <div dir="ltr" className="navsearch navsearch-bar" style={{ zIndex: "1000", backgroundColor: "#012148" }}>
+      <div className="navsearch-inner">
+        <Link to="/" className="navsearch-logo">
+          <img src={logo} alt="جوفون" className="navsearch-logo-img" />
+        </Link>
 
-        {/* 🔍 Search Bar */}
-        <div className="flex w-[60%] relative" ref={searchRef}>
-          <Form className="w-100 position-relative">
-            <Form.Control
-              dir="rtl"
-              type="search"
-              placeholder="ابحث عن منتجك المفضل ؟"
-              className="flex-grow me-2 search-input"
-              value={searchQuery}
-              onChange={(e) => {
-                const value = e.target.value;
-                setSearchQuery(value);
-                if (value.trim().length >= 1) {
-                  setShowSearchMenu(true);
-                } else {
-                  setShowSearchMenu(false);
-                }
-              }}
-              onFocus={() => {
-                if (searchQuery.trim().length >= 1 && searchResults.length > 0) {
-                  setShowSearchMenu(true);
-                }
-              }}
-              style={{ 
-                fontFamily: 'var(--font-primary)',
-                fontSize: '1rem',
-                fontWeight: '400'
-              }}
-            />
-            {searchLoading && (
-              <div className="search-loading">
-                <Spinner size="sm" />
-              </div>
-            )}
+        {/* Search Bar */}
+        <div className="navsearch-search-wrap" ref={searchRef}>
+          <Form className="navsearch-form">
+            <div className="navsearch-input-group">
+              <Form.Control
+                dir="rtl"
+                type="search"
+                placeholder="ابحث عن منتجك المفضل..."
+                className="navsearch-input"
+                value={searchQuery}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setSearchQuery(value);
+                  if (value.trim().length >= 1) {
+                    setShowSearchMenu(true);
+                  } else {
+                    setShowSearchMenu(false);
+                  }
+                }}
+                onFocus={() => {
+                  if (searchQuery.trim().length >= 1 && searchResults.length > 0) {
+                    setShowSearchMenu(true);
+                  }
+                }}
+                style={{ fontFamily: 'var(--font-primary)' }}
+              />
+              {searchLoading && (
+                <div className="navsearch-spinner">
+                  <Spinner size="sm" animation="border" />
+                </div>
+              )}
+            </div>
             
             {/* Search Results Dropdown */}
             {showSearchMenu && searchQuery.trim().length >= 1 && (
@@ -289,37 +285,33 @@ const Navsearch = () => {
           </Form>
         </div>
 
-        <div className="flex items-center">
-          {/* Theme Toggle Button */}
+        <div className="navsearch-actions">
           <Button
             variant="link"
             onClick={toggleTheme}
-            className="theme-toggle-btn me-2"
+            className="navsearch-icon-btn"
             title={theme === 'light' ? 'تفعيل الوضع الداكن' : 'تفعيل الوضع الفاتح'}
           >
             {theme === 'light' ? (
-              <FaMoon className="text-white text-xl" />
+              <FaMoon className="navsearch-icon" />
             ) : (
-              <FaSun className="text-white text-xl" />
+              <FaSun className="navsearch-icon" />
             )}
           </Button>
 
           {!isAdmin && (
-            <Link to="/cart" className="relative">
-              <FaCartPlus className="text-3xl mt-2 mx-2 text-white" />
+            <Link to="/cart" className="navsearch-cart-link">
+              <FaCartPlus className="navsearch-icon navsearch-cart-icon" />
               {totalCartItems > 0 && (
-                <span className="absolute bg-blue-700 text-white font-bold text-lg flex justify-center items-center w-6 h-6 rounded-full top-0 -left-4">{totalCartItems}</span>
+                <span className="navsearch-cart-badge">{totalCartItems}</span>
               )}
             </Link>
           )}
 
-          {/* Show Bill Only for Admins */}
           {isAdmin && (
-            <Link to='/admin/notifications' title="Notifications">
-              <div className="flex items-center">
-                <IoIosNotifications className="text-blue-500  text-2xl mx-2" />
-                {!!unreadCount && <span className="absolute text-white bg-red-500 w-5 h-5 rounded-full flex items-center justify-center font-bold">{unreadCount}</span>}
-              </div>
+            <Link to='/admin/notifications' title="الإشعارات" className="navsearch-cart-link">
+              <IoIosNotifications className="navsearch-icon" style={{ fontSize: '1.5rem' }} />
+              {!!unreadCount && <span className="navsearch-cart-badge navsearch-badge-danger">{unreadCount}</span>}
             </Link>
           )}
 
@@ -327,14 +319,10 @@ const Navsearch = () => {
             <Dropdown.Toggle 
               variant="none" 
               id="dropdown-user" 
-              className="d-flex align-items-center bg-transparent border-0 p-2 rounded-circle hover-bg"
-              style={{
-                transition: "all 0.3s ease",
-                borderRadius: "50%"
-              }}
+              className="navsearch-user-toggle"
             >
               <div className="position-relative">
-                <FaUserCircle className="text-white text-2xl" />
+                <FaUserCircle className="navsearch-icon navsearch-user-icon" />
                 {userData && (
                   <div className="position-absolute top-0 start-100 translate-middle">
                     <span className="badge bg-success rounded-pill" style={{ fontSize: "0.6rem" }}>
@@ -432,10 +420,10 @@ const Navsearch = () => {
                   <div className="d-grid gap-2">
                     <Button 
                       variant="primary" 
-                      className="rounded-pill py-2 fw-medium"
+                      className="rounded-pill py-2 fw-medium navsearch-login-btn"
                       onClick={() => setShowLoginModal(true)}
                       style={{
-                        background: "linear-gradient(45deg, #0078FF, #0056CC)",
+                        backgroundColor: "#012148",
                         border: "none",
                         transition: "all 0.3s ease"
                       }}
@@ -474,86 +462,306 @@ const Navsearch = () => {
       <SignupModal show={showSignupModal} handleClose={() => setShowSignupModal(false)} />
 
       {/* Custom Styles */}
-      <style jsx>{`
-        .hover-bg:hover {
-          background-color: rgba(255, 255, 255, 0.1) !important;
+      <style>{`
+        .navsearch-bar {
+          min-height: 70px;
+          display: flex;
+          align-items: center;
+          width: 100%;
+          box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
         }
-        
+        .navsearch-inner {
+          width: 92%;
+          max-width: 1400px;
+          margin: 0 auto;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 1.5rem;
+        }
+        .navsearch-logo {
+          flex-shrink: 0;
+          display: flex;
+          align-items: center;
+        }
+        .navsearch-logo-img {
+          height: 48px;
+          width: auto;
+          max-width: 180px;
+          object-fit: contain;
+          transition: transform 0.2s ease;
+        }
+        .navsearch-logo:hover .navsearch-logo-img {
+          transform: scale(1.03);
+        }
+        .navsearch-search-wrap {
+          flex: 1;
+          max-width: 520px;
+          position: relative;
+        }
+        .navsearch-form {
+          width: 100%;
+          position: relative;
+        }
+        .navsearch-input-group {
+          position: relative;
+          display: flex;
+          align-items: center;
+        }
+        .navsearch-input {
+          width: 100%;
+          height: 44px;
+          padding: 0 1rem 0 2.5rem;
+          border: none;
+          border-radius: 22px;
+          font-size: 0.95rem;
+          background: rgba(255, 255, 255, 0.95);
+          transition: box-shadow 0.2s ease, background 0.2s ease;
+        }
+        .navsearch-input::placeholder {
+          color: #6b7280;
+        }
+        .navsearch-input:focus {
+          outline: none;
+          box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.5);
+          background: #fff;
+        }
+        .navsearch-spinner {
+          position: absolute;
+          left: 12px;
+          top: 50%;
+          transform: translateY(-50%);
+          color: #012148;
+        }
+        .navsearch-actions {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          flex-shrink: 0;
+        }
+        .navsearch-icon-btn,
+        .navsearch-cart-link,
+        .navsearch-user-toggle {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 42px;
+          height: 42px;
+          border-radius: 50%;
+          color: #fff;
+          transition: background 0.2s ease, transform 0.2s ease;
+          border: none;
+          padding: 0;
+          text-decoration: none;
+        }
+        .navsearch-icon-btn:hover,
+        .navsearch-cart-link:hover,
+        .navsearch-user-toggle:hover {
+          background: rgba(255, 255, 255, 0.15);
+          color: #fff;
+          transform: scale(1.05);
+        }
+        .navsearch-icon {
+          font-size: 1.35rem;
+          color: #fff;
+        }
+        .navsearch-cart-icon {
+          font-size: 1.5rem;
+        }
+        .navsearch-user-icon {
+          font-size: 1.6rem;
+        }
+        .navsearch-cart-badge {
+          position: absolute;
+          top: -2px;
+          left: -2px;
+          min-width: 20px;
+          height: 20px;
+          padding: 0 5px;
+          background: #fff;
+          color: #012148;
+          font-size: 0.75rem;
+          font-weight: 700;
+          border-radius: 10px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+        .navsearch-badge-danger {
+          background: #dc3545;
+          color: #fff;
+        }
+        .navsearch-cart-link,
+        .navsearch-user-toggle {
+          position: relative;
+        }
+        .navsearch-user-toggle::after {
+          display: none;
+        }
+        .navsearch-login-btn:hover {
+          background-color: #013060 !important;
+          color: #fff;
+        }
+
+        /* Search results dropdown */
+        .search-results-dropdown {
+          position: absolute;
+          top: calc(100% + 8px);
+          left: 0;
+          right: 0;
+          background: #fff;
+          border-radius: 12px;
+          box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+          max-height: 380px;
+          overflow: hidden;
+          display: flex;
+          flex-direction: column;
+          z-index: 1100;
+          border: 1px solid rgba(0, 0, 0, 0.06);
+        }
+        .search-results-header {
+          padding: 12px 16px;
+          border-bottom: 1px solid #eee;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          font-size: 0.9rem;
+          font-weight: 600;
+          color: #012148;
+        }
+        .view-all-link {
+          color: #012148;
+          font-size: 0.85rem;
+          font-weight: 500;
+          text-decoration: none;
+        }
+        .view-all-link:hover {
+          text-decoration: underline;
+          color: #013060;
+        }
+        .search-results-list {
+          overflow-y: auto;
+          max-height: 320px;
+        }
+        .search-result-item {
+          display: flex;
+          gap: 12px;
+          padding: 12px 16px;
+          cursor: pointer;
+          transition: background 0.15s ease;
+          border-bottom: 1px solid #f5f5f5;
+        }
+        .search-result-item:hover {
+          background: #f8f9fa;
+        }
+        .search-result-item .result-image {
+          position: relative;
+          width: 56px;
+          height: 56px;
+          flex-shrink: 0;
+          border-radius: 8px;
+          overflow: hidden;
+          background: #f0f0f0;
+        }
+        .search-result-item .result-image img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+        .search-result-item .result-info {
+          flex: 1;
+          min-width: 0;
+        }
+        .search-result-item .result-name {
+          font-size: 0.95rem;
+          font-weight: 600;
+          color: #1a1a1a;
+          margin-bottom: 2px;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+        .search-result-item .result-brand,
+        .search-result-item .result-category {
+          font-size: 0.8rem;
+          color: #6b7280;
+        }
+        .search-result-item .result-price {
+          font-size: 0.9rem;
+          font-weight: 700;
+          color: #012148;
+          margin-top: 4px;
+        }
+        .search-result-item .original-price {
+          text-decoration: line-through;
+          color: #9ca3af;
+          margin-right: 6px;
+        }
+        .search-loading-state {
+          padding: 24px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
+          color: #6b7280;
+        }
+        .search-no-results {
+          padding: 32px 24px;
+          text-align: center;
+          color: #6b7280;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 8px;
+        }
+        .discount-badge-small {
+          position: absolute;
+          top: 4px;
+          right: 4px;
+          background: #dc3545;
+          color: #fff;
+          font-size: 0.7rem;
+          font-weight: 700;
+          padding: 2px 5px;
+          border-radius: 4px;
+        }
+
         .hover-item:hover {
-          background-color: #f8f9fa !important;
+          background-color: #f0f4f8 !important;
           transform: translateX(-2px);
         }
-        
         .hover-item.text-danger:hover {
           background-color: rgba(220, 53, 69, 0.1) !important;
           color: #dc3545 !important;
         }
-        
         .dropdown-menu {
-          animation: slideDown 0.3s ease-out;
+          animation: slideDown 0.25s ease-out;
         }
-        
         @keyframes slideDown {
-          from {
-            opacity: 0;
-            transform: translateY(-10px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
+          from { opacity: 0; transform: translateY(-8px); }
+          to { opacity: 1; transform: translateY(0); }
         }
-        
-        .dropdown-item {
-          border-radius: 8px !important;
-          margin-bottom: 2px;
-        }
-        
+        .dropdown-item { border-radius: 8px !important; margin-bottom: 2px; }
         .dropdown-item:focus {
-          background-color: #e3f2fd !important;
-          color: #1976d2 !important;
+          background-color: #e8eef4 !important;
+          color: #012148 !important;
         }
-        
-        .dropdown-toggle::after {
-          display: none;
-        }
-        
-        .badge {
-          animation: pulse 2s infinite;
-        }
-        
+        .badge { animation: pulse 2s infinite; }
         @keyframes pulse {
-          0% {
-            transform: scale(1);
-          }
-          50% {
-            transform: scale(1.1);
-          }
-          100% {
-            transform: scale(1);
-          }
+          0%, 100% { transform: scale(1); }
+          50% { transform: scale(1.1); }
         }
 
-        .theme-toggle-btn {
-          padding: 0.5rem;
-          border-radius: 50%;
-          background: rgba(255, 255, 255, 0.1);
-          border: none;
-          transition: all 0.3s ease;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          width: 40px;
-          height: 40px;
-        }
-
-        .theme-toggle-btn:hover {
-          background: rgba(255, 255, 255, 0.2);
-          transform: scale(1.1);
-        }
-
-        .theme-toggle-btn:focus {
-          box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.3);
+        @media (max-width: 768px) {
+          .navsearch-inner { width: 95%; gap: 0.75rem; }
+          .navsearch-logo-img { height: 40px; max-width: 140px; }
+          .navsearch-search-wrap { max-width: none; }
+          .navsearch-input { height: 40px; font-size: 0.9rem; }
+          .navsearch-icon-btn,
+          .navsearch-cart-link,
+          .navsearch-user-toggle { width: 38px; height: 38px; }
+          .navsearch-icon { font-size: 1.2rem; }
+          .search-results-dropdown { max-height: 300px; }
         }
       `}</style>
     </div>

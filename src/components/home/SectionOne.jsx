@@ -2,15 +2,15 @@ import Carousel from "react-bootstrap/Carousel";
 
 const SectionOne = () => {
   const heroImages = [
-    '1ca2f997-ae86-4d81-ac25-f13540de531a.jpg',
-    '9ef30d56-1f51-496d-96e1-460db5c051e5.jpg',
-    '4999c4b6-05ae-44c2-adae-cdfaeb883514.jpg'
+    "/d05272fd-11f8-4eee-83df-1cd818c4c392.jfif",
+    "/995c7807-a1c9-4507-8604-4e9bba15d9a5.jfif",
+    "/5ae97612-6ebe-4db0-8abc-48db208ebab0.jfif",
   ];
 
   return (
-    <div className="hero-carousel-wrapper">
-      <Carousel 
-        className='hero-carousel'
+    <section className="hero-carousel-wrapper" aria-label="معرض الصور الرئيسي">
+      <Carousel
+        className="hero-carousel"
         fade
         interval={5000}
         indicators={true}
@@ -21,191 +21,199 @@ const SectionOne = () => {
             <div className="hero-image-container">
               <img
                 src={image}
-                alt={`Hero slide ${index + 1}`}
+                alt={`شريحة ${index + 1}`}
                 className="hero-image"
                 loading={index === 0 ? "eager" : "lazy"}
+                decoding="async"
               />
             </div>
           </Carousel.Item>
         ))}
       </Carousel>
-      
+
       <style>{`
         .hero-carousel-wrapper {
           width: 100%;
-          margin-top: 0;
+          margin: 0;
           position: relative;
+          overflow: hidden;
         }
-        
+
         .hero-carousel {
           width: 100%;
         }
-        
+
+        .hero-carousel .carousel-item {
+          overflow: hidden;
+        }
+
         .hero-image-container {
           width: 100%;
-          height: 0;
-          padding-bottom: 40%; /* Aspect ratio 2.5:1 */
           position: relative;
           overflow: hidden;
-          background: #f0f0f0;
+          background: #1a1a1a;
+          /* Desktop: بنر عريض */
+          aspect-ratio: 21 / 9;
+          min-height: 280px;
         }
-        
+
         .hero-image {
           position: absolute;
-          top: 0;
-          left: 0;
+          inset: 0;
           width: 100%;
           height: 100%;
-          object-fit: contain;
-          object-position: center;
-          image-rendering: -webkit-optimize-contrast;
-          image-rendering: crisp-edges;
-          image-rendering: auto;
-          -webkit-backface-visibility: hidden;
-          backface-visibility: hidden;
-          -webkit-transform: translateZ(0);
-          transform: translateZ(0);
+          object-fit: cover;
+          object-position: center center;
+          display: block;
         }
-        
-        /* Carousel Controls Styling */
+
+        /* Carousel Controls */
         .hero-carousel .carousel-control-prev,
         .hero-carousel .carousel-control-next {
-          width: 50px;
-          height: 50px;
-          background: rgba(0, 0, 0, 0.3);
+          width: 48px;
+          height: 48px;
+          background: rgba(0, 0, 0, 0.4);
           border-radius: 50%;
           top: 50%;
           transform: translateY(-50%);
-          backdrop-filter: blur(5px);
-          transition: all 0.3s ease;
-          opacity: 0.8;
+          backdrop-filter: blur(6px);
+          transition: background 0.2s, opacity 0.2s;
+          opacity: 0.9;
         }
-        
+
         .hero-carousel .carousel-control-prev:hover,
         .hero-carousel .carousel-control-next:hover {
-          background: rgba(0, 0, 0, 0.5);
+          background: rgba(0, 0, 0, 0.6);
           opacity: 1;
         }
-        
+
         .hero-carousel .carousel-control-prev {
           right: 20px;
           left: auto;
         }
-        
+
         .hero-carousel .carousel-control-next {
           left: 20px;
           right: auto;
         }
-        
+
         .hero-carousel .carousel-control-prev-icon,
         .hero-carousel .carousel-control-next-icon {
           width: 20px;
           height: 20px;
         }
-        
-        /* Carousel Indicators */
+
         .hero-carousel .carousel-indicators {
           bottom: 20px;
           margin-bottom: 0;
         }
-        
+
         .hero-carousel .carousel-indicators button {
-          width: 12px;
-          height: 12px;
+          width: 10px;
+          height: 10px;
           border-radius: 50%;
           background: rgba(255, 255, 255, 0.5);
-          border: 2px solid rgba(255, 255, 255, 0.8);
-          transition: all 0.3s ease;
-          margin: 0 5px;
+          border: 2px solid rgba(255, 255, 255, 0.9);
+          transition: transform 0.2s, background 0.2s;
+          margin: 0 4px;
         }
-        
+
         .hero-carousel .carousel-indicators button.active {
-          background: white;
-          transform: scale(1.2);
+          background: #fff;
+          transform: scale(1.25);
         }
-        
-        /* Responsive Styles */
+
+        /* تابلت */
+        @media (max-width: 991px) {
+          .hero-image-container {
+            aspect-ratio: 16 / 10;
+            min-height: 260px;
+          }
+        }
+
+        /* موبايل */
         @media (max-width: 768px) {
           .hero-image-container {
-            padding-bottom: 60%; /* Taller aspect ratio for mobile */
+            aspect-ratio: 4 / 5;
+            min-height: 320px;
           }
-          
+
           .hero-carousel .carousel-control-prev,
           .hero-carousel .carousel-control-next {
             width: 40px;
             height: 40px;
           }
-          
+
           .hero-carousel .carousel-control-prev {
-            right: 10px;
+            right: 12px;
           }
-          
+
           .hero-carousel .carousel-control-next {
-            left: 10px;
+            left: 12px;
           }
-          
+
           .hero-carousel .carousel-control-prev-icon,
           .hero-carousel .carousel-control-next-icon {
-            width: 16px;
-            height: 16px;
+            width: 18px;
+            height: 18px;
           }
-          
+
           .hero-carousel .carousel-indicators {
-            bottom: 15px;
+            bottom: 16px;
           }
-          
-          .hero-carousel .carousel-indicators button {
-            width: 10px;
-            height: 10px;
-            margin: 0 4px;
-          }
-        }
-        
-        @media (max-width: 576px) {
-          .hero-image-container {
-            padding-bottom: 70%; /* Even taller for small mobile */
-          }
-          
-          .hero-carousel .carousel-control-prev,
-          .hero-carousel .carousel-control-next {
-            width: 35px;
-            height: 35px;
-          }
-          
-          .hero-carousel .carousel-control-prev {
-            right: 5px;
-          }
-          
-          .hero-carousel .carousel-control-next {
-            left: 5px;
-          }
-          
-          .hero-carousel .carousel-indicators {
-            bottom: 10px;
-          }
-          
+
           .hero-carousel .carousel-indicators button {
             width: 8px;
             height: 8px;
             margin: 0 3px;
           }
         }
-        
-        @media (min-width: 1200px) {
+
+        /* موبايل صغير */
+        @media (max-width: 480px) {
           .hero-image-container {
-            padding-bottom: 35%; /* Wider aspect ratio for large screens */
+            aspect-ratio: 3 / 4;
+            min-height: 300px;
+          }
+
+          .hero-carousel .carousel-control-prev,
+          .hero-carousel .carousel-control-next {
+            width: 36px;
+            height: 36px;
+          }
+
+          .hero-carousel .carousel-control-prev {
+            right: 8px;
+          }
+
+          .hero-carousel .carousel-control-next {
+            left: 8px;
+          }
+
+          .hero-carousel .carousel-indicators {
+            bottom: 12px;
+          }
+
+          .hero-carousel .carousel-indicators button {
+            width: 6px;
+            height: 6px;
+            margin: 0 2px;
           }
         }
-        
-        /* High DPI Displays */
-        @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+
+        /* شاشات كبيرة */
+        @media (min-width: 1200px) {
+          .hero-image-container {
+            aspect-ratio: 21 / 8;
+            max-height: 520px;
+          }
+
           .hero-image {
-            image-rendering: -webkit-optimize-contrast;
-            image-rendering: crisp-edges;
+            object-fit: cover;
           }
         }
       `}</style>
-    </div>
+    </section>
   );
 };
 

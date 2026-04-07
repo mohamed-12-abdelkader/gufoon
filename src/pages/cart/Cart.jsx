@@ -18,7 +18,6 @@ const Cart = () => {
   const [showOrderModal, setShowOrderModal] = useState(false);
   const [address, setAddress] = useState("");
   const [orderLoading, setOrderLoading] = useState(false);
-  const [paymentMethod, setPaymentMethod] = useState("cash_on_delivery");
   const [phoneNumber, setPhoneNumber] = useState("");
 
   const [couponCode, setCouponCode] = useState("");
@@ -46,7 +45,6 @@ const Cart = () => {
     // Reset form when closing
     setAddress("");
     setPhoneNumber("");
-    setPaymentMethod("cash_on_delivery");
   };
 
   // Auth modal handlers
@@ -340,92 +338,67 @@ const Cart = () => {
       return;
     }
 
-    // التحقق من رقم الهاتف للدفع بالفيزا
-    if (paymentMethod === 'paymob') {
-      const user = JSON.parse(localStorage.getItem('user') || '{}');
-      const finalPhone = phoneNumber.trim() || user.phoneNumber || user.phone || '';
-      
-      if (!finalPhone || finalPhone.length < 10) {
-        toast.error("يرجى إدخال رقم هاتف صحيح للدفع بالفيزا (10 أرقام على الأقل)");
-        return;
-      }
+    const user = JSON.parse(localStorage.getItem("user") || "{}");
+    const finalPhone =
+      phoneNumber.trim() || user.phoneNumber || user.phone || "";
+
+    if (!finalPhone || finalPhone.length < 10) {
+      toast.error("يرجى إدخال رقم هاتف صحيح (10 أرقام على الأقل)");
+      return;
     }
 
     setOrderLoading(true);
 
     try {
-      const token = localStorage.getItem('token');
-      
-      // 1. إنشاء الطلب
+      const token = localStorage.getItem("token");
+
       const orderData = {
         shippingAddress: address.trim(),
-        paymentMethod: paymentMethod // cash_on_delivery أو paymob
+        paymentMethod: "paymob",
       };
 
       const orderResponse = await baseUrl.post("/api/orders/me", orderData, {
         headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
       });
 
       const order = orderResponse.data;
-      console.log('Order created:', order);
+      console.log("Order created:", order);
 
-      // 2. معالجة الدفع حسب الطريقة المختارة
-      if (paymentMethod === 'cash_on_delivery') {
-        // الدفع عند الاستلام - تم بنجاح
-        await clearCart();
-        toast.success("✅ تم إنشاء الطلب بنجاح! سيتم الدفع عند الاستلام.");
-        handleCloseModal();
-        // يمكن إعادة التوجيه إلى صفحة الطلبات
-        setTimeout(() => {
-          window.location.href = '/orders';
-        }, 2000);
-      } else if (paymentMethod === 'paymob') {
-        // الدفع بالفيزا - إنشاء Payment Intention
-        const user = JSON.parse(localStorage.getItem('user') || '{}');
-        
-        // استخدام رقم الهاتف من الحقل أو من بيانات المستخدم
-        const finalPhone = phoneNumber.trim() || user.phoneNumber || user.phone || '';
-        
-        if (!finalPhone || finalPhone.length < 10) {
-          toast.error("يرجى إدخال رقم هاتف صحيح");
-          setOrderLoading(false);
-          return;
-        }
-        
-        const paymentData = {
-          orderId: order.id,
-          amount: parseFloat(order.totalAmount), // Ensure it's a number
-          currency: 'SAR',
-          customerName: user.fullName || user.name || 'عميل',
-          customerEmail: user.email || '',
-          customerPhone: finalPhone
-        };
+      const paymentData = {
+        orderId: order.id,
+        amount: parseFloat(order.totalAmount),
+        currency: "SAR",
+        customerName: user.fullName || user.name || "عميل",
+        customerEmail: user.email || "",
+        customerPhone: finalPhone,
+      };
 
-        console.log('Sending payment data:', paymentData);
+      console.log("Sending payment data:", paymentData);
 
-        toast.info("جاري التوجيه إلى صفحة الدفع...");
+      toast.info("جاري التوجيه إلى صفحة الدفع...");
 
-        const paymentResponse = await baseUrl.post("api/paymob/create-intention", paymentData, {
+      const paymentResponse = await baseUrl.post(
+        "api/paymob/create-intention",
+        paymentData,
+        {
           headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
-        });
-
-        const responseData = paymentResponse.data;
-        console.log('Payment intention response:', responseData);
-
-        // checkoutUrl موجود مباشرة في response.data
-        if (responseData.checkoutUrl) {
-          // توجيه المستخدم إلى صفحة الدفع
-          window.location.href = responseData.checkoutUrl;
-        } else {
-          console.error('No checkoutUrl in response:', responseData);
-          throw new Error('لم يتم إنشاء رابط الدفع');
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
         }
+      );
+
+      const responseData = paymentResponse.data;
+      console.log("Payment intention response:", responseData);
+
+      if (responseData.checkoutUrl) {
+        window.location.href = responseData.checkoutUrl;
+      } else {
+        console.error("No checkoutUrl in response:", responseData);
+        throw new Error("لم يتم إنشاء رابط الدفع");
       }
     } catch (error) {
       console.error("Checkout error:", error);
@@ -731,69 +704,33 @@ const Cart = () => {
               </Form.Text>
             </Form.Group>
 
-            <Form.Group className="mb-4">
-              <Form.Label className="fw-bold mb-3">طريقة الدفع *</Form.Label>
-              <div className="payment-methods">
-                <Form.Check
-                  type="radio"
-                  id="cash_on_delivery"
-                  name="paymentMethod"
-                  value="cash_on_delivery"
-                  checked={paymentMethod === "cash_on_delivery"}
-                  onChange={(e) => setPaymentMethod(e.target.value)}
-                  label={
-                    <div className="payment-option">
-                      <div className="d-flex align-items-center">
-                        <span className="payment-icon me-2">💵</span>
-                        <div>
-                          <strong>الدفع عند الاستلام</strong>
-                          <small className="d-block text-muted">ادفع نقداً عند استلام الطلب</small>
-                        </div>
-                      </div>
-                    </div>
-                  }
-                  className="payment-radio mb-3 p-3 border rounded"
-                />
-                <Form.Check
-                  type="radio"
-                  id="paymob"
-                  name="paymentMethod"
-                  value="paymob"
-                  checked={paymentMethod === "paymob"}
-                  onChange={(e) => setPaymentMethod(e.target.value)}
-                  label={
-                    <div className="payment-option">
-                      <div className="d-flex align-items-center">
-                        <span className="payment-icon me-2">💳</span>
-                        <div>
-                          <strong>الدفع بالفيزا / بطاقة ائتمان</strong>
-                          <small className="d-block text-muted">دفع آمن عبر Paymob</small>
-                        </div>
-                      </div>
-                    </div>
-                  }
-                  className="payment-radio mb-3 p-3 border rounded"
-                />
+            <div className="mb-4 p-3 rounded border bg-light payment-info-banner">
+              <div className="d-flex align-items-start gap-2">
+                <span className="payment-icon" aria-hidden>💳</span>
+                <div>
+                  <strong className="d-block">الدفع بالفيزا / بطاقة ائتمان</strong>
+                  <small className="text-muted">
+                    الدفع يتم بشكل آمن عبر Paymob بعد تأكيد الطلب
+                  </small>
+                </div>
               </div>
-            </Form.Group>
+            </div>
 
-            {paymentMethod === 'paymob' && (
-              <Form.Group className="mb-4">
-                <Form.Label className="fw-bold mb-2">رقم الهاتف *</Form.Label>
-                <Form.Control
-                  type="tel"
-                  value={phoneNumber}
-                  onChange={(e) => setPhoneNumber(e.target.value)}
-                  placeholder="05xxxxxxxx"
-                  required={paymentMethod === 'paymob'}
-                  pattern="[0-9]{10,15}"
-                  style={{ direction: 'ltr', textAlign: 'left' }}
-                />
-                <Form.Text className="text-muted">
-                  رقم الهاتف مطلوب للدفع بالفيزا (10 أرقام على الأقل)
-                </Form.Text>
-              </Form.Group>
-            )}
+            <Form.Group className="mb-4">
+              <Form.Label className="fw-bold mb-2">رقم الهاتف *</Form.Label>
+              <Form.Control
+                type="tel"
+                value={phoneNumber}
+                onChange={(e) => setPhoneNumber(e.target.value)}
+                placeholder="05xxxxxxxx"
+                required
+                pattern="[0-9]{10,15}"
+                style={{ direction: "ltr", textAlign: "left" }}
+              />
+              <Form.Text className="text-muted">
+                مطلوب لإتمام الدفع الإلكتروني (10 أرقام على الأقل)، أو يُستخدم رقمك المحفوظ في الحساب
+              </Form.Text>
+            </Form.Group>
 
             <div className="order-summary-modal mb-3 p-3 bg-light rounded">
               <div className="d-flex justify-content-between mb-2">
@@ -817,7 +754,7 @@ const Cart = () => {
               variant="primary" 
               type="submit" 
               className="w-100 py-3 fw-bold" 
-              disabled={orderLoading || !address.trim() || (paymentMethod === 'paymob' && (!phoneNumber.trim() || phoneNumber.trim().length < 10))}
+              disabled={orderLoading || !address.trim()}
               style={{
                 background: "linear-gradient(45deg, #0078FF, #0056CC)",
                 border: "none",
@@ -828,10 +765,10 @@ const Cart = () => {
               {orderLoading ? (
                 <>
                   <Spinner size="sm" className="me-2" />
-                  {paymentMethod === 'paymob' ? 'جاري التوجيه إلى صفحة الدفع...' : 'جاري إنشاء الطلب...'}
+                  جاري التوجيه إلى صفحة الدفع...
                 </>
               ) : (
-                paymentMethod === 'paymob' ? 'إتمام الطلب والانتقال للدفع' : 'تأكيد الطلب'
+                "إتمام الطلب والانتقال للدفع"
               )}
             </Button>
           </Form>
@@ -859,40 +796,17 @@ const Cart = () => {
       />
       
       <style jsx>{`
-        .payment-methods {
-          display: flex;
-          flex-direction: column;
-          gap: 0.5rem;
+        .payment-info-banner {
+          border-color: var(--border-color) !important;
         }
 
-        .payment-radio {
-          cursor: pointer;
-          transition: all 0.3s ease;
-          background: var(--card-bg);
-          border: 2px solid var(--border-color) !important;
-        }
-
-        .payment-radio:hover {
-          background: var(--bg-secondary);
-          border-color: #0078FF !important;
-          transform: translateX(-4px);
-        }
-
-        .payment-radio input[type="radio"]:checked ~ * {
-          color: #0078FF;
-        }
-
-        .payment-radio:has(input:checked) {
-          background: rgba(0, 120, 255, 0.1);
-          border-color: #0078FF !important;
-        }
-
-        .payment-option {
-          width: 100%;
-        }
-
-        .payment-icon {
+        .payment-info-banner .payment-icon {
           font-size: 1.5rem;
+          line-height: 1.2;
+        }
+
+        [data-theme="dark"] .payment-info-banner {
+          background: var(--bg-tertiary) !important;
         }
 
         .order-summary-modal {
