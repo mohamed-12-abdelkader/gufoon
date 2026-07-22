@@ -22,6 +22,7 @@ import { NotificationBell } from "../contexts/Notifications";
 import Coupons from "../components/admin/Coupons";
 import UserType from "../Hook/userType/UserType";
 import Categories from "../components/admin/Categories";
+import WhatsAppSettings from "../components/admin/WhatsAppSettings";
 import UserChat from "../pages/chat/UserChat";
 import AdminChatNew from "../pages/chat/AdminChatNew";
 import PaymentCallback from "../pages/payment/PaymentCallback";
@@ -77,6 +78,7 @@ const Router = () => {
           <Route path="add_brand" element={<AddBrand />} />
           <Route path="add_color" element={<AddColore />} />
           <Route path="all_order" element={<AllOrder />} />
+          <Route path="whatsapp" element={<WhatsAppSettings />} />
           <Route path="add_discount" element={<AddDiscount />} />
           <Route path="chat" element={<AdminChatNew />} />
         </Route>

@@ -90,7 +90,7 @@ const MyOrders = () => {
                 ) : (
                   <>
                     <span className="fw-bold">الإجمالي:</span> {order.totalAmount} ر.س
-                    {["Pending", "Processing"].includes(order.status) && (
+                    {["Pending", "AwaitingWhatsAppConfirm", "Processing"].includes(order.status) && (
                       <Button
                         variant="danger"
                         size="sm"

@@ -28,6 +28,8 @@ import {
   FaDollarSign,
   FaSearch,
   FaSort,
+  FaWhatsapp,
+  FaClock,
 } from "react-icons/fa";
 import baseUrl from "../../api/baseUrl";
 
@@ -35,6 +37,7 @@ const limit = 20;
 
 const STATUS_MAP = {
   Pending: "قيد الانتظار",
+  AwaitingWhatsAppConfirm: "بانتظار واتساب",
   Processing: "قيد المعالجة",
   Shipped: "تم الشحن",
   Delivered: "تم التسليم",
@@ -43,6 +46,7 @@ const STATUS_MAP = {
 
 const STATUS_COLORS = {
   Pending: "#FFA726",
+  AwaitingWhatsAppConfirm: "#25D366",
   Processing: "#42A5F5",
   Shipped: "#66BB6A",
   Delivered: "#26A69A",
@@ -50,7 +54,8 @@ const STATUS_COLORS = {
 };
 
 const STATUS_ICONS = {
-  Pending: FaBox,
+  Pending: FaClock,
+  AwaitingWhatsAppConfirm: FaWhatsapp,
   Processing: FaCheckCircle,
   Shipped: FaTruck,
   Delivered: FaCheckCircle,

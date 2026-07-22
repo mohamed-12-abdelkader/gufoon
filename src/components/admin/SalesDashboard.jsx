@@ -66,8 +66,12 @@ const SalesDashboard = () => {
             }}
           >
             <option value="">جميع الطلبات</option>
-            <option value="Delivered">تم التوصيل</option>
             <option value="Pending">قيد الانتظار</option>
+            <option value="AwaitingWhatsAppConfirm">بانتظار واتساب</option>
+            <option value="Processing">قيد المعالجة</option>
+            <option value="Shipped">تم الشحن</option>
+            <option value="Delivered">تم التسليم</option>
+            <option value="Cancelled">ملغي</option>
           </select>
 
           <select
