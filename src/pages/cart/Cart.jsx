@@ -2,23 +2,24 @@ import React, { useState, useEffect } from "react";
 import { Container, Row, Col, Button, Spinner, Modal, Form } from "react-bootstrap";
 import { FaTrash, FaMinus, FaPlus } from "react-icons/fa";
 import { useCart } from "../../contexts/CartContext";
-import axios from "axios";
 import { toast } from "react-toastify";
 import baseUrl from "../../api/baseUrl";
 import UserType from "../../Hook/userType/UserType";
-import AuthRequiredModal from "../../components/modal/AuthRequiredModal";
-import LoginModal from "../../components/modal/LoginModal";
-import SignupModal from "../../components/modal/SignupModal";
+import PaymentMethodPicker from "../../components/checkout/PaymentMethodPicker";
+import { saveGuestPendingPayment } from "../../utils/guestPayment";
 
 const Cart = () => {
   const { cart, removeFromCart, updateQuantity, loading, clearCart, fetchCart, updateCartFromResponse } = useCart();
-  const [userData, isAdmin, user] = UserType();
+  const [userData] = UserType();
   const [updatingItem, setUpdatingItem] = useState(null);
   const [removingItem, setRemovingItem] = useState(null);
   const [showOrderModal, setShowOrderModal] = useState(false);
   const [address, setAddress] = useState("");
   const [orderLoading, setOrderLoading] = useState(false);
   const [phoneNumber, setPhoneNumber] = useState("");
+  const [guestName, setGuestName] = useState("");
+  const [guestCity, setGuestCity] = useState("");
+  const [paymentMethod, setPaymentMethod] = useState("paymob");
 
   const [couponCode, setCouponCode] = useState("");
   const [appliedCoupon, setAppliedCoupon] = useState(null);
@@ -26,41 +27,18 @@ const Cart = () => {
   const [couponError, setCouponError] = useState(null);
   const [pricing, setPricing] = useState(null); // Store pricing from API
 
-  // Auth modals states
-  const [showAuthRequiredModal, setShowAuthRequiredModal] = useState(false);
-  const [showLoginModal, setShowLoginModal] = useState(false);
-  const [showSignupModal, setShowSignupModal] = useState(false);
-
   const handleShowModal = () => {
-    // Check if user is logged in
-    if (!userData) {
-      setShowAuthRequiredModal(true);
-      return;
-    }
     setShowOrderModal(true);
   };
   
   const handleCloseModal = () => {
     setShowOrderModal(false);
-    // Reset form when closing
     setAddress("");
     setPhoneNumber("");
+    setGuestName("");
+    setGuestCity("");
+    setPaymentMethod("paymob");
   };
-
-  // Auth modal handlers
-  const handleShowLoginModal = () => {
-    setShowAuthRequiredModal(false);
-    setShowLoginModal(true);
-  };
-
-  const handleShowSignupModal = () => {
-    setShowAuthRequiredModal(false);
-    setShowSignupModal(true);
-  };
-
-  const handleCloseAuthRequiredModal = () => setShowAuthRequiredModal(false);
-  const handleCloseLoginModal = () => setShowLoginModal(false);
-  const handleCloseSignupModal = () => setShowSignupModal(false);
 
   // Fetch cart data with pricing and coupon when component mounts
   useEffect(() => {
@@ -118,19 +96,13 @@ const Cart = () => {
 
   const handleUpdateQuantity = async (item, action) => {
     const token = localStorage.getItem("token");
-    if (!token) {
-      toast.error("يرجى تسجيل الدخول");
-      return;
-    }
-
     setUpdatingItem(item.id);
     const newQuantity = action === "plus" ? item.quantity + 1 : item.quantity - 1;
     
     try {
       await updateQuantity(item.id, newQuantity);
       
-      // Re-apply coupon to get updated pricing when quantity changes
-      if (appliedCoupon) {
+      if (token && appliedCoupon) {
         try {
           const { data } = await baseUrl.post(
             "api/coupons/apply",
@@ -164,18 +136,12 @@ const Cart = () => {
 
   const handleRemoveItem = async (cartId) => {
     const token = localStorage.getItem("token");
-    if (!token) {
-      toast.error("يرجى تسجيل الدخول");
-      return;
-    }
-
     setRemovingItem(cartId);
     
     try {
       await removeFromCart(cartId);
       
-      // Reset pricing when item is removed (coupon might need recalculation)
-      if (appliedCoupon) {
+      if (token && appliedCoupon) {
         try {
           const { data } = await baseUrl.post(
             "api/coupons/apply",
@@ -208,6 +174,12 @@ const Cart = () => {
   };
 
   const handleApplyCoupon = async () => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      toast.info("الكوبونات متاحة بعد تسجيل الدخول");
+      return;
+    }
+
     if (!couponCode.trim()) {
       setCouponError("يرجى إدخال كود الخصم");
       return;
@@ -333,16 +305,74 @@ const Cart = () => {
   const handleSubmitOrder = async (e) => {
     e.preventDefault();
     
-    if (!address.trim()) {
-      toast.error("يرجى إدخال عنوان الشحن");
+    if (!address.trim() || address.trim().length < 5) {
+      toast.error("يرجى إدخال عنوان الشحن الكامل");
       return;
     }
 
+    const token = localStorage.getItem("token");
     const user = JSON.parse(localStorage.getItem("user") || "{}");
+
+    if (!token) {
+      if (!guestName.trim() || guestName.trim().length < 2) {
+        toast.error("يرجى إدخال الاسم الكامل");
+        return;
+      }
+      if (!phoneNumber.trim() || phoneNumber.trim().length < 8) {
+        toast.error("يرجى إدخال رقم هاتف صحيح");
+        return;
+      }
+
+      setOrderLoading(true);
+      try {
+        const { data } = await baseUrl.post("/api/orders/guest", {
+          fullName: guestName.trim(),
+          phoneNumber: phoneNumber.trim(),
+          shippingAddress: address.trim(),
+          city: guestCity.trim() || undefined,
+          paymentMethod,
+          cartItems: cart.map((item) => ({
+            productId: item.productId,
+            quantity: item.quantity,
+          })),
+        });
+
+        if (paymentMethod === "paymob") {
+          saveGuestPendingPayment(data?.id, phoneNumber.trim());
+          await clearCart();
+          if (data?.checkoutUrl) {
+            toast.info("جاري التوجيه إلى صفحة الدفع...");
+            window.location.href = data.checkoutUrl;
+            return;
+          }
+          toast.error(
+            data?.paymentError ||
+              "تم تسجيل الطلب لكن تعذر إنشاء رابط الدفع. يمكنك إعادة المحاولة الآن."
+          );
+          window.location.href = `/payment/callback?order_id=${data?.id || ""}&success=false`;
+          return;
+        }
+
+        await clearCart();
+        handleCloseModal();
+        toast.success(
+          `تم تسجيل طلبك${data?.id ? ` رقم ${data.id}` : ""} بنجاح. سنتواصل معك لتأكيد الطلب والدفع عند الاستلام.`
+        );
+      } catch (error) {
+        console.error("Guest checkout error:", error);
+        toast.error(
+          error.response?.data?.message || "حدث خطأ أثناء تقديم الطلب، حاول مرة أخرى."
+        );
+      } finally {
+        setOrderLoading(false);
+      }
+      return;
+    }
+
     const finalPhone =
       phoneNumber.trim() || user.phoneNumber || user.phone || "";
 
-    if (!finalPhone || finalPhone.length < 10) {
+    if (paymentMethod === "paymob" && (!finalPhone || finalPhone.length < 10)) {
       toast.error("يرجى إدخال رقم هاتف صحيح (10 أرقام على الأقل)");
       return;
     }
@@ -350,11 +380,9 @@ const Cart = () => {
     setOrderLoading(true);
 
     try {
-      const token = localStorage.getItem("token");
-
       const orderData = {
         shippingAddress: address.trim(),
-        paymentMethod: "paymob",
+        paymentMethod,
       };
 
       const orderResponse = await baseUrl.post("/api/orders/me", orderData, {
@@ -365,7 +393,13 @@ const Cart = () => {
       });
 
       const order = orderResponse.data;
-      console.log("Order created:", order);
+
+      if (paymentMethod === "cash_on_delivery") {
+        await clearCart();
+        handleCloseModal();
+        toast.success(`تم تسجيل طلبك${order?.id ? ` رقم ${order.id}` : ""} بنجاح. الدفع عند الاستلام.`);
+        return;
+      }
 
       const paymentData = {
         orderId: order.id,
@@ -375,8 +409,6 @@ const Cart = () => {
         customerEmail: user.email || "",
         customerPhone: finalPhone,
       };
-
-      console.log("Sending payment data:", paymentData);
 
       toast.info("جاري التوجيه إلى صفحة الدفع...");
 
@@ -392,12 +424,10 @@ const Cart = () => {
       );
 
       const responseData = paymentResponse.data;
-      console.log("Payment intention response:", responseData);
 
       if (responseData.checkoutUrl) {
         window.location.href = responseData.checkoutUrl;
       } else {
-        console.error("No checkoutUrl in response:", responseData);
         throw new Error("لم يتم إنشاء رابط الدفع");
       }
     } catch (error) {
@@ -552,6 +582,7 @@ const Cart = () => {
               ملخص الطلب
             </h4>
 
+            {userData && (
             <Form className="mb-3">
               <Form.Group controlId="couponCode">
                 <Form.Label className="fw-semibold" style={{ 
@@ -628,6 +659,7 @@ const Cart = () => {
                 )}
               </Form.Group>
             </Form>
+            )}
 
             <div className="d-flex justify-content-between mb-3" style={{ fontFamily: 'var(--font-primary)' }}>
               <span className="fw-medium">عدد المنتجات</span>
@@ -676,7 +708,7 @@ const Cart = () => {
                 e.target.style.boxShadow = "0 4px 15px rgba(0, 120, 255, 0.3)";
               }}
             >
-              {userData ? "إتمام الطلب" : "تسجيل الدخول لإتمام الطلب"}
+              إتمام الطلب
             </Button>
           </div>
         </Col>
@@ -688,6 +720,30 @@ const Cart = () => {
         </Modal.Header>
         <Modal.Body>
           <Form onSubmit={handleSubmitOrder}>
+            {!userData && (
+              <>
+                <Form.Group className="mb-3">
+                  <Form.Label className="fw-bold mb-2">الاسم الكامل *</Form.Label>
+                  <Form.Control
+                    type="text"
+                    value={guestName}
+                    onChange={(e) => setGuestName(e.target.value)}
+                    placeholder="اسم المستلم"
+                    required
+                  />
+                </Form.Group>
+                <Form.Group className="mb-3">
+                  <Form.Label className="fw-bold mb-2">المدينة</Form.Label>
+                  <Form.Control
+                    type="text"
+                    value={guestCity}
+                    onChange={(e) => setGuestCity(e.target.value)}
+                    placeholder="الرياض"
+                  />
+                </Form.Group>
+              </>
+            )}
+
             <Form.Group className="mb-4">
               <Form.Label className="fw-bold mb-2">عنوان الشحن *</Form.Label>
               <Form.Control
@@ -704,17 +760,7 @@ const Cart = () => {
               </Form.Text>
             </Form.Group>
 
-            <div className="mb-4 p-3 rounded border bg-light payment-info-banner">
-              <div className="d-flex align-items-start gap-2">
-                <span className="payment-icon" aria-hidden>💳</span>
-                <div>
-                  <strong className="d-block">الدفع بالفيزا / بطاقة ائتمان</strong>
-                  <small className="text-muted">
-                    الدفع يتم بشكل آمن عبر Paymob بعد تأكيد الطلب
-                  </small>
-                </div>
-              </div>
-            </div>
+            <PaymentMethodPicker value={paymentMethod} onChange={setPaymentMethod} />
 
             <Form.Group className="mb-4">
               <Form.Label className="fw-bold mb-2">رقم الهاتف *</Form.Label>
@@ -723,12 +769,14 @@ const Cart = () => {
                 value={phoneNumber}
                 onChange={(e) => setPhoneNumber(e.target.value)}
                 placeholder="05xxxxxxxx"
-                required
-                pattern="[0-9]{10,15}"
+                required={!userData}
+                pattern={userData ? "[0-9]{10,15}" : "[0-9]{8,15}"}
                 style={{ direction: "ltr", textAlign: "left" }}
               />
               <Form.Text className="text-muted">
-                مطلوب لإتمام الدفع الإلكتروني (10 أرقام على الأقل)، أو يُستخدم رقمك المحفوظ في الحساب
+                {userData
+                  ? "مطلوب لإتمام الدفع الإلكتروني (10 أرقام على الأقل)، أو يُستخدم رقمك المحفوظ في الحساب"
+                  : "مطلوب للتواصل وتأكيد الطلب أو إتمام الدفع الإلكتروني"}
               </Form.Text>
             </Form.Group>
 
@@ -765,35 +813,19 @@ const Cart = () => {
               {orderLoading ? (
                 <>
                   <Spinner size="sm" className="me-2" />
-                  جاري التوجيه إلى صفحة الدفع...
+                  {paymentMethod === "paymob"
+                    ? "جاري التوجيه إلى صفحة الدفع..."
+                    : "جاري تأكيد الطلب..."}
                 </>
-              ) : (
+              ) : paymentMethod === "paymob" ? (
                 "إتمام الطلب والانتقال للدفع"
+              ) : (
+                "تأكيد الطلب (الدفع عند الاستلام)"
               )}
             </Button>
           </Form>
         </Modal.Body>
       </Modal>
-
-      {/* Auth Required Modal */}
-      <AuthRequiredModal
-        show={showAuthRequiredModal}
-        handleClose={handleCloseAuthRequiredModal}
-        onLoginClick={handleShowLoginModal}
-        onSignupClick={handleShowSignupModal}
-      />
-
-      {/* Login Modal */}
-      <LoginModal
-        show={showLoginModal}
-        handleClose={handleCloseLoginModal}
-      />
-
-      {/* Signup Modal */}
-      <SignupModal
-        show={showSignupModal}
-        handleClose={handleCloseSignupModal}
-      />
       
       <style jsx>{`
         .payment-info-banner {

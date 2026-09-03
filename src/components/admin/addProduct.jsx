@@ -317,8 +317,8 @@ const AddProduct = () => {
   });
 
   return (
-    <div className="max-w-3xl mx-auto p-6 bg-white dark:bg-gray-800 shadow-lg rounded-lg">
-      <h2 className="text-2xl font-semibold mb-5 text-gray-700 dark:text-gray-100">إضافة منتج جديد</h2>
+    <div className="max-w-3xl mx-auto p-6 admin-product-form">
+      <h2 className="text-2xl font-semibold mb-5">إضافة منتج جديد</h2>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         {/* Product Name */}
@@ -538,12 +538,35 @@ const AddProduct = () => {
         {/* Submit Button */}
         <button
           type="submit"
-          className="w-full py-3 bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white rounded-md font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full py-3 admin-product-submit rounded-md font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           disabled={loading || processing || !cover || productImages.length === 0}
         >
           {loading ? `جاري الإضافة... ${uploadProgress > 0 ? `${uploadProgress}%` : ""}` : "إضافة المنتج"}
         </button>
       </form>
+      <style>{`
+        .admin-product-form {
+          background: var(--card-bg);
+          border: 1px solid var(--border-color);
+          border-radius: 18px;
+          color: var(--text-primary);
+        }
+        .admin-product-form h2,
+        .admin-product-form label {
+          color: var(--text-primary) !important;
+        }
+        .admin-product-form input,
+        .admin-product-form textarea,
+        .admin-product-form select {
+          background: var(--bg-secondary) !important;
+          color: var(--text-primary) !important;
+          border-color: var(--border-color) !important;
+        }
+        .admin-product-submit {
+          background: #006C35 !important;
+          color: #f4ead8 !important;
+        }
+      `}</style>
     </div>
   );
 };

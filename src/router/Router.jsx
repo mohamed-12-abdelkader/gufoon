@@ -23,6 +23,7 @@ import Coupons from "../components/admin/Coupons";
 import UserType from "../Hook/userType/UserType";
 import Categories from "../components/admin/Categories";
 import WhatsAppSettings from "../components/admin/WhatsAppSettings";
+import ImportProducts from "../components/admin/ImportProducts";
 import UserChat from "../pages/chat/UserChat";
 import AdminChatNew from "../pages/chat/AdminChatNew";
 import PaymentCallback from "../pages/payment/PaymentCallback";
@@ -69,6 +70,7 @@ const Router = () => {
        
         }>
           <Route path="add_product" element={<AddProduct />} />
+          <Route path="import_products" element={<ImportProducts />} />
           <Route path="categories" element={<Categories />} />
           <Route path="coupons" element={<Coupons />} />
           <Route path="notifications" element={<NotificationBell />} />

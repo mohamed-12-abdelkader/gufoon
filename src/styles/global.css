@@ -46,29 +46,51 @@
   --letter-spacing-wider: 0.05em;
   --letter-spacing-widest: 0.1em;
 
-  /* Light Theme Colors */
-  --bg-primary: #ffffff;
-  --bg-secondary: #f8f9fa;
-  --bg-tertiary: #e9ecef;
-  --text-primary: #2c3e50;
-  --text-secondary: #6c757d;
-  --text-muted: #adb5bd;
-  --border-color: #dee2e6;
-  --card-bg: #ffffff;
-  --shadow: rgba(0, 0, 0, 0.1);
+  /* Brand — Saudi flag green + warm luxury accents */
+  --accent: #006C35;
+  --accent-strong: #005a2c;
+  --accent-soft: rgba(0, 108, 53, 0.18);
+  --accent-glow: rgba(0, 108, 53, 0.42);
+  --gold: #d4af77;
+  --gold-strong: #c49a55;
+  --gold-soft: rgba(212, 175, 119, 0.18);
+  --gold-glow: rgba(212, 175, 119, 0.42);
+  --cream: #f4ead8;
+  --copper: #c4785a;
+
+  /* Dark Theme (site is dark-only) */
+  --bg-primary: #070b09;
+  --bg-secondary: #0e1612;
+  --bg-tertiary: #15201a;
+  --text-primary: #f3faf6;
+  --text-secondary: #b7c7bc;
+  --text-muted: #7a8c80;
+  --border-color: rgba(0, 108, 53, 0.22);
+  --card-bg: #101814;
+  --shadow: rgba(0, 0, 0, 0.45);
 }
 
 /* Dark Theme Colors */
 [data-theme="dark"] {
-  --bg-primary: #1a1a1a;
-  --bg-secondary: #2d2d2d;
-  --bg-tertiary: #3d3d3d;
-  --text-primary: #ffffff;
-  --text-secondary: #e9ecef;
-  --text-muted: #adb5bd;
-  --border-color: #404040;
-  --card-bg: #2d2d2d;
-  --shadow: rgba(0, 0, 0, 0.3);
+  --accent: #006C35;
+  --accent-strong: #005a2c;
+  --accent-soft: rgba(0, 108, 53, 0.18);
+  --accent-glow: rgba(0, 108, 53, 0.42);
+  --gold: #d4af77;
+  --gold-strong: #c49a55;
+  --gold-soft: rgba(212, 175, 119, 0.18);
+  --gold-glow: rgba(212, 175, 119, 0.42);
+  --cream: #f4ead8;
+  --copper: #c4785a;
+  --bg-primary: #070b09;
+  --bg-secondary: #0e1612;
+  --bg-tertiary: #15201a;
+  --text-primary: #f3faf6;
+  --text-secondary: #b7c7bc;
+  --text-muted: #7a8c80;
+  --border-color: rgba(0, 108, 53, 0.22);
+  --card-bg: #101814;
+  --shadow: rgba(0, 0, 0, 0.45);
 }
 
 /* Global Font Reset */
@@ -200,8 +222,8 @@ input, textarea, select, .form-control {
 
 input:focus, textarea:focus, select:focus, .form-control:focus {
   font-weight: var(--font-weight-medium) !important;
-  border-color: #0078FF !important;
-  box-shadow: 0 0 0 0.2rem rgba(0, 120, 255, 0.25) !important;
+  border-color: var(--accent) !important;
+  box-shadow: 0 0 0 0.2rem var(--accent-soft) !important;
 }
 
 .form-label {
@@ -422,7 +444,7 @@ td {
 
 [data-theme="dark"] .form-control:focus {
   background-color: var(--bg-secondary) !important;
-  border-color: #0078FF !important;
+  border-color: var(--accent) !important;
   color: var(--text-primary) !important;
 }
 
@@ -489,11 +511,11 @@ td {
 
 /* Navbar Dark Mode */
 [data-theme="dark"] .navsearch {
-  background-color: #0056b3 !important;
+  background-color: #006C35 !important;
 }
 
 /* Footer and other components */
-[data-theme="dark"] footer {
+[data-theme="dark"] footer:not(.site-footer) {
   background-color: var(--bg-secondary) !important;
   color: var(--text-primary) !important;
 }
@@ -544,8 +566,8 @@ td {
 /* High Contrast Mode */
 @media (prefers-contrast: high) {
   body {
-    color: #000000 !important;
-    background-color: #ffffff !important;
+    color: #f3faf6 !important;
+    background-color: #070b09 !important;
   }
   
   .btn {
@@ -554,6 +576,68 @@ td {
   
   .form-control {
     border-width: 2px !important;
+  }
+}
+
+.payment-method-picker {
+  width: 100%;
+  margin-bottom: 1.25rem;
+}
+
+.payment-method-picker__label {
+  font-weight: 700;
+  margin-bottom: 0.65rem;
+  color: var(--text-primary, #e8f0eb);
+}
+
+.payment-method-picker__grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+.payment-method-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.2rem;
+  text-align: right;
+  padding: 0.9rem 1rem;
+  border-radius: 14px;
+  border: 1px solid var(--border-color, #2a3d32);
+  background: var(--bg-tertiary, #121a16);
+  color: inherit;
+  cursor: pointer;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.payment-method-card__icon {
+  font-size: 1.35rem;
+  line-height: 1;
+}
+
+.payment-method-card__title {
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+.payment-method-card__hint {
+  font-size: 0.75rem;
+  opacity: 0.75;
+}
+
+.payment-method-card.is-selected {
+  border-color: #006c35;
+  box-shadow: 0 0 0 1px #006c35, 0 8px 20px rgba(0, 108, 53, 0.18);
+}
+
+.payment-method-card:hover {
+  border-color: #d4af77;
+}
+
+@media (max-width: 576px) {
+  .payment-method-picker__grid {
+    grid-template-columns: 1fr;
   }
 }
 

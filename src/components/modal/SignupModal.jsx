@@ -1,31 +1,9 @@
 import React, { useState } from "react";
-import {
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalCloseButton,
-  ModalFooter,
-  FormControl,
-  FormLabel,
-  FormErrorMessage,
-  Input,
-  InputGroup,
-  InputLeftElement,
-  Button,
-  VStack,
-  HStack,
-  Icon,
-  Box,
-  Text,
-  Divider,
-  useColorModeValue,
-  InputRightElement,
-} from "@chakra-ui/react";
-import { FaUser, FaLock, FaPhone, FaEye, FaEyeSlash } from "react-icons/fa";
+import { Modal, Form, Button, Spinner, InputGroup } from "react-bootstrap";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { useAuth } from "../../contexts/AuthContext";
+import "./AuthModal.css";
 
 const SignupModal = ({ show, handleClose }) => {
   const [formData, setFormData] = useState({
@@ -33,16 +11,10 @@ const SignupModal = ({ show, handleClose }) => {
     phoneNumber: "",
     password: "",
   });
-
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const { register } = useAuth();
-  
-  // Color mode values
-  const bgColor = useColorModeValue("white", "gray.800");
-  const borderColor = useColorModeValue("gray.200", "gray.600");
-  const textColor = useColorModeValue("gray.600", "gray.300");
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -53,7 +25,7 @@ const SignupModal = ({ show, handleClose }) => {
   };
 
   const validateForm = () => {
-    let newErrors = {};
+    const newErrors = {};
 
     if (!formData.fullName.trim()) {
       newErrors.fullName = "الاسم مطلوب";
@@ -68,13 +40,7 @@ const SignupModal = ({ show, handleClose }) => {
     }
 
     setErrors(newErrors);
-
-    if (Object.keys(newErrors).length > 0) {
-      Object.values(newErrors).forEach((msg) => toast.error(msg));
-      return false;
-    }
-
-    return true;
+    return Object.keys(newErrors).length === 0;
   };
 
   const handleSignup = async (e) => {
@@ -91,19 +57,19 @@ const SignupModal = ({ show, handleClose }) => {
         password: formData.password,
       };
       await register(payload);
-      
-      // Verify token was saved
+
       const savedToken = localStorage.getItem("token");
       if (savedToken) {
         toast.success("✅ تم إنشاء الحساب بنجاح! تم حفظ التوكين.");
       } else {
         toast.warning("تم إنشاء الحساب لكن لم يتم حفظ التوكين");
       }
-      
+
       handleClose();
     } catch (error) {
       console.error("Signup error:", error);
-      const errorMessage = error.response?.data?.message || error.message || "خطأ في التسجيل، حاول مجددًا";
+      const errorMessage =
+        error.response?.data?.message || error.message || "خطأ في التسجيل، حاول مجددًا";
       toast.error(errorMessage);
     } finally {
       setLoading(false);
@@ -111,195 +77,96 @@ const SignupModal = ({ show, handleClose }) => {
   };
 
   return (
-    <Modal isOpen={show} onClose={handleClose} size="lg" isCentered>
-      <ModalOverlay bg="blackAlpha.600" backdropFilter="blur(10px)" />
-      <ModalContent 
-        bg={bgColor} 
-        borderRadius="xl" 
-        boxShadow="2xl"
-        border="1px solid"
-        borderColor={borderColor}
-        dir="rtl"
-        maxH="90vh"
-        overflowY="auto"
-      >
-        <form onSubmit={handleSignup}>
-          <ModalHeader 
-            textAlign="center" 
-            fontSize="2xl" 
-            fontWeight="bold" 
-            color="blue.500"
-            borderBottom="1px solid"
-            borderColor={borderColor}
-            pb={4}
-          >
-            إنشاء حساب جديد
-          </ModalHeader>
-          <ModalCloseButton />
-          
-          <ModalBody py={6}>
-            <VStack spacing={6}>
-              {/* Welcome Text */}
-              <Box textAlign="center">
-                <Text fontSize="lg" color={textColor} mb={2}>
-                  انضم إلينا اليوم
-                </Text>
-                <Text fontSize="sm" color={textColor}>
-                  أنشئ حسابك للاستمتاع بتجربة تسوق مميزة
-                </Text>
-              </Box>
+    <Modal
+      show={show}
+      onHide={handleClose}
+      size="lg"
+      centered
+      dir="rtl"
+      className="auth-modal"
+    >
+      <Form onSubmit={handleSignup}>
+        <Modal.Header closeButton>
+          <Modal.Title>إنشاء حساب جديد</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <p className="auth-lead">انضم إلينا اليوم</p>
+          <p className="auth-hint">أنشئ حسابك للاستمتاع بتجربة تسوق مميزة</p>
 
-              <Divider />
+          <Form.Group className="mb-3">
+            <Form.Label className="fw-bold mb-2">الاسم الكامل</Form.Label>
+            <Form.Control
+              name="fullName"
+              value={formData.fullName}
+              onChange={handleChange}
+              placeholder="أدخل اسمك الكامل"
+              isInvalid={!!errors.fullName}
+              required
+            />
+            <Form.Control.Feedback type="invalid">{errors.fullName}</Form.Control.Feedback>
+          </Form.Group>
 
-              {/* Form Fields */}
-              <VStack spacing={5} w="full">
-                {/* Full Name */}
-                <FormControl isInvalid={!!errors.fullName} w="full">
-                  <FormLabel fontSize="sm" fontWeight="medium" color={textColor}>
-                    الاسم الكامل
-                  </FormLabel>
-                  <InputGroup>
-                    <InputLeftElement pointerEvents="none">
-                      <Icon as={FaUser} color="gray.400" />
-                    </InputLeftElement>
-                    <Input
-                      name="fullName"
-                      value={formData.fullName}
-                      onChange={handleChange}
-                      placeholder="أدخل اسمك الكامل"
-                      size="lg"
-                      borderRadius="lg"
-                      borderColor={borderColor}
-                      _focus={{
-                        borderColor: "blue.500",
-                        boxShadow: "0 0 0 1px #3182ce"
-                      }}
-                      _hover={{
-                        borderColor: "blue.300"
-                      }}
-                    />
-                  </InputGroup>
-                  <FormErrorMessage>{errors.fullName}</FormErrorMessage>
-                </FormControl>
+          <Form.Group className="mb-3">
+            <Form.Label className="fw-bold mb-2">رقم الهاتف</Form.Label>
+            <Form.Control
+              name="phoneNumber"
+              value={formData.phoneNumber}
+              onChange={handleChange}
+              placeholder="مثال: 0501234567"
+              isInvalid={!!errors.phoneNumber}
+              required
+              style={{ direction: "ltr", textAlign: "left" }}
+            />
+            <Form.Control.Feedback type="invalid">{errors.phoneNumber}</Form.Control.Feedback>
+          </Form.Group>
 
-                {/* Phone Number */}
-                <FormControl isInvalid={!!errors.phoneNumber} w="full">
-                  <FormLabel fontSize="sm" fontWeight="medium" color={textColor}>
-                    رقم الهاتف
-                  </FormLabel>
-                  <InputGroup>
-                    <InputLeftElement pointerEvents="none">
-                      <Icon as={FaPhone} color="gray.400" />
-                    </InputLeftElement>
-                    <Input
-                      name="phoneNumber"
-                      value={formData.phoneNumber}
-                      onChange={handleChange}
-                      placeholder="مثال: 01012345678"
-                      size="lg"
-                      borderRadius="lg"
-                      borderColor={borderColor}
-                      _focus={{
-                        borderColor: "blue.500",
-                        boxShadow: "0 0 0 1px #3182ce"
-                      }}
-                      _hover={{
-                        borderColor: "blue.300"
-                      }}
-                    />
-                  </InputGroup>
-                  <FormErrorMessage>{errors.phoneNumber}</FormErrorMessage>
-                </FormControl>
-
-                {/* Password — بدون فالديشن على المحتوى */}
-                <FormControl w="full">
-                  <FormLabel fontSize="sm" fontWeight="medium" color={textColor}>
-                    كلمة المرور
-                  </FormLabel>
-                  <InputGroup>
-                    <InputLeftElement pointerEvents="none">
-                      <Icon as={FaLock} color="gray.400" />
-                    </InputLeftElement>
-                    <Input
-                      type={showPassword ? "text" : "password"}
-                      name="password"
-                      value={formData.password}
-                      onChange={handleChange}
-                      placeholder="أدخل كلمة المرور"
-                      size="lg"
-                      borderRadius="lg"
-                      borderColor={borderColor}
-                      _focus={{
-                        borderColor: "blue.500",
-                        boxShadow: "0 0 0 1px #3182ce"
-                      }}
-                      _hover={{
-                        borderColor: "blue.300"
-                      }}
-                    />
-                    <InputRightElement>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => setShowPassword(!showPassword)}
-                      >
-                        <Icon as={showPassword ? FaEyeSlash : FaEye} color="gray.400" />
-                      </Button>
-                    </InputRightElement>
-                  </InputGroup>
-                </FormControl>
-              </VStack>
-            </VStack>
-          </ModalBody>
-          
-          <ModalFooter 
-            borderTop="1px solid" 
-            borderColor={borderColor} 
-            pt={4}
-            justifyContent="center"
-          >
-            <HStack spacing={4} w="full">
+          <Form.Group className="mb-2">
+            <Form.Label className="fw-bold mb-2">كلمة المرور</Form.Label>
+            <InputGroup>
+              <Form.Control
+                type={showPassword ? "text" : "password"}
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                placeholder="أدخل كلمة المرور"
+                required
+              />
               <Button
-                colorScheme="blue"
-                type="submit"
-                isLoading={loading}
-                loadingText="جاري إنشاء الحساب..."
-                size="lg"
-                flex={1}
-                borderRadius="lg"
-                fontWeight="medium"
-                bgGradient="linear(to-r, blue.400, blue.600)"
-                _hover={{
-                  transform: "translateY(-1px)",
-                  boxShadow: "lg",
-                  bgGradient: "linear(to-r, blue.500, blue.700)"
-                }}
-                transition="all 0.2s"
-                _active={{
-                  transform: "translateY(0px)"
-                }}
+                type="button"
+                variant="outline-secondary"
+                onClick={() => setShowPassword((prev) => !prev)}
+                aria-label={showPassword ? "إخفاء كلمة المرور" : "إظهار كلمة المرور"}
               >
-                إنشاء الحساب
+                {showPassword ? <FaEyeSlash /> : <FaEye />}
               </Button>
-              <Button 
-                variant="outline" 
-                onClick={handleClose}
-                size="lg"
-                flex={1}
-                borderRadius="lg"
-                borderColor={borderColor}
-                color={textColor}
-                _hover={{
-                  bg: "gray.50",
-                  borderColor: "gray.300"
-                }}
-              >
-                إلغاء
-              </Button>
-            </HStack>
-          </ModalFooter>
-        </form>
-      </ModalContent>
+            </InputGroup>
+          </Form.Group>
+        </Modal.Body>
+        <Modal.Footer className="d-flex gap-2">
+          <Button
+            type="submit"
+            className="flex-grow-1 py-3 fw-bold auth-btn-primary"
+            disabled={loading}
+          >
+            {loading ? (
+              <>
+                <Spinner size="sm" className="me-2" />
+                جاري إنشاء الحساب...
+              </>
+            ) : (
+              "إنشاء الحساب"
+            )}
+          </Button>
+          <Button
+            type="button"
+            className="flex-grow-1 py-3 fw-bold auth-btn-ghost"
+            onClick={handleClose}
+            disabled={loading}
+          >
+            إلغاء
+          </Button>
+        </Modal.Footer>
+      </Form>
     </Modal>
   );
 };

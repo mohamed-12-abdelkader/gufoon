@@ -5,8 +5,9 @@ import ProductCard from "../components/card/ProductCard";
 import DeleteModal from "../components/modal/DeleteModal";
 import { Form, Button, Accordion } from "react-bootstrap";
 import { FaFilter, FaSortAmountDown, FaSortAmountUp } from "react-icons/fa";
-import { useParams } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
 import baseUrl from "../api/baseUrl";
+import { searchProducts } from "../utils/services";
 import ScrollToTop from "../components/scollToTop/ScrollToTop";
 
 const availableFrames = ["Full Frame", "Half Frame", "Rimless"];
@@ -46,6 +47,8 @@ function getTotalCountFromApi(data) {
 
 const ViewAllProducts = ({ offers }) => {
   const { id } = useParams();
+  const [searchParams] = useSearchParams();
+  const searchQ = (searchParams.get("search") || searchParams.get("q") || "").trim();
 
   const additionalFilters = {};
   if (id) {
@@ -73,12 +76,23 @@ const ViewAllProducts = ({ offers }) => {
   const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
+    setCurrentPage(1);
+    setFilter((prev) => ({ ...prev, skip: 0 }));
+  }, [searchQ]);
+
+  useEffect(() => {
     async function fetchProducts() {
       setLoading(true);
       setError(null);
       try {
         let data;
-        if (id) {
+        if (searchQ) {
+          data = await searchProducts({
+            q: searchQ,
+            limit: filter.limit,
+            skip: filter.skip,
+          });
+        } else if (id) {
           // Use the new category-specific API endpoint
           const response = await baseUrl.get(`api/products/category/${id}`, {
             params: {
@@ -121,7 +135,7 @@ const ViewAllProducts = ({ offers }) => {
     }
 
     fetchProducts();
-  }, [filter, id]);
+  }, [filter, id, searchQ]);
 
   const handlePageChange = (page) => {
     setCurrentPage(page);
@@ -973,8 +987,17 @@ const ViewAllProducts = ({ offers }) => {
             <>
               <div className="products-toolbar">
                 <p className="products-count">
-                  عرض <strong>{products.length}</strong> من{" "}
-                  <strong>{totalCount}</strong> منتج
+                  {searchQ ? (
+                    <>
+                      نتائج البحث عن «{searchQ}»:{" "}
+                      <strong>{totalCount}</strong> منتج
+                    </>
+                  ) : (
+                    <>
+                      عرض <strong>{products.length}</strong> من{" "}
+                      <strong>{totalCount}</strong> منتج
+                    </>
+                  )}
                 </p>
               </div>
               <div className="products-wrapper">
@@ -999,7 +1022,9 @@ const ViewAllProducts = ({ offers }) => {
                 </div>
                 <h4 className="text-muted mb-2">لا توجد منتجات</h4>
                 <p className="text-muted mb-0 small">
-                  لا توجد منتجات متاحة في هذا التصنيف حالياً
+                  {searchQ
+                    ? `لا توجد نتائج للبحث عن «${searchQ}»`
+                    : "لا توجد منتجات متاحة في هذا التصنيف حالياً"}
                 </p>
               </div>
             </div>

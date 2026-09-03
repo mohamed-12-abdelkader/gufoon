@@ -84,7 +84,7 @@ const Order = () => {
   }
 
   return (
-    <div dir="rtl" className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 py-8 px-4">
+    <div dir="rtl" className="min-h-screen py-8 px-4" style={{ background: "var(--bg-primary)" }}>
       <div className="max-w-7xl mx-auto mt-20">
         {/* Header Section */}
         <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl dark:shadow-2xl p-6 mb-6 border border-gray-200 dark:border-gray-700">
@@ -117,7 +117,7 @@ const Order = () => {
                 </div>
                 <div className="bg-gray-50 dark:bg-gray-700/50 p-4 rounded-lg">
                   <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">💰 إجمالي المبلغ</p>
-                  <p className="font-bold text-2xl text-blue-600 dark:text-blue-400">{order.totalAmount?.toFixed(2) || 0} ر.س</p>
+                  <p className="font-bold text-2xl" style={{ color: "#d4af77" }}>{order.totalAmount?.toFixed(2) || 0} ر.س</p>
                 </div>
                 <div className="bg-gray-50 dark:bg-gray-700/50 p-4 rounded-lg md:col-span-2">
                   <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">📍 عنوان الشحن</p>
@@ -135,19 +135,19 @@ const Order = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-800/30 p-4 rounded-lg border border-blue-200 dark:border-blue-700">
                   <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">الاسم الكامل</p>
-                  <p className="font-semibold text-gray-800 dark:text-gray-200">{order.user?.fullName || "غير متوفر"}</p>
+                  <p className="font-semibold text-gray-800 dark:text-gray-200">{order.user?.fullName || order.guestName || "ضيف"}</p>
                 </div>
                 <div className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/30 dark:to-green-800/30 p-4 rounded-lg border border-green-200 dark:border-green-700">
                   <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">📧 البريد الإلكتروني</p>
-                  <p className="font-semibold text-gray-800 dark:text-gray-200">{order.user?.email || "غير متوفر"}</p>
+                  <p className="font-semibold text-gray-800 dark:text-gray-200">{order.user?.email || "طلب بدون حساب"}</p>
                 </div>
                 <div className="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/30 dark:to-purple-800/30 p-4 rounded-lg border border-purple-200 dark:border-purple-700">
                   <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">📞 رقم الهاتف</p>
-                  <p className="font-semibold text-gray-800 dark:text-gray-200">{order.user?.phoneNumber || "غير متوفر"}</p>
+                  <p className="font-semibold text-gray-800 dark:text-gray-200">{order.user?.phoneNumber || order.guestPhone || "غير متوفر"}</p>
                 </div>
                 <div className="bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-900/30 dark:to-orange-800/30 p-4 rounded-lg border border-orange-200 dark:border-orange-700">
                   <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">🏙️ المدينة</p>
-                  <p className="font-semibold text-gray-800 dark:text-gray-200">{order.user?.city || "غير متوفر"}</p>
+                  <p className="font-semibold text-gray-800 dark:text-gray-200">{order.shippingCity || order.user?.city || "غير متوفر"}</p>
                 </div>
               </div>
             </div>

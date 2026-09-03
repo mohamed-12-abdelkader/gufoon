@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { useLocation, NavLink } from "react-router-dom";
-import { FaPercent, FaClipboardList, FaChartLine, FaBell } from "react-icons/fa";
+import { FaPercent, FaClipboardList, FaChartLine, FaBell, FaFileImport } from "react-icons/fa";
 import { FaWhatsapp } from "react-icons/fa";
 import { AiOutlineAppstoreAdd } from "react-icons/ai";
 import { MdCategory, MdColorLens, MdOutlineBrandingWatermark } from "react-icons/md";
@@ -15,6 +15,7 @@ const AdminLinks = ({ currentLink, setCurrentLink }) => {
     { link: "واتساب", path: "/admin/whatsapp", icon: <FaWhatsapp className="text-success" /> },
     { link: "الإشعارات", path: "/admin/notifications", icon: <FaBell className="text-yellow-500" /> },
     { link: "اضافة منتج", path: "/admin/add_product", icon: <AiOutlineAppstoreAdd className="text-red-500" /> },
+    { link: "استيراد المنتجات", path: "/admin/import_products", icon: <FaFileImport className="text-green-500" /> },
     { link: "اضافة خصم", path: "/admin/add_discount", icon: <FaPercent className="text-purple-500" /> },
     { link: "كوبونات الخصم", path: "/admin/coupons", icon: <FaPercent className="text-green-600" /> },
     { link: "اضافة فئة", path: "/admin/add_category", icon: <MdCategory className="text-green-500" /> },
@@ -33,7 +34,7 @@ const AdminLinks = ({ currentLink, setCurrentLink }) => {
           key={link.path}
           to={link.path}
           className={({ isActive }) =>
-            `flex items-center gap-3 p-3 rounded shadow-sm transition ${isActive ? "bg-blue-600 text-white" : "bg-white text-black"}`
+            `flex items-center gap-3 p-3 rounded shadow-sm transition admin-side-link ${isActive ? "is-active" : ""}`
           }
           onClick={() => setCurrentLink(link.path)}
         >
@@ -41,6 +42,22 @@ const AdminLinks = ({ currentLink, setCurrentLink }) => {
           <h6 className="font-bold">{link.link}</h6>
         </NavLink>
       ))}
+      <style>{`
+        .admin-side-link {
+          background: var(--card-bg);
+          color: var(--text-primary) !important;
+          border: 1px solid var(--border-color);
+        }
+        .admin-side-link h6 {
+          color: inherit !important;
+          margin: 0 !important;
+        }
+        .admin-side-link.is-active {
+          background: #006C35;
+          color: #fff !important;
+          border-color: #006C35;
+        }
+      `}</style>
     </div>
   );
 };

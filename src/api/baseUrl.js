@@ -1,7 +1,10 @@
 import axios from "axios";
 
 const baseUrl = axios.create({
-  baseURL: "https://api.gufoon.shop/",
+  baseURL:
+    process.env.NODE_ENV === "development"
+      ? "http://localhost:8000/"
+      : "https://api.gufoon.shop/",
 });
 
 export default baseUrl;

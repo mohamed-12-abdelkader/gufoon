@@ -1,9 +1,14 @@
 import React, { useEffect, useState } from "react";
-import { Container, Card, Button, Spinner, Alert, Badge } from "react-bootstrap";
+import { Container, Card, Button, Spinner, Alert, Badge, Form } from "react-bootstrap";
 import { useSearchParams, useNavigate } from "react-router-dom";
-import { FaCheckCircle, FaTimesCircle, FaSpinner } from "react-icons/fa";
+import { FaCheckCircle, FaTimesCircle } from "react-icons/fa";
 import { toast } from "react-toastify";
 import baseUrl from "../../api/baseUrl";
+import {
+  saveGuestPendingPayment,
+  readGuestPendingPayment,
+  clearGuestPendingPayment,
+} from "../../utils/guestPayment";
 
 const PaymentCallback = () => {
   const [searchParams] = useSearchParams();
@@ -12,15 +17,17 @@ const PaymentCallback = () => {
   const [orderId, setOrderId] = useState(null);
   const [orderDetails, setOrderDetails] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [retryLoading, setRetryLoading] = useState(false);
+  const [retryPhone, setRetryPhone] = useState(
+    () => readGuestPendingPayment()?.phoneNumber || ""
+  );
 
   useEffect(() => {
     const verifyPayment = async () => {
       try {
         // Paymob قد يرسل معلومات في URL parameters
         const success = searchParams.get("success");
-        const transactionId = searchParams.get("transaction_id");
         const orderIdParam = searchParams.get("order_id");
-        const hmac = searchParams.get("hmac");
 
         if (orderIdParam) {
           setOrderId(orderIdParam);
@@ -43,6 +50,7 @@ const PaymentCallback = () => {
               // التحقق من حالة الدفع
               if (order.paymentStatus === "paid" || order.status === "Processing") {
                 setStatus("success");
+                clearGuestPendingPayment();
                 toast.success("تم الدفع بنجاح!");
               } else if (order.paymentStatus === "failed") {
                 setStatus("failed");
@@ -51,6 +59,7 @@ const PaymentCallback = () => {
                 // إذا كانت الحالة pending، نتحقق من success parameter
                 if (success === "true" || success === "1") {
                   setStatus("success");
+                  clearGuestPendingPayment();
                   toast.success("تم الدفع بنجاح!");
                 } else {
                   setStatus("failed");
@@ -62,6 +71,7 @@ const PaymentCallback = () => {
               // Fallback to URL parameters
               if (success === "true" || success === "1") {
                 setStatus("success");
+                clearGuestPendingPayment();
               } else {
                 setStatus("failed");
               }
@@ -70,6 +80,7 @@ const PaymentCallback = () => {
             // No token, check URL parameters only
             if (success === "true" || success === "1") {
               setStatus("success");
+              clearGuestPendingPayment();
             } else {
               setStatus("failed");
             }
@@ -78,6 +89,7 @@ const PaymentCallback = () => {
           // No order ID, check URL parameters
           if (success === "true" || success === "1") {
             setStatus("success");
+            clearGuestPendingPayment();
           } else {
             setStatus("failed");
           }
@@ -92,6 +104,39 @@ const PaymentCallback = () => {
 
     verifyPayment();
   }, [searchParams]);
+
+  const pendingGuestPayment = readGuestPendingPayment();
+  const retryOrderId = Number(orderId || pendingGuestPayment?.orderId || 0);
+  const canRetryGuestPay = !localStorage.getItem("token") && retryOrderId > 0;
+
+  const handleRetryGuestPayment = async () => {
+    const phone = retryPhone.trim() || pendingGuestPayment?.phoneNumber || "";
+    if (!retryOrderId || !phone) {
+      toast.error("أدخل رقم الجوال المستخدم عند إنشاء الطلب");
+      return;
+    }
+
+    setRetryLoading(true);
+    try {
+      const { data } = await baseUrl.post("api/paymob/guest-intention", {
+        orderId: retryOrderId,
+        phoneNumber: phone,
+      });
+      if (data?.checkoutUrl) {
+        saveGuestPendingPayment(retryOrderId, phone);
+        toast.info("جاري التوجيه إلى صفحة الدفع...");
+        window.location.href = data.checkoutUrl;
+        return;
+      }
+      toast.error(data?.message || "تعذر إنشاء رابط الدفع");
+    } catch (error) {
+      toast.error(
+        error.response?.data?.message || "تعذر إعادة إنشاء رابط الدفع"
+      );
+    } finally {
+      setRetryLoading(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -191,6 +236,45 @@ const PaymentCallback = () => {
           <p className="lead mb-4">
             حدث خطأ أثناء عملية الدفع. يرجى المحاولة مرة أخرى أو اختيار طريقة دفع أخرى.
           </p>
+
+          {canRetryGuestPay && (
+            <div className="mx-auto mb-4 text-start" style={{ maxWidth: 420 }}>
+              <Alert variant="warning" className="mb-3">
+                يمكنك إعادة إنشاء رابط الدفع بدون حساب بنفس رقم الجوال.
+              </Alert>
+              {retryOrderId > 0 && (
+                <p className="mb-2">
+                  رقم الطلب: <strong>#{retryOrderId}</strong>
+                </p>
+              )}
+              <Form.Group className="mb-3">
+                <Form.Label className="fw-bold">رقم الجوال</Form.Label>
+                <Form.Control
+                  type="tel"
+                  value={retryPhone}
+                  onChange={(e) => setRetryPhone(e.target.value)}
+                  placeholder="05xxxxxxxx"
+                  style={{ direction: "ltr", textAlign: "left" }}
+                />
+              </Form.Group>
+              <Button
+                variant="success"
+                size="lg"
+                className="w-100"
+                disabled={retryLoading}
+                onClick={handleRetryGuestPayment}
+              >
+                {retryLoading ? (
+                  <>
+                    <Spinner size="sm" className="me-2" />
+                    جاري إنشاء رابط الدفع...
+                  </>
+                ) : (
+                  "إعادة إنشاء رابط الدفع"
+                )}
+              </Button>
+            </div>
+          )}
 
           <div className="d-flex gap-3 justify-content-center">
             <Button

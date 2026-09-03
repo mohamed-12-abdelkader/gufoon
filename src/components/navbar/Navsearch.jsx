@@ -1,18 +1,17 @@
 import { useState, useEffect, useRef } from "react";
 import { Button, Dropdown, Form, Offcanvas, Spinner } from "react-bootstrap";
 import { FaBell, FaCartPlus, FaSearch } from "react-icons/fa6";
-import { FaUserCircle, FaSignOutAlt, FaShoppingBag, FaUserEdit, FaTools, FaFileInvoiceDollar, FaCog, FaHeart, FaHistory, FaSun, FaMoon, FaSearchLocation } from "react-icons/fa";
+import { FaUserCircle, FaSignOutAlt, FaShoppingBag, FaUserEdit, FaTools, FaFileInvoiceDollar, FaCog, FaHeart, FaHistory, FaSearchLocation } from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";
 import LoginModal from "../modal/LoginModal";
 import SignupModal from "../modal/SignupModal";
 import { useAuth } from "../../contexts/AuthContext";
 import { useCart } from "../../contexts/CartContext";
 import { useNotifications } from "../../contexts/Notifications";
-import { useTheme } from "../../contexts/ThemeContext";
 import { IoIosNotifications } from "react-icons/io";
 import UserType from "../../Hook/userType/UserType";
 import { toast } from "react-toastify";
-import baseUrl from "../../api/baseUrl";
+import { searchProducts } from "../../utils/services";
 import logo from "../../images/logo-removebg-preview.png"
 const Navsearch = () => {
   const [show, setShow] = useState(false);
@@ -26,13 +25,13 @@ const Navsearch = () => {
   const [searchCount, setSearchCount] = useState(0);
   const searchRef = useRef(null);
   const searchTimeoutRef = useRef(null);
+  const searchSeqRef = useRef(0);
   const [userData, isAdmin, user] = UserType();
   const navigate = useNavigate();
 
   const { cart } = useCart();
   const { unreadCount } = useNotifications();
   const { logout } = useAuth();
-  const { theme, toggleTheme } = useTheme();
 
   const totalCartItems = cart.reduce((total, item) => total + item.quantity, 0);
 
@@ -56,8 +55,8 @@ const Navsearch = () => {
     if (searchQuery.trim().length >= 1) {
       // Search immediately with minimal debounce (100ms) to avoid too many requests
       searchTimeoutRef.current = setTimeout(() => {
-        handleSearch();
-      }, 100); // Reduced to 100ms for faster response
+        handleSearch(searchQuery);
+      }, 250);
     } else {
       setSearchResults([]);
       setSearchCount(0);
@@ -71,45 +70,48 @@ const Navsearch = () => {
     };
   }, [searchQuery]);
 
-  const handleSearch = async () => {
-    if (searchQuery.trim().length < 1) {
+  const handleSearch = async (rawQuery) => {
+    const q = String(rawQuery ?? searchQuery).trim();
+    if (q.length < 1) {
       setSearchResults([]);
       setSearchCount(0);
       setShowSearchMenu(false);
       return;
     }
 
+    const seq = ++searchSeqRef.current;
+
     try {
       setSearchLoading(true);
-      const response = await baseUrl.get('/api/products/search', {
-        params: {
-          q: searchQuery.trim(),
-          limit: 10,
-          skip: 0
-        }
+      const { count, data } = await searchProducts({
+        q,
+        limit: 10,
+        skip: 0,
       });
 
-      const data = response.data;
-      
-      // Handle the new API response structure
-      if (data && data.results) {
-        setSearchResults(Array.isArray(data.results) ? data.results : []);
-        setSearchCount(data.count || data.pagination?.total || 0);
-        setShowSearchMenu(true);
-      } else {
-        // Fallback for old API structure
-        setSearchResults(Array.isArray(data) ? data : []);
-        setSearchCount(data.length || 0);
-        setShowSearchMenu(true);
-      }
+      if (seq !== searchSeqRef.current) return;
+
+      setSearchResults(data);
+      setSearchCount(count);
+      setShowSearchMenu(true);
     } catch (error) {
-      console.error('Error searching products:', error);
+      if (seq !== searchSeqRef.current) return;
+      console.error("Error searching products:", error);
       setSearchResults([]);
       setSearchCount(0);
-      // Don't show error to user, just clear results
     } finally {
-      setSearchLoading(false);
+      if (seq === searchSeqRef.current) {
+        setSearchLoading(false);
+      }
     }
+  };
+
+  const goToSearchPage = (query) => {
+    const q = String(query ?? searchQuery).trim();
+    if (!q) return;
+    setShowSearchMenu(false);
+    setSearchQuery("");
+    navigate(`/products?search=${encodeURIComponent(q)}`);
   };
 
   const handleProductClick = (productId) => {
@@ -146,7 +148,7 @@ const Navsearch = () => {
   };
 
   return (
-    <div dir="ltr" className="navsearch navsearch-bar" style={{ zIndex: "1000", backgroundColor: "#012148" }}>
+    <div dir="ltr" className="navsearch navsearch-bar">
       <div className="navsearch-inner">
         <Link to="/" className="navsearch-logo">
           <img src={logo} alt="جوفون" className="navsearch-logo-img" />
@@ -154,7 +156,13 @@ const Navsearch = () => {
 
         {/* Search Bar */}
         <div className="navsearch-search-wrap" ref={searchRef}>
-          <Form className="navsearch-form">
+          <Form
+            className="navsearch-form"
+            onSubmit={(e) => {
+              e.preventDefault();
+              goToSearchPage(searchQuery);
+            }}
+          >
             <div className="navsearch-input-group">
               <Form.Control
                 dir="rtl"
@@ -201,9 +209,9 @@ const Navsearch = () => {
                         <Link 
                           to={`/products?search=${encodeURIComponent(searchQuery.trim())}`}
                           className="view-all-link"
-                          onClick={() => {
-                            setShowSearchMenu(false);
-                            setSearchQuery("");
+                          onClick={(e) => {
+                            e.preventDefault();
+                            goToSearchPage(searchQuery);
                           }}
                         >
                           عرض الكل
@@ -213,11 +221,10 @@ const Navsearch = () => {
                     <div className="search-results-list">
                       {searchResults.map((product) => {
                         // Get product image
-                        const productImage = product.cover || 
-                          (product.ProductImages && product.ProductImages.length > 0 
-                            ? product.ProductImages[0].url 
-                            : null) ||
-                          'https://via.placeholder.com/80x80?text=No+Image';
+                        const productImage = product.cover ||
+                          product.ProductImages?.[0]?.url ||
+                          product.productImages?.[0]?.url ||
+                          "https://via.placeholder.com/80x80?text=No+Image";
                         
                         // Calculate discounted price
                         const discountedPrice = product.discount && product.discount > 0
@@ -286,19 +293,6 @@ const Navsearch = () => {
         </div>
 
         <div className="navsearch-actions">
-          <Button
-            variant="link"
-            onClick={toggleTheme}
-            className="navsearch-icon-btn"
-            title={theme === 'light' ? 'تفعيل الوضع الداكن' : 'تفعيل الوضع الفاتح'}
-          >
-            {theme === 'light' ? (
-              <FaMoon className="navsearch-icon" />
-            ) : (
-              <FaSun className="navsearch-icon" />
-            )}
-          </Button>
-
           {!isAdmin && (
             <Link to="/cart" className="navsearch-cart-link">
               <FaCartPlus className="navsearch-icon navsearch-cart-icon" />
@@ -423,7 +417,7 @@ const Navsearch = () => {
                       className="rounded-pill py-2 fw-medium navsearch-login-btn"
                       onClick={() => setShowLoginModal(true)}
                       style={{
-                        backgroundColor: "#012148",
+                        backgroundColor: "#006C35",
                         border: "none",
                         transition: "all 0.3s ease"
                       }}
@@ -435,6 +429,8 @@ const Navsearch = () => {
                       className="rounded-pill py-2 fw-medium"
                       onClick={() => setShowSignupModal(true)}
                       style={{
+                        color: "#c49a55",
+                        borderColor: "#d4af77",
                         transition: "all 0.3s ease"
                       }}
                     >
@@ -464,11 +460,14 @@ const Navsearch = () => {
       {/* Custom Styles */}
       <style>{`
         .navsearch-bar {
+          z-index: 1000;
           min-height: 70px;
           display: flex;
           align-items: center;
           width: 100%;
-          box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+          background: #12110f;
+          border-bottom: 1px solid rgba(212, 175, 119, 0.28);
+          box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
         }
         .navsearch-inner {
           width: 92%;
@@ -523,8 +522,8 @@ const Navsearch = () => {
         }
         .navsearch-input:focus {
           outline: none;
-          box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.5);
-          background: #fff;
+          box-shadow: 0 0 0 2px rgba(212, 175, 119, 0.65);
+          background: #fffaf2;
         }
         .navsearch-spinner {
           position: absolute;
@@ -557,13 +556,17 @@ const Navsearch = () => {
         .navsearch-icon-btn:hover,
         .navsearch-cart-link:hover,
         .navsearch-user-toggle:hover {
-          background: rgba(255, 255, 255, 0.15);
-          color: #fff;
+          background: rgba(212, 175, 119, 0.16);
+          color: #d4af77;
           transform: scale(1.05);
+        }
+        .navsearch-cart-link:hover .navsearch-icon,
+        .navsearch-user-toggle:hover .navsearch-icon {
+          color: #d4af77;
         }
         .navsearch-icon {
           font-size: 1.35rem;
-          color: #fff;
+          color: #f4ead8;
         }
         .navsearch-cart-icon {
           font-size: 1.5rem;
@@ -578,8 +581,8 @@ const Navsearch = () => {
           min-width: 20px;
           height: 20px;
           padding: 0 5px;
-          background: #fff;
-          color: #012148;
+          background: #d4af77;
+          color: #1a140c;
           font-size: 0.75rem;
           font-weight: 700;
           border-radius: 10px;
@@ -599,8 +602,8 @@ const Navsearch = () => {
           display: none;
         }
         .navsearch-login-btn:hover {
-          background-color: #013060 !important;
-          color: #fff;
+          background-color: #005a2c !important;
+          color: #06210f;
         }
 
         /* Search results dropdown */

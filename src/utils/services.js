@@ -56,3 +56,26 @@ export async function getProductById(id) {
   const res = await baseUrl.get(`api/products/${id}`);
   return res.data;
 }
+
+export async function searchProducts({ q, limit = 20, skip = 0 }) {
+  const query = String(q || "").trim();
+  if (!query) {
+    return { count: 0, data: [] };
+  }
+
+  const res = await baseUrl.get("api/products/search", {
+    params: { q: query, limit, skip },
+  });
+
+  const payload = res.data || {};
+  const data = Array.isArray(payload.data)
+    ? payload.data
+    : Array.isArray(payload.results)
+      ? payload.results
+      : [];
+
+  return {
+    count: Number(payload.count) || data.length,
+    data,
+  };
+}

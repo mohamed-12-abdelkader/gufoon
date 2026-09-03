@@ -1,43 +1,18 @@
 import React, { useState } from "react";
-import {
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalFooter,
-  ModalBody,
-  ModalCloseButton,
-  Button,
-  Input,
-  InputGroup,
-  InputLeftElement,
-  Spinner,
-  Box,
-  Text,
-  Divider,
-  VStack,
-  HStack,
-  Icon,
-  useColorModeValue,
-} from "@chakra-ui/react";
-import { FaUser, FaLock, FaEye, FaEyeSlash } from "react-icons/fa";
+import { Modal, Form, Button, Spinner, InputGroup } from "react-bootstrap";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
+import "./AuthModal.css";
 
 const LoginModal = ({ show, handleClose }) => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [pending, setPending] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const { login } = useAuth()
-
+  const { login } = useAuth();
   const navigate = useNavigate();
-  
-  // Color mode values
-  const bgColor = useColorModeValue("white", "gray.800");
-  const borderColor = useColorModeValue("gray.200", "gray.600");
-  const textColor = useColorModeValue("gray.600", "gray.300");
 
   const handleLogin = async (event) => {
     event.preventDefault();
@@ -58,161 +33,78 @@ const LoginModal = ({ show, handleClose }) => {
   };
 
   return (
-    <Modal isOpen={show} onClose={handleClose} size="md" isCentered>
-      <ModalOverlay bg="blackAlpha.600" backdropFilter="blur(10px)" />
-      <ModalContent 
-        bg={bgColor} 
-        borderRadius="xl" 
-        boxShadow="2xl"
-        border="1px solid"
-        borderColor={borderColor}
-        dir="rtl"
-      >
-        <form onSubmit={handleLogin}>
-          <ModalHeader 
-            textAlign="center" 
-            fontSize="2xl" 
-            fontWeight="bold" 
-            color="blue.500"
-            borderBottom="1px solid"
-            borderColor={borderColor}
-            pb={4}
-          >
-            تسجيل الدخول
-          </ModalHeader>
-          <ModalCloseButton />
-          
-          <ModalBody py={8}>
-            <VStack spacing={6}>
-              {/* Welcome Text */}
-              <Box textAlign="center">
-                <Text fontSize="lg" color={textColor} mb={2}>
-                  مرحباً بك مرة أخرى
-                </Text>
-                <Text fontSize="sm" color={textColor}>
-                  سجل دخولك للوصول إلى حسابك
-                </Text>
-              </Box>
+    <Modal
+      show={show}
+      onHide={handleClose}
+      size="lg"
+      centered
+      dir="rtl"
+      className="auth-modal"
+    >
+      <Form onSubmit={handleLogin}>
+        <Modal.Header closeButton>
+          <Modal.Title>تسجيل الدخول</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <p className="auth-lead">مرحباً بك مرة أخرى</p>
+          <p className="auth-hint">سجل دخولك للوصول إلى حسابك</p>
 
-              <Divider />
+          <Form.Group className="mb-3">
+            <Form.Label className="fw-bold mb-2">اسم المستخدم</Form.Label>
+            <Form.Control
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              placeholder="أدخل اسم المستخدم"
+              required
+            />
+          </Form.Group>
 
-              {/* Username Input */}
-              <Box w="full">
-                <Text fontSize="sm" fontWeight="medium" color={textColor} mb={2}>
-                  اسم المستخدم
-                </Text>
-                <InputGroup>
-                  <InputLeftElement pointerEvents="none">
-                    <Icon as={FaUser} color="gray.400" />
-                  </InputLeftElement>
-                  <Input
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                    placeholder="أدخل اسم المستخدم"
-                    size="lg"
-                    borderRadius="lg"
-                    borderColor={borderColor}
-                    _focus={{
-                      borderColor: "blue.500",
-                      boxShadow: "0 0 0 1px #3182ce"
-                    }}
-                    _hover={{
-                      borderColor: "blue.300"
-                    }}
-                  />
-                </InputGroup>
-              </Box>
-
-              {/* Password Input */}
-              <Box w="full">
-                <Text fontSize="sm" fontWeight="medium" color={textColor} mb={2}>
-                  كلمة المرور
-                </Text>
-                <InputGroup>
-                  <InputLeftElement pointerEvents="none">
-                    <Icon as={FaLock} color="gray.400" />
-                  </InputLeftElement>
-                  <Input
-                    type={showPassword ? "text" : "password"}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="أدخل كلمة المرور"
-                    size="lg"
-                    borderRadius="lg"
-                    borderColor={borderColor}
-                    _focus={{
-                      borderColor: "blue.500",
-                      boxShadow: "0 0 0 1px #3182ce"
-                    }}
-                    _hover={{
-                      borderColor: "blue.300"
-                    }}
-                  />
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    onClick={() => setShowPassword(!showPassword)}
-                    position="absolute"
-                    right="0"
-                    top="50%"
-                    transform="translateY(-50%)"
-                    zIndex={1}
-                  >
-                    <Icon as={showPassword ? FaEyeSlash : FaEye} color="gray.400" />
-                  </Button>
-                </InputGroup>
-              </Box>
-            </VStack>
-          </ModalBody>
-          
-          <ModalFooter 
-            borderTop="1px solid" 
-            borderColor={borderColor} 
-            pt={4}
-            justifyContent="center"
-          >
-            <HStack spacing={4} w="full">
+          <Form.Group className="mb-2">
+            <Form.Label className="fw-bold mb-2">كلمة المرور</Form.Label>
+            <InputGroup>
+              <Form.Control
+                type={showPassword ? "text" : "password"}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="أدخل كلمة المرور"
+                required
+              />
               <Button
-                colorScheme="blue"
-                type="submit"
-                isLoading={pending}
-                loadingText="جاري تسجيل الدخول..."
-                size="lg"
-                flex={1}
-                borderRadius="lg"
-                fontWeight="medium"
-                bgGradient="linear(to-r, blue.400, blue.600)"
-                _hover={{
-                  transform: "translateY(-1px)",
-                  boxShadow: "lg",
-                  bgGradient: "linear(to-r, blue.500, blue.700)"
-                }}
-                transition="all 0.2s"
-                _active={{
-                  transform: "translateY(0px)"
-                }}
+                type="button"
+                variant="outline-secondary"
+                onClick={() => setShowPassword((prev) => !prev)}
+                aria-label={showPassword ? "إخفاء كلمة المرور" : "إظهار كلمة المرور"}
               >
-                تسجيل الدخول
+                {showPassword ? <FaEyeSlash /> : <FaEye />}
               </Button>
-              <Button 
-                variant="outline" 
-                onClick={handleClose}
-                size="lg"
-                flex={1}
-                borderRadius="lg"
-                borderColor={borderColor}
-                color={textColor}
-                _hover={{
-                  bg: "gray.50",
-                  borderColor: "gray.300"
-                }}
-              >
-                إلغاء
-              </Button>
-            </HStack>
-          </ModalFooter>
-        </form>
-      </ModalContent>
+            </InputGroup>
+          </Form.Group>
+        </Modal.Body>
+        <Modal.Footer className="d-flex gap-2">
+          <Button
+            type="submit"
+            className="flex-grow-1 py-3 fw-bold auth-btn-primary"
+            disabled={pending}
+          >
+            {pending ? (
+              <>
+                <Spinner size="sm" className="me-2" />
+                جاري تسجيل الدخول...
+              </>
+            ) : (
+              "تسجيل الدخول"
+            )}
+          </Button>
+          <Button
+            type="button"
+            className="flex-grow-1 py-3 fw-bold auth-btn-ghost"
+            onClick={handleClose}
+            disabled={pending}
+          >
+            إلغاء
+          </Button>
+        </Modal.Footer>
+      </Form>
     </Modal>
   );
 };

@@ -1,11 +1,4 @@
 import React, { useEffect, useState } from "react";
-import {
-  Container,
-  Nav,
-  Navbar,
-  NavDropdown,
-  Offcanvas,
-} from "react-bootstrap";
 import { Link } from "react-router-dom";
 import Navsearch from "./Navsearch";
 import { useAuth } from "../../contexts/AuthContext";
@@ -13,232 +6,202 @@ import { useChat } from "../../contexts/ChatContext";
 import ChatNotificationBadge from "../chat/ChatNotificationBadge";
 import baseUrl from "../../api/baseUrl";
 
+const toList = (data) => {
+  if (Array.isArray(data)) return data;
+  if (Array.isArray(data?.data)) return data.data;
+  if (Array.isArray(data?.categories)) return data.categories;
+  return [];
+};
+
+const normalize = (items) =>
+  toList(items)
+    .map((cat) => ({
+      id: cat.id,
+      name: cat.name,
+      children: toList(cat.children || cat.subCategories || cat.subs),
+    }))
+    .filter((cat) => cat.id && cat.name);
+
 function NavbarComponent() {
-  const [carts, setCarts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
-
-  const { isAdmin, isAuthenticated } = useAuth()
-  const { isConnected } = useChat()
-
-  const [show, setShow] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
-
-  const handleClose = () => setShow(false);
-  const handleShow = () => setShow(true);
+  const { isAdmin, isAuthenticated } = useAuth();
+  const { isConnected } = useChat();
 
   useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth <= 450);
-    };
-
-    handleResize();
-    window.addEventListener("resize", handleResize);
-    return () => {
-      window.removeEventListener("resize", handleResize);
-    };
-  }, []);
-
-  const fetchCarts = () => {
-    const storedCarts = JSON.parse(localStorage.getItem("carts")) || [];
-    setCarts(storedCarts);
-  };
-
-  const fetchCategories = async () => {
-    try {
+    const fetchCategories = async () => {
       setLoading(true);
-      const response = await baseUrl.get("/api/categories/hierarchy");
-      setCategories(response.data);
-    } catch (error) {
-      console.error("Error fetching categories:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+      const endpoints = [
+        "/api/categories/hierarchy",
+        "/api/categories/main",
+        "/api/categories",
+        "/api/categories/homepage",
+      ];
 
-  useEffect(() => {
-    fetchCarts();
+      for (const url of endpoints) {
+        try {
+          const { data } = await baseUrl.get(url);
+          const list = normalize(data);
+          if (list.length) {
+            setCategories(list);
+            setLoading(false);
+            return;
+          }
+        } catch (error) {
+          console.error("Navbar categories:", url, error);
+        }
+      }
+
+      setCategories([]);
+      setLoading(false);
+    };
+
     fetchCategories();
   }, []);
 
-  const navLinks = (
-    <Nav dir='rtl' className='me-auto mb- ' style={{ zIndex: "1000" }}>
-      <div className='w-[100%] flex flex-wrap justify-between'>
-        {loading ? (
-          <div className="flex items-center justify-center w-full py-2">
-            <span className="text-gray-500">جاري التحميل...</span>
-          </div>
-        ) : (
-          categories.map((category) => (
-            <NavDropdown 
-              key={category.id} 
-              title={category.name} 
-              id={`navbarScrollingDropdown-${category.id}`}
-              className="category-dropdown"
-            >
-              {category.children && category.children.length > 0 ? (
-                category.children.map((child) => (
-                  <NavDropdown.Item key={child.id} className="category-item">
-                    <Link 
-                      to={`/categories/${child.id}`}
-                      className="block w-full text-right py-2 px-3 hover:bg-gray-100 transition-colors"
-                    >
-                      {child.name}
+  return (
+    <div className="sticky top-0" style={{ zIndex: 1050 }}>
+      <Navsearch />
+
+      <nav className="site-cats-bar" dir="rtl" aria-label="تصنيفات الموقع">
+        <div className="site-cats-inner">
+          {loading ? (
+            <span className="site-cats-status">جاري تحميل التصنيفات...</span>
+          ) : categories.length === 0 ? (
+            <span className="site-cats-status">لا توجد تصنيفات</span>
+          ) : (
+            categories.map((category) => (
+              <div key={category.id} className="site-cat">
+                <Link to={`/categories/${category.id}`} className="site-cat-link">
+                  {category.name}
+                </Link>
+                {category.children.length > 0 && (
+                  <div className="site-cat-menu">
+                    <Link to={`/categories/${category.id}`} className="site-cat-child">
+                      عرض الكل
                     </Link>
-                  </NavDropdown.Item>
-                ))
-              ) : (
-                <NavDropdown.Item className="category-item">
-                  <Link 
-                    to={`/categories/${category.id}`}
-                    className="block w-full text-right py-2 px-3 hover:bg-gray-100 transition-colors"
-                  >
-                    عرض جميع المنتجات
-                  </Link>
-                </NavDropdown.Item>
-              )}
-            </NavDropdown>
-          ))
-        )}
-        
-        {/* Special offers dropdown */}
-       
-      </div>
-      {isAdmin() && <div className="mt-2 flex">
-        <Link
-          to={"/admin"}
-          className='font-bold text-nowrap mx-1'
-          style={{ color: '#012148' }}
-        >
-          صفحة الأدمن
-        </Link>
-      </div>}
-      
-      {/* Chat Links */}
-      {isAuthenticated && (
-        <div className="mt-2 flex items-center space-x-2">
-          <Link
-            to={isAdmin() ? "/admin/chat" : "/chat"}
-            className="flex items-center space-x-2 transition-colors"
-            style={{ color: '#012148' }}
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-            </svg>
-            <span className="text-sm font-medium">
-              {isAdmin() ? 'إدارة المحادثات' : 'الدردشة'}
-            </span>
-            <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-500' : 'bg-red-500'}`}></div>
-          </Link>
-          
+                    {category.children.map((child) => (
+                      <Link
+                        key={child.id}
+                        to={`/categories/${child.id}`}
+                        className="site-cat-child"
+                      >
+                        {child.name}
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))
+          )}
+
+          {isAdmin() && (
+            <Link to="/admin" className="site-cat-link site-cat-extra">
+              صفحة الأدمن
+            </Link>
+          )}
           {isAuthenticated && (
-            <ChatNotificationBadge />
+            <Link
+              to={isAdmin() ? "/admin/chat" : "/chat"}
+              className="site-cat-link site-cat-extra"
+            >
+              {isAdmin() ? "إدارة المحادثات" : "الدردشة"}
+              <span className={`site-cat-dot ${isConnected ? "on" : "off"}`} />
+              <ChatNotificationBadge />
+            </Link>
           )}
         </div>
-      )}
-    </Nav>
-  );
+      </nav>
 
-  return (
-    <div className='sticky top-0' style={{ zIndex: 1050 }}>
-      <Navsearch />
-      <Navbar
-        dir='rtl'
-        expand='lg'
-        className='navbar navbar-categories'
-      >
-        <Container className='navbar-categories-container'>
-          <Navbar.Toggle
-            aria-controls='responsive-navbar-nav'
-            onClick={isMobile ? handleShow : null}
-            className='navbar-toggler-custom'
-          />
-          <Navbar.Collapse
-            id='responsive-navbar-nav'
-            className='navbar-collapse-custom'
-          >
-            {!isMobile && navLinks}
-          </Navbar.Collapse>
-        </Container>
-      </Navbar>
-      <Offcanvas show={show} onHide={handleClose} className='offcanvas-custom' placement='end' dir='rtl'>
-        <Offcanvas.Header closeButton className='offcanvas-header-custom'>
-          <Offcanvas.Title className='offcanvas-title-custom'>
-            التصنيفات
-          </Offcanvas.Title>
-        </Offcanvas.Header>
-        <Offcanvas.Body className='offcanvas-body-custom'>
-          <div className='offcanvas-nav-wrap'>{navLinks}</div>
-        </Offcanvas.Body>
-      </Offcanvas>
       <style>{`
-        .navbar-categories {
-          background: #f8fafc !important;
-          border-bottom: 1px solid rgba(1, 33, 72, 0.08);
-          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
-          padding: 0.5rem 0;
+        .site-cats-bar {
+          background: linear-gradient(180deg, #0a7a3e 0%, #006C35 100%);
+          border-top: 1px solid rgba(212, 175, 119, 0.35);
+          border-bottom: 1px solid rgba(244, 234, 216, 0.12);
         }
-        .navbar-categories-container {
-          max-width: 1400px;
+        .site-cats-inner {
+          width: min(1400px, calc(100% - 1.5rem));
           margin: 0 auto;
-        }
-        .navbar-toggler-custom {
-          border: 1px solid rgba(1, 33, 72, 0.2);
-          border-radius: 8px;
-          padding: 0.4rem 0.6rem;
-        }
-        .navbar-toggler-custom:focus {
-          box-shadow: 0 0 0 2px rgba(1, 33, 72, 0.2);
-        }
-        .navbar-collapse-custom {
+          display: flex;
+          flex-wrap: wrap;
+          align-items: center;
           justify-content: center;
+          gap: 0.15rem 0.2rem;
+          min-height: 48px;
+          padding: 0.25rem 0;
         }
-        .category-dropdown .nav-link,
-        .navbar-categories .nav-dropdown-toggle {
-          color: #012148 !important;
+        .site-cats-status {
+          color: #fff !important;
           font-weight: 600;
-          font-size: 0.95rem;
-          padding: 0.5rem 1rem;
-          border-radius: 8px;
-          transition: background 0.2s ease, color 0.2s ease;
-        }
-        .category-dropdown .nav-link:hover,
-        .navbar-categories .nav-link:hover {
-          background: rgba(1, 33, 72, 0.06);
-          color: #013060 !important;
-        }
-        .category-dropdown .dropdown-menu {
-          border-radius: 12px;
-          border: 1px solid rgba(0, 0, 0, 0.06);
-          box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
           padding: 0.5rem;
-          margin-top: 4px;
         }
-        .category-item .dropdown-item {
-          border-radius: 8px;
-          padding: 0.5rem 1rem;
-          color: #012148;
-          font-weight: 500;
+        .site-cat {
+          position: relative;
         }
-        .category-item .dropdown-item:hover {
-          background: rgba(1, 33, 72, 0.08);
-          color: #013060;
-        }
-        .offcanvas-header-custom {
-          border-bottom: 1px solid #eee;
-          padding: 1rem 1.25rem;
-        }
-        .offcanvas-title-custom {
+        .site-cat-link {
+          display: inline-flex;
+          align-items: center;
+          gap: 0.35rem;
+          color: #ffffff !important;
           font-weight: 700;
-          font-size: 1.35rem;
-          color: #012148;
-          font-family: var(--font-primary);
+          font-size: 0.95rem;
+          padding: 0.55rem 0.9rem;
+          border-radius: 8px;
+          white-space: nowrap;
         }
-        .offcanvas-body-custom {
-          padding: 1rem 1.25rem;
+        .site-cat-link:hover,
+        .site-cat:hover > .site-cat-link {
+          background: rgba(244, 234, 216, 0.16);
+          color: #f4ead8 !important;
         }
-        .offcanvas-nav-wrap {
-          width: 100%;
+        .site-cat-menu {
+          display: none;
+          position: absolute;
+          top: 100%;
+          right: 0;
+          min-width: 210px;
+          background: #161412;
+          border: 1px solid rgba(212, 175, 119, 0.28);
+          border-radius: 12px;
+          box-shadow: 0 10px 28px rgba(0, 0, 0, 0.35);
+          padding: 0.4rem;
+          z-index: 1200;
+        }
+        .site-cat:hover .site-cat-menu,
+        .site-cat:focus-within .site-cat-menu {
+          display: flex;
+          flex-direction: column;
+        }
+        .site-cat-child {
+          color: #f3faf6 !important;
+          font-weight: 600;
+          padding: 0.5rem 0.8rem;
+          border-radius: 8px;
+          text-align: right;
+        }
+        .site-cat-child:hover {
+          background: rgba(212, 175, 119, 0.16);
+          color: #d4af77 !important;
+        }
+        .site-cat-extra {
+          font-size: 0.88rem;
+        }
+        .site-cat-dot {
+          width: 8px;
+          height: 8px;
+          border-radius: 50%;
+          display: inline-block;
+        }
+        .site-cat-dot.on { background: #86efac; }
+        .site-cat-dot.off { background: #f87171; }
+        @media (max-width: 767px) {
+          .site-cats-inner {
+            flex-wrap: nowrap;
+            justify-content: flex-start;
+            overflow-x: auto;
+            scrollbar-width: none;
+          }
+          .site-cats-inner::-webkit-scrollbar { display: none; }
         }
       `}</style>
     </div>

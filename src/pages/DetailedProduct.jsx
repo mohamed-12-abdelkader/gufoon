@@ -4,14 +4,11 @@ import { Button, Carousel, Row, Col, Badge } from "react-bootstrap";
 import { FaCartPlus, FaShippingFast, FaRegClock, FaShoppingBag } from "react-icons/fa";
 import { BsBox2Heart, BsStarFill } from "react-icons/bs";
 import { MdLocalOffer } from "react-icons/md";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { getProductById } from "../utils/services";
 import { toast } from "react-toastify";
 import UserType from "../Hook/userType/UserType";
 import BuyNowModal from "../components/modal/BuyNowModal";
-import AuthRequiredModal from "../components/modal/AuthRequiredModal";
-import LoginModal from "../components/modal/LoginModal";
-import SignupModal from "../components/modal/SignupModal";
 import { useCart } from "../contexts/CartContext";
 import "./DetailedProduct.css";
 
@@ -21,15 +18,36 @@ const DetailedProduct = () => {
   const [product, setProduct] = useState(null)
   const [index, setIndex] = useState(0);
   
-  // Modal states
   const [showBuyNowModal, setShowBuyNowModal] = useState(false);
-  const [showAuthRequiredModal, setShowAuthRequiredModal] = useState(false);
-  const [showLoginModal, setShowLoginModal] = useState(false);
-  const [showSignupModal, setShowSignupModal] = useState(false);
-  
-  // User authentication
-  const [userData, isAdmin, user] = UserType();
+  const [, isAdmin] = UserType();
   const { addToCart } = useCart();
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const scrollTop = () => {
+      window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
+    };
+
+    const previous = window.history.scrollRestoration;
+    if ("scrollRestoration" in window.history) {
+      window.history.scrollRestoration = "manual";
+    }
+
+    scrollTop();
+    const frame = requestAnimationFrame(scrollTop);
+    const timer = window.setTimeout(scrollTop, 50);
+
+    return () => {
+      cancelAnimationFrame(frame);
+      window.clearTimeout(timer);
+      if ("scrollRestoration" in window.history && previous) {
+        window.history.scrollRestoration = previous;
+      }
+    };
+  }, [product_id]);
 
   useEffect(() => {
     async function fetchProduct() {
@@ -46,57 +64,26 @@ const DetailedProduct = () => {
     fetchProduct();
   }, [product_id]);
 
-  // Handle Add to Cart
   const handleAddToCart = async () => {
-    if (!userData) {
-      setShowAuthRequiredModal(true);
-      return;
-    }
-
     try {
       await addToCart(product);
-      // Toast message is handled by CartContext
     } catch (error) {
       console.error('Error adding to cart:', error);
       toast.error("خطأ في إضافة المنتج للسلة، حاول مجدداً");
     }
   };
 
-  // Handle Buy Now
   const handleBuyNow = () => {
-    if (!userData) {
-      setShowAuthRequiredModal(true);
-      return;
-    }
     setShowBuyNowModal(true);
-  };
-
-  // Handle Auth Required Modal Actions
-  const handleShowLoginModal = () => {
-    setShowAuthRequiredModal(false);
-    setShowLoginModal(true);
-  };
-
-  const handleShowSignupModal = () => {
-    setShowAuthRequiredModal(false);
-    setShowSignupModal(true);
-  };
-
-  // Close all modals
-  const handleCloseAllModals = () => {
-    setShowBuyNowModal(false);
-    setShowAuthRequiredModal(false);
-    setShowLoginModal(false);
-    setShowSignupModal(false);
   };
 
 
   if (loading) return (
     <div className='product-details-page' dir='rtl'>
       <div className='product-details-hero'>
-        <div className='container py-2'>
-          <div className='skeleton-title'></div>
+        <div className='container product-details-hero__inner'>
           <div className='skeleton-subtitle'></div>
+          <div className='skeleton-title'></div>
         </div>
       </div>
 
@@ -216,12 +203,36 @@ const DetailedProduct = () => {
   return (
     <div className="product-details-page" dir="rtl">
       <header className="product-details-hero">
-        <div className="container py-2 py-md-3">
-          <h1 className="product-details-hero__title">{product.name}</h1>
+        <div className="container product-details-hero__inner">
+          <nav className="product-details-hero__crumbs" aria-label="مسار الصفحة">
+            <Link to="/">الرئيسية</Link>
+            <span aria-hidden="true">/</span>
+            <Link to="/products">المنتجات</Link>
+            {product.category?.name && product.categoryId && (
+              <>
+                <span aria-hidden="true">/</span>
+                <Link to={`/categories/${product.categoryId}`}>{product.category.name}</Link>
+              </>
+            )}
+          </nav>
+
           <div className="product-details-hero__meta">
-            <BsStarFill style={{ color: "#ffc107" }} aria-hidden />
-            <span>منتج أصلي 100%</span>
+            <span className="product-details-hero__badge">
+              <BsStarFill className="product-details-hero__star" aria-hidden />
+              منتج أصلي 100%
+            </span>
+            {product.brand?.name && (
+              <span className="product-details-hero__chip">{product.brand.name}</span>
+            )}
+            <span className={`product-details-hero__chip ${product.stock > 0 ? "is-stock" : "is-out"}`}>
+              {product.stock > 0 ? "متوفر" : "غير متوفر"}
+            </span>
+            {product.discount > 0 && (
+              <span className="product-details-hero__chip is-sale">خصم {product.discount}%</span>
+            )}
           </div>
+
+          <h1 className="product-details-hero__title">{product.name}</h1>
         </div>
       </header>
 
@@ -322,7 +333,7 @@ const DetailedProduct = () => {
                     {product.discount > 0 && (
                       <div className='old-price'>
                         <del className='text-muted'>{product.price} ر.س</del>
-                        <Badge bg='danger' className='ms-2'>
+                        <Badge className="product-save-badge ms-2">
                           توفير {product.discount}%
                         </Badge>
                       </div>
@@ -337,7 +348,7 @@ const DetailedProduct = () => {
                         onClick={handleAddToCart}
                       >
                         <FaCartPlus size={18} />
-                        <span className="text-white">إضافة للسلة</span>
+                        <span>إضافة للسلة</span>
                       </Button>
                       <Button
                         variant="success"
@@ -345,14 +356,14 @@ const DetailedProduct = () => {
                         onClick={handleBuyNow}
                       >
                         <FaShoppingBag size={18} />
-                        <span className="text-white">شراء الآن</span>
+                        <span>شراء الآن</span>
                       </Button>
                     </div>
                   )}
                 </div>
                 {product.warranty && (
                   <div className='warranty-info'>
-                    <FaRegClock className='text-primary' />
+                    <FaRegClock />
                     <span>ضمان استبدال لمدة {product.warranty} أشهر</span>
                   </div>
                 )}
@@ -397,13 +408,11 @@ const DetailedProduct = () => {
                     <h6 className='mb-1 fw-bold'>حالة المخزون</h6>
                     <p className='mb-0 text-muted'>
                       {product.stock > 0 ? (
-                        <span className='text-success'>
-                          <i className='fas fa-check-circle me-1'></i>
+                        <span className="stock-in">
                           متوفر ({product.stock} قطعة)
                         </span>
                       ) : (
-                        <span className='text-danger'>
-                          <i className='fas fa-times-circle me-1'></i>
+                        <span className="stock-out">
                           غير متوفر
                         </span>
                       )}
@@ -411,7 +420,7 @@ const DetailedProduct = () => {
                   </div>
                   {product.stock > 0 && (
                     <div className='text-center'>
-                      <div className='badge bg-success fs-6 px-3 py-2'>
+                      <div className="product-ready-badge">
                         جاهز للشحن
                       </div>
                     </div>
@@ -424,28 +433,10 @@ const DetailedProduct = () => {
       </div>
       <ScrollToTop />
 
-      {/* Modals */}
       <BuyNowModal 
         show={showBuyNowModal} 
         handleClose={() => setShowBuyNowModal(false)} 
         product={product} 
-      />
-      
-      <AuthRequiredModal 
-        show={showAuthRequiredModal} 
-        handleClose={() => setShowAuthRequiredModal(false)}
-        onLoginClick={handleShowLoginModal}
-        onSignupClick={handleShowSignupModal}
-      />
-      
-      <LoginModal 
-        show={showLoginModal} 
-        handleClose={() => setShowLoginModal(false)} 
-      />
-      
-      <SignupModal 
-        show={showSignupModal} 
-        handleClose={() => setShowSignupModal(false)} 
       />
 
     </div>
